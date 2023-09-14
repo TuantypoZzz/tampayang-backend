@@ -1,0 +1,9 @@
+
+{
+    "success": "Success",
+    "err001": "Oops sorry, something went wrong!",
+    "sys001": "Something wrong with our %s. Please try again or contact customer service",
+    "sys002": "Something wrong with our %s. Please try again or contact customer %s",
+
+    "dbins001": "Insert Query Error! Data should be a Map"
+}   
