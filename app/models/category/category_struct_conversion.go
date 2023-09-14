@@ -1,7 +1,5 @@
 package category_model
 
-import "fmt"
-
 // list for converting interface to it's struct
 
 func ConvertToGetAllUserHandlerStruct(data []map[string]interface{}) []GetAllUserHandlerStruct {
@@ -15,8 +13,6 @@ func ConvertToGetAllUserHandlerStruct(data []map[string]interface{}) []GetAllUse
             Booleandesu: item["booleandesu"].(int64),
             Created: 	 string(item["created"].([]byte)),
         }
-
-		fmt.Println(myStruct)
 
         result = append(result, myStruct)
     }
