@@ -1,8 +1,9 @@
-package handler
+package user_handler
 
 import (
 	// "golang-fiber-template/app/models"
 	// globalFunction "golang-fiber-template/core/functions"
+	// "fmt"
 	// "fmt"
 	"time"
 
@@ -66,6 +67,21 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, err)
 	}
 
+	// Format created_date as "DD-MM-YYYY HH:mm:ss" just before returning the response
+	for i := range dbResult {
+		// Parse the Created_date string into a time.Time value
+		createdDate, err := time.Parse(constant.NOW_DATE_TIME_FORMAT, dbResult[i].Created_date)
+		if err != nil {
+			return response.ErrorResponse(ctx, err)
+		}
+
+		// Format the parsed time.Time value
+		formattedDate := createdDate.Format(constant.NOW_DATE_TIME_FORMAT)
+
+		// Update the Created_date field with the formatted string
+		dbResult[i].Created_date = formattedDate
+	}
+
 	return response.SuccessResponse(ctx, dbResult)
 
 	//USING NO CONDITION IN QUERY--------------
@@ -79,3 +95,6 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	// return response.SuccessResponse(ctx, dbResult)
 	
 }
+
+
+

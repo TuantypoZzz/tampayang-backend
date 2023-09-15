@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nulla-vis/golang-fiber-template/config"
 	"github.com/nulla-vis/golang-fiber-template/core/helper"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -70,8 +71,9 @@ func InserData(tblName string, data map[string]interface{}) int64{
 	sqlQuery := "INSERT INTO " + tblName + "(" + cols + ")" + " VALUES (" + vals + ")"
 
 	// print query
-	logQuery(sqlQuery, bindings)
-
+    if config.GO_ENV == "development" {
+        logQuery(sqlQuery, bindings)
+    }
 	result, err := db.ExecContext(ctx, sqlQuery, bindings...)
 	if err != nil {
 		panic(err)
@@ -92,7 +94,9 @@ func QuerySelectWitCondition(sqlQuery string, bindings []interface{}, ) ([]map[s
 	defer db.Close()
 	ctx := context.Background()
 
-	logQuery(sqlQuery, bindings)
+    if config.GO_ENV == "development" {
+        logQuery(sqlQuery, bindings)
+    }
 
 	// Execute the query with the provided bindings
     rows, err := db.QueryContext(ctx, sqlQuery, bindings...)
@@ -213,7 +217,9 @@ func QuerySelect(sqlQuery string, bindings []interface{}, result interface{}) er
     defer db.Close()
     ctx := context.Background()
 
-    logQuery(sqlQuery, bindings)
+    if config.GO_ENV == "development" {
+        logQuery(sqlQuery, bindings)
+    }
 
     // Execute the query with the provided bindings
     rows, err := db.QueryContext(ctx, sqlQuery, bindings...)
@@ -320,7 +326,9 @@ func logQuery(query string, args []interface{}) {
 // 	defer db.Close()
 // 	ctx := context.Background()
 
-// 	logQuery(sqlQuery, bindings)
+// if config.GO_ENV == "development" {
+//     logQuery(sqlQuery, bindings)
+// }
 
 // 	// Execute the query with the provided bindings
 //     rows, err := db.QueryContext(ctx, sqlQuery, bindings...)

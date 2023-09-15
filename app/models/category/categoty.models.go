@@ -87,7 +87,7 @@ func SelectAllFromCategoryWithConditionWithouStruct(where string, bindings []int
 
 	return result, nil
 }
-
+//Query WITHOUT struct (NOT RECOMMENDED)--------------------------------------------------------------------------------------------
 
 
 
