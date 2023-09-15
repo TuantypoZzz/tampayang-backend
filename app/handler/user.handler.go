@@ -56,14 +56,25 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 }
 
 func GetAllUserHandler(ctx *fiber.Ctx) error {
+	// USING CONDITION IN QUERY--------------
 	whereCondition := "cat.id > ?"
-	whereData := []interface{}{15}
+	whereData := []interface{}{1}
 
-	dbResult,err := category_model.SelectAllFromCategoryWithConditionWithStruct(whereCondition, whereData)
+	dbResult,err := category_model.SelectAllFromCategoryWithCondition(whereCondition, whereData)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
 
 	return response.SuccessResponse(ctx, dbResult)
 
+	//USING NO CONDITION IN QUERY--------------
+	// var sqlQuery = "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM category AS cat"
+	
+	// dbResult,err := category_model.SelectAllFromCategoryWithoutCondition(sqlQuery)
+	// if err != nil {
+	// 	return response.ErrorResponse(ctx, err)
+	// }
+
+	// return response.SuccessResponse(ctx, dbResult)
+	
 }

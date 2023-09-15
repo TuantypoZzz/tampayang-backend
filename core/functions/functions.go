@@ -2,9 +2,11 @@ package globalFunction
 
 import (
 	"fmt"
-	"github.com/nulla-vis/golang-fiber-template/core/helper"
 	"reflect"
+	"strconv"
 	"strings"
+
+	"github.com/nulla-vis/golang-fiber-template/core/helper"
 )
 
 func GetMessage(code string, replacements interface{}) map[string]interface{}{
@@ -68,4 +70,24 @@ func ConvertByteSlicesToStrings(data interface{}) {
             }
         }
     }
+}
+
+// Convert []uint8 to int64
+func ConvertBytesToInt64(data []byte) (int64, error) {
+    strData := string(data)
+    intValue, err := strconv.ParseInt(strData, 10, 64)
+    if err != nil {
+        return 0, err
+    }
+    return intValue, nil
+}
+
+// Convert []uint8 to float64
+func ConvertBytesToFloat64(data []byte) (float64, error) {
+    strData := string(data)
+    floatValue, err := strconv.ParseFloat(strData, 64)
+    if err != nil {
+        return 0.0, err
+    }
+    return floatValue, nil
 }

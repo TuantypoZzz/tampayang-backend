@@ -1,32 +1,40 @@
 package category_model
 
 import (
-	// "database/sql"
-	// "time"
 	"github.com/nulla-vis/golang-fiber-template/config/tables"
 	"github.com/nulla-vis/golang-fiber-template/core/database"
     globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
-	// "github.com/nulla-vis/golang-fiber-template/core"
 )
 
-// var db *sql.DB = database.GetConnectionDB()
+/**
+------------------
+| IMPORTANT NOTE |
+------------------
+
+1. Better to query using STRUCT
+2. Add struct in {modelname}_struct.go based on what field you want to query
+3. If query using condition and bindings, add data conversion in {modelname}_struct_conversion.go
+4. Query with condition call database.QuerySelectWitCondition
+5. Just query select without condition call database.QuerySelectWithoutCondition
+6. If not using STRUCT, always convert data from database using globalFunction.ConvertByteSlicesToStrings
+
+---------------
+| MODEL RULES |
+---------------
+1. Inside function, declare sqlQuery
+2. If have additional LOGIC, if can process it before query to database or after it
+3. Make as less database process as possible 
+3. Call function from database module based on query
+
+*/
 
 func InsertCategory(data map[string]interface{}) int64{
 	lastId := database.InserData("category", data)
 	return lastId
 }
 
-// Declare struct like column(s) in sqlQuery
-
-type SelectAllFromCategoryWithConditionStruct struct {
-    Id          int32       `json:"id"`
-    Name        string      `json:"name"`
-    Rating      float64     `json:"Rating"`
-    Booleandesu bool        `json:"booleandesu"`
-}
-
 //Query WITH struct
-func SelectAllFromCategoryWithConditionWithStruct(where string, bindings []interface{}) ([]GetAllUserHandlerStruct, error) {
+func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([]GetAllUserHandlerStruct, error) {
     // Initialize the SQL query
     sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM " + tables.Category + " AS cat"
 
@@ -35,7 +43,7 @@ func SelectAllFromCategoryWithConditionWithStruct(where string, bindings []inter
         sqlQuery += " WHERE " + where
     }
 
-    dbResult, err := database.QuerySelect(sqlQuery, bindings)
+    dbResult, err := database.QuerySelectWitCondition(sqlQuery, bindings)
     if err != nil {
         panic(err)
     }
@@ -45,9 +53,22 @@ func SelectAllFromCategoryWithConditionWithStruct(where string, bindings []inter
 	return result, nil
 }
 
+//Query WITH struct
+func SelectAllFromCategoryWithoutCondition() ([]GetAllUserHandlerStruct, error) {
+    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM category AS cat"
 
-//Query WITHOUT struct
-func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([]map[string]interface{}, error) {
+    var result []GetAllUserHandlerStruct
+    
+    if err := database.QuerySelectWithoutCondition(sqlQuery, &result); err != nil {
+        // Handle error
+        panic(err)
+    }
+
+	return result, nil
+}
+
+//Query WITHOUT struct (NOT RECOMMENDED)--------------------------------------------------------------------------------------------
+func SelectAllFromCategoryWithConditionWithouStruct(where string, bindings []interface{}) ([]map[string]interface{}, error) {
     // Initialize the SQL query
     sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM " + tables.Category + " AS cat"
 
@@ -56,7 +77,7 @@ func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([
         sqlQuery += " WHERE " + where
     }
 
-    result, err := database.QuerySelect(sqlQuery, bindings)
+    result, err := database.QuerySelectWitCondition(sqlQuery, bindings)
     if err != nil {
         panic(err)
     }
@@ -66,7 +87,6 @@ func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([
 
 	return result, nil
 }
-
 
 
 

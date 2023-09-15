@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"database/sql"
+	"reflect"
+
 	// "os"
 
 	// "encoding/base64"
@@ -84,7 +86,7 @@ func InserData(tblName string, data map[string]interface{}) int64{
 
 }
 
-func QuerySelect(sqlQuery string, bindings []interface{}, ) ([]map[string]interface{}, error) {
+func QuerySelectWitCondition(sqlQuery string, bindings []interface{}, ) ([]map[string]interface{}, error) {
 	// PREPARE CONNECTION AND VARIABLES
 	db := GetConnectionDB()
 	defer db.Close()
@@ -138,6 +140,68 @@ func QuerySelect(sqlQuery string, bindings []interface{}, ) ([]map[string]interf
     }
 
     return result, nil
+}
+
+func QuerySelectWithoutCondition(query string, result interface{}) error {
+    // PREPARE CONNECTION AND VARIABLES
+    db := GetConnectionDB()
+    
+    defer db.Close()
+
+    // Execute the query
+    rows, err := db.Query(query)
+    if err != nil {
+        return err
+    }
+    defer rows.Close()
+
+    // Use the ScanStruct function to scan data into the result slice
+    if err := ScanStruct(rows, result); err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func ScanStruct(rows *sql.Rows, dest interface{}) error {
+    // Ensure dest is a pointer to a slice of structs
+    destValue := reflect.ValueOf(dest)
+    if destValue.Kind() != reflect.Ptr || destValue.Elem().Kind() != reflect.Slice {
+        return fmt.Errorf("dest must be a pointer to a slice of structs")
+    }
+
+    // Get the type of the struct that each row will be scanned into
+    elementType := destValue.Elem().Type().Elem()
+
+    // Create a slice of pointers to the fields of the struct
+    fieldPointers := make([]interface{}, elementType.NumField())
+    for i := 0; i < elementType.NumField(); i++ {
+        fieldPointers[i] = reflect.New(elementType.Field(i).Type).Interface()
+    }
+
+    // Iterate through the rows and scan each row into a new struct
+    for rows.Next() {
+        if err := rows.Scan(fieldPointers...); err != nil {
+            return err
+        }
+
+        // Create a new instance of the result struct
+        newItem := reflect.New(elementType).Elem()
+
+        // Set the struct fields with values from pointers
+        for i := 0; i < elementType.NumField(); i++ {
+            newItem.Field(i).Set(reflect.ValueOf(fieldPointers[i]).Elem())
+        }
+
+        // Append the new instance to the destination slice
+        destValue.Elem().Set(reflect.Append(destValue.Elem(), newItem))
+    }
+
+    if err := rows.Err(); err != nil {
+        return err
+    }
+
+    return nil
 }
 
 
