@@ -9,11 +9,12 @@ func ConvertToGetAllUserHandlerStruct(data []map[string]interface{}) []GetAllUse
 
     for _, item := range data {
         myStruct := GetAllUserHandlerStruct{
-			Id:          item["id"].(int64),
-            Name:        string(item["name"].([]byte)),
-            Rating:      item["rating"].(float64),
-            Booleandesu: item["booleandesu"].(int64),
-            Created: 	 string(item["created"].([]byte)),
+			Id:             item["id"].(int64),
+            Name:           string(item["name"].([]byte)),
+            Rating:         item["rating"].(float64),
+            Booleandesu:    item["booleandesu"].(int64),
+            Created: 	    string(item["created"].([]byte)),
+            Created_date: 	string(item["created_date"].([]byte)),
         }
 
         result = append(result, myStruct)
@@ -21,6 +22,7 @@ func ConvertToGetAllUserHandlerStruct(data []map[string]interface{}) []GetAllUse
 
     return result
 }
+
 
 // no need to use this, instead use QuerySelectWithoutCondition from database module
 func ConvertToGetAllUserHandlerStructNew(data []map[string]interface{}) []GetAllUserHandlerStruct {

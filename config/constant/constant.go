@@ -2,5 +2,6 @@ package constant
 
 const (
 	NOW_TIME_FORMAT = "2006-01-02"
+	NOW_DATE_TIME_FORMAT = "2006-01-02 15:04:05"
 	SOME_NUMBER = 2023
 )

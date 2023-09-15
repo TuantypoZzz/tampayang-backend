@@ -34,6 +34,7 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 	data := map[string]interface{}{
 		"name": name,
 		"created": now.Format(constant.NOW_TIME_FORMAT),
+		"created_date": now.Format(constant.NOW_DATE_TIME_FORMAT),
 	}
 
 	lastId := category_model.InsertCategory(data)

@@ -3,7 +3,7 @@ package category_model
 import (
 	"github.com/nulla-vis/golang-fiber-template/config/tables"
 	"github.com/nulla-vis/golang-fiber-template/core/database"
-    globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
+	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
 )
 
 /**
@@ -23,7 +23,7 @@ import (
 ---------------
 1. Inside function, declare sqlQuery
 2. If have additional LOGIC, if can process it before query to database or after it
-3. Make as less database process as possible 
+3. Make as less database process as possible
 3. Call function from database module based on query
 
 */
@@ -36,7 +36,7 @@ func InsertCategory(data map[string]interface{}) int64{
 //Query WITH struct
 func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([]GetAllUserHandlerStruct, error) {
     // Initialize the SQL query
-    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM " + tables.Category + " AS cat"
+    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM " + tables.Category + " AS cat"
 
     // Add the WHERE clause if provided
     if where != "" {
