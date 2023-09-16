@@ -8,7 +8,8 @@ Migration
 2. Create migration : migrate create -ext sql -dir migrations {filename}
 3. make sure to be specified when delacring {filename} and not too complicated
 4. run migration : migrate -source file://./migrations -database "mysql://user:password@tcp(host:3306)/database" up
-5. run migration : migrate -source file://./migrations -database "mysql://user:password@tcp(host:3306)/database" down
+5. up -> run all migration, down 1 -> undo 1 migration , version -> show current migration version, force {version} -> fore to specific migration version
+
 
 Setup
 ------------
