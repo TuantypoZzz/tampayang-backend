@@ -1,0 +1,19 @@
+# Define the database connection string and migration source
+DATABASE_URL := "mysql://user:password@tcp(localhost\:3306)/database"
+MIGRATIONS_SOURCE := "file://./migrations"
+
+# Define migration commands
+migrate_up:
+	migrate -source $(MIGRATIONS_SOURCE) -database $(DATABASE_URL) up
+
+migrate_down:
+	migrate -source $(MIGRATIONS_SOURCE) -database $(DATABASE_URL) down 1
+
+migrate_force:
+	migrate -source $(MIGRATIONS_SOURCE) -database $(DATABASE_URL) -force
+
+# Add other targets as needed
+test:
+	go test ./...
+
+# You can add more targets for other tasks (e.g., building, cleaning, etc.)
