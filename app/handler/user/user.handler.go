@@ -4,7 +4,9 @@ import (
 	// "golang-fiber-template/app/models"
 	// globalFunction "golang-fiber-template/core/functions"
 	"time"
+
 	"github.com/gofiber/fiber/v2"
+	gorest_api "github.com/nulla-vis/golang-fiber-template/app/libs/gorest"
 	category_model "github.com/nulla-vis/golang-fiber-template/app/models/category"
 	"github.com/nulla-vis/golang-fiber-template/config/constant"
 	"github.com/nulla-vis/golang-fiber-template/core/response"
@@ -94,7 +96,11 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	*/
 
 	// 3rd party API Call / Fetct API
-	return nil
+	result, err := gorest_api.GorestGetAllUser()
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+	return response.SuccessResponse(ctx, result)
 }
 
 

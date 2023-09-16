@@ -2,6 +2,7 @@ package globalFunction
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,7 +10,10 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
+	// "github.com/nulla-vis/golang-fiber-template/config/constant"
+	"github.com/nulla-vis/golang-fiber-template/config/constant"
 	"github.com/nulla-vis/golang-fiber-template/core/helper"
 )
 
@@ -99,18 +103,32 @@ func ConvertBytesToFloat64(data []byte) (float64, error) {
 func MakeAPIRequest(data map[string]interface{}) (*http.Response, error) {
     var bodyReader io.Reader
 
-    //type assection
+    // Type assertion for method
     method, ok := data["method"].(string)
     if !ok {
-        // Handle the case where "method" is not a string
-        fmt.Errorf("Method is not a string")
+        return nil, fmt.Errorf("Method is not a string")
     }
 
-    //type assection
-    urlString, ok := data["url"].(string)
+    // Type assertion for URL
+    url, ok := data["url"].(string)
     if !ok {
-        // Handle the case where "method" is not a string
-        fmt.Errorf("URL is not a string")
+        return nil, fmt.Errorf("URL is not a string")
+    }
+
+    // Type assertion for headers
+    headersMap, ok := data["headers"].(map[string]interface{})
+    if !ok {
+        return nil, fmt.Errorf("Headers is not a map")
+    }
+
+    headers := make(map[string]string)
+    for key, value := range headersMap {
+        // Convert headers to map[string]string
+        if strValue, ok := value.(string); ok {
+            headers[key] = strValue
+        } else {
+            return nil, fmt.Errorf("Header value is not a string")
+        }
     }
 
     // Serialize the request body to JSON for POST requests
@@ -122,26 +140,60 @@ func MakeAPIRequest(data map[string]interface{}) (*http.Response, error) {
         bodyReader = bytes.NewBuffer(requestBodyBytes)
     }
 
-    // Create a new HTTP request
-    req, err := http.NewRequest(method, urlString, bodyReader)
+    // Create a context with a timeout
+    timeout, ok := data["timeout"].(int)
+    if !ok {
+        timeout = constant.DEFAULT_TIMEOUT // Default timeout in milliseconds (adjust as needed)
+    }
+    ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
+    defer cancel()
+
+    // Create an HTTP request with the context
+    req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
     if err != nil {
         return nil, err
     }
 
     // Set headers
-    // for key, value := range data["headers"] {
-    //     req.Header.Set(key, value)
-    // }
+    for key, value := range headers {
+        req.Header.Set(key, value)
+    }
 
-    // Create an HTTP client
+    // Perform the request
     client := &http.Client{}
-
-    // Send the request
     response, err := client.Do(req)
     if err != nil {
         return nil, err
     }
 
+    // If "json" is set to true, parse the response body as JSON
+    if parseAsJSON, ok := data["json"].(bool); ok && parseAsJSON {
+        response, err = parseJSONResponse(response)
+        if err != nil {
+            return nil, err
+        }
+    }
+
     return response, nil
 }
+
+
+// Helper function to parse JSON response
+func parseJSONResponse(resp *http.Response) (*http.Response, error) {
+    // Read the response body into a byte slice
+    responseBody, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+
+    // Create a new ReadCloser from the byte slice
+    resp.Body = io.NopCloser(bytes.NewReader(responseBody))
+
+    return resp, nil
+}
+
+
+
+
+
 
