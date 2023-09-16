@@ -10,7 +10,7 @@ migrate_down:
 	migrate -source $(MIGRATIONS_SOURCE) -database $(DATABASE_URL) down 1
 
 migrate_force:
-	migrate -source $(MIGRATIONS_SOURCE) -database $(DATABASE_URL) -force
+	migrate -source $(MIGRATIONS_SOURCE) -database $(DATABASE_URL) -force $(VERSION)
 
 # Add other targets as needed
 test:
