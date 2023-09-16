@@ -1,4 +1,4 @@
-package user_handler
+package test_controller
 
 import (
 	// "golang-fiber-template/app/models"
@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	gorest_api "github.com/nulla-vis/golang-fiber-template/app/libs/gorest"
-	category_model "github.com/nulla-vis/golang-fiber-template/app/models/category"
+	// gorest_api "github.com/nulla-vis/golang-fiber-template/app/libs/gorest"
+	test_model "github.com/nulla-vis/golang-fiber-template/app/models/test_model"
 	"github.com/nulla-vis/golang-fiber-template/config/constant"
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 	// "encoding/base64"
@@ -37,7 +37,7 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 		"created_date": now.Format(constant.NOW_DATE_TIME_FORMAT),
 	}
 
-	lastId := category_model.InsertCategory(data)
+	lastId := test_model.InsertCategory(data)
 
 	responseData := map[string]interface{}{
 		"last_id": lastId,
@@ -62,7 +62,7 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	whereCondition := "cat.id > ?"
 	whereData := []interface{}{1}
 
-	dbResult,err := category_model.SelectAllFromCategoryWithCondition(whereCondition, whereData)
+	dbResult,err := test_model.SelectAllFromCategoryWithCondition(whereCondition, whereData)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
@@ -86,21 +86,23 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	*/
 
 	//USING NO CONDITION IN QUERY--------------
-	/**
-	dbResult,err := category_model.SelectAllFromCategoryWithoutCondition()
+	
+	dbResult,err := test_model.SelectAllFromCategoryWithoutCondition()
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
 
 	return response.SuccessResponse(ctx, dbResult)
-	*/
+	
 
 	// 3rd party API Call / Fetct API
+	/**
 	result, err := gorest_api.GorestGetAllUser()
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
 	return response.SuccessResponse(ctx, result)
+	*/
 }
 
 

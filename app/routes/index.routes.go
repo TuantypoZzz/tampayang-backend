@@ -6,5 +6,5 @@ import (
 
 func RouteInit(app *fiber.App) {
 	// User Routes
-	UserRoute(app)
+	TestRoute(app)
 }

@@ -1,4 +1,4 @@
-package category_model
+package test_model
 
 import (
 	"github.com/nulla-vis/golang-fiber-template/config/tables"

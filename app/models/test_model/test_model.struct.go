@@ -1,4 +1,4 @@
-package category_model
+package test_model
 
 // List of all stuct for Category Query
 
