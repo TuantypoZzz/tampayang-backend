@@ -1,7 +1,6 @@
 package response
 
 import (
-	// "fmt"
 	"reflect"
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,6 +35,14 @@ func SuccessResponse(ctx *fiber.Ctx, data interface{}) error{
 		Payload    interface{} `json:"payload"`
 	}
 
+    if _, ok := data.(string); ok {
+        // myVar is a string, and str contains its value
+        message := map[string]interface{}{
+            "message": "Please use globalFuntion GetMessage",
+        }
+        return ErrorResponse(ctx, message)
+    }
+
 	if reflect.ValueOf(data).IsNil() {
 		data = map[string]string{}
 	}
@@ -58,40 +65,65 @@ func SuccessResponse(ctx *fiber.Ctx, data interface{}) error{
 	return ctx.Status(fiber.StatusOK).JSON(successData)
 }
 
-func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error{
-
-	type ErrorResponse struct {
-		Status     string      `json:"status"`
-		StatusCode int         `json:"statusCode"`
-		Payload    interface{} `json:"payload"`
-	}
-
-	if errData == nil {
-    	errData = map[string]string{}
-	}
-
-	// LOGGER HERE -----
-		// Panggil function build log data
-			// reqHeaders := ctx.GetReqHeaders()
-			// fmt.Println(reqHeaders)
-
-		// insert data tersebut ke dalam log
-	// LOGGER END ------
-
-    payload := map[string]interface{}{
-        "errors": []map[string]interface{}{
-            {
-                "message": errData,
-            },
-        },
+func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
+    type ErrorResponse struct {
+        Status     string      `json:"status"`
+        StatusCode int         `json:"statusCode"`
+        Payload    interface{} `json:"payload"`
     }
 
-	errorData := ErrorResponse{
-		Status: "error",
-		StatusCode: fiber.StatusInternalServerError,
-		Payload: payload,
-	}
+    if errData == nil {
+        errData = map[string]string{}
+    }
 
-	return ctx.Status(fiber.StatusInternalServerError).JSON(errorData)
+    payload := make(map[string]interface{})
+
+    codeOk := false
+    enOk := false
+    idOk := false
+
+    switch v := errData.(type) {
+    case string:
+        // If errData is a string, use it as the message
+        payload["message"] = v
+    case map[string]interface{}:
+        // Check for specific keys
+        if code, ok := v["code"].(string); ok {
+            payload["code"] = code
+            codeOk = true
+        }
+        if en, ok := v["en"].(string); ok {
+            payload["en"] = en
+            enOk = true
+        }
+        if id, ok := v["id"].(string); ok {
+            payload["id"] = id
+            idOk = true
+        }
+
+        if !codeOk || !enOk || !idOk {
+            payload = v
+        }
+
+    case error:
+        // If errData is an error, use its error message
+        payload["message"] = v.Error()
+    default:
+        // Handle other data types if needed
+        payload["message"] = "An error occurred"
+    }
+
+    errorData := ErrorResponse{
+        Status:     "error",
+        StatusCode: fiber.StatusInternalServerError,
+        Payload:    payload,
+    }
+
+    // Set the status and JSON response data and return ctx
+    return ctx.Status(fiber.StatusInternalServerError).JSON(errorData)
 }
+
+
+
+
 

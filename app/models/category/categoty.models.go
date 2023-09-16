@@ -26,6 +26,12 @@ import (
 3. Make as less database process as possible
 3. Call function from database module based on query
 
+---------------
+| ERRORS |
+---------------
+1. sql: expected x destination arguments in Scan, not y -> check the query and struct KEYS
+
+
 */
 
 func InsertCategory(data map[string]interface{}) int64{
@@ -55,13 +61,13 @@ func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([
 
 //Query WITH struct
 func SelectAllFromCategoryWithoutCondition() ([]GetAllUserHandlerStruct, error) {
-    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM category AS cat"
+    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM category AS cat"
 
     var result []GetAllUserHandlerStruct
     
     if err := database.QuerySelectWithoutCondition(sqlQuery, &result); err != nil {
         // Handle error
-        panic(err)
+        return nil, err
     }
 
 	return result, nil

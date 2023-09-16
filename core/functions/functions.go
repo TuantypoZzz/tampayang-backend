@@ -1,7 +1,11 @@
 package globalFunction
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -91,3 +95,53 @@ func ConvertBytesToFloat64(data []byte) (float64, error) {
     }
     return floatValue, nil
 }
+
+func MakeAPIRequest(data map[string]interface{}) (*http.Response, error) {
+    var bodyReader io.Reader
+
+    //type assection
+    method, ok := data["method"].(string)
+    if !ok {
+        // Handle the case where "method" is not a string
+        fmt.Errorf("Method is not a string")
+    }
+
+    //type assection
+    urlString, ok := data["url"].(string)
+    if !ok {
+        // Handle the case where "method" is not a string
+        fmt.Errorf("URL is not a string")
+    }
+
+    // Serialize the request body to JSON for POST requests
+    if method == "POST" {
+        requestBodyBytes, err := json.Marshal(data["body"])
+        if err != nil {
+            return nil, err
+        }
+        bodyReader = bytes.NewBuffer(requestBodyBytes)
+    }
+
+    // Create a new HTTP request
+    req, err := http.NewRequest(method, urlString, bodyReader)
+    if err != nil {
+        return nil, err
+    }
+
+    // Set headers
+    // for key, value := range data["headers"] {
+    //     req.Header.Set(key, value)
+    // }
+
+    // Create an HTTP client
+    client := &http.Client{}
+
+    // Send the request
+    response, err := client.Do(req)
+    if err != nil {
+        return nil, err
+    }
+
+    return response, nil
+}
+

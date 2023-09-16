@@ -3,10 +3,7 @@ package user_handler
 import (
 	// "golang-fiber-template/app/models"
 	// globalFunction "golang-fiber-template/core/functions"
-	// "fmt"
-	// "fmt"
 	"time"
-
 	"github.com/gofiber/fiber/v2"
 	category_model "github.com/nulla-vis/golang-fiber-template/app/models/category"
 	"github.com/nulla-vis/golang-fiber-template/config/constant"
@@ -59,6 +56,7 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 
 func GetAllUserHandler(ctx *fiber.Ctx) error {
 	// USING CONDITION IN QUERY--------------
+	/**
 	whereCondition := "cat.id > ?"
 	whereData := []interface{}{1}
 
@@ -83,17 +81,20 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	}
 
 	return response.SuccessResponse(ctx, dbResult)
+	*/
 
 	//USING NO CONDITION IN QUERY--------------
-	// var sqlQuery = "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM category AS cat"
-	
-	// dbResult,err := category_model.SelectAllFromCategoryWithoutCondition(sqlQuery)
-	// if err != nil {
-	// 	return response.ErrorResponse(ctx, err)
-	// }
+	/**
+	dbResult,err := category_model.SelectAllFromCategoryWithoutCondition()
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
 
-	// return response.SuccessResponse(ctx, dbResult)
-	
+	return response.SuccessResponse(ctx, dbResult)
+	*/
+
+	// 3rd party API Call / Fetct API
+	return nil
 }
 
 
