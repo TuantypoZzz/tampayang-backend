@@ -21,14 +21,33 @@ import (
 
 func GetConnectionDB() *sql.DB {
 		// GET CONFIG DATA
-		config := helper.ConfigJson()
+		configuration := helper.ConfigJson()
+
+        var (
+            user_name, password, database, host interface{}
+            fullUrl string
+        )
+            
+
+
+        if config.GO_ENV == "development" {
+            user_name = configuration["development"].(map[string]interface{})["username"]
+            password = configuration["development"].(map[string]interface{})["password"]
+            database = configuration["development"].(map[string]interface{})["database"]
+            host = configuration["development"].(map[string]interface{})["host"]
+            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":3306)/" + fmt.Sprint(database)
+        }
+
+        if config.GO_ENV == "production" {
+            user_name = configuration["production"].(map[string]interface{})["username"]
+            password = configuration["production"].(map[string]interface{})["password"]
+            database = configuration["production"].(map[string]interface{})["database"]
+            host = configuration["production"].(map[string]interface{})["host"]
+            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":3306)/" + fmt.Sprint(database)
+        }
 
 		// SET DB VARIABLES
-		user_name := config["development"].(map[string]interface{})["username"]
-		password := config["development"].(map[string]interface{})["password"]
-		database := config["development"].(map[string]interface{})["database"]
-		host := config["development"].(map[string]interface{})["host"]
-		fullUrl := fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":3306)/" + fmt.Sprint(database)
+
 	
 		// OPEN DB CONNECTION
 		db, err := sql.Open("mysql", fullUrl)
@@ -70,7 +89,7 @@ func InserData(tblName string, data map[string]interface{}) int64{
 
 	sqlQuery := "INSERT INTO " + tblName + "(" + cols + ")" + " VALUES (" + vals + ")"
 
-	// print query
+	// Print query
     if config.GO_ENV == "development" {
         logQuery(sqlQuery, bindings)
     }

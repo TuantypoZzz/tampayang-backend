@@ -10,3 +10,9 @@ type GetAllUserHandlerStruct struct {
 	Created 	    string		`json:"created"`
     Created_date    string      `json:"created_date"` //date time handle logic in handler/model after struct is returned
 }
+
+type InsertCategoryStruct struct {
+    Name            string      `json:"name"`
+    Created         string      `json:"created"`
+    Created_date    string      `json:"created_date"`
+}

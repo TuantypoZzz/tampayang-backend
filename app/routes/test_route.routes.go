@@ -7,6 +7,6 @@ import (
 
 func TestRoute(app *fiber.App) {
 	// User Routes
-	// app.Get("/user/:name", handler.CreateUserHandler)
-	app.Get("/user/all-user", test_controller.GetAllUserHandler)
+	app.Get("/user/:name", test_controller.CreateUserHandler)
+	// app.Get("/user/all-user", test_controller.GetAllUserHandler)
 }

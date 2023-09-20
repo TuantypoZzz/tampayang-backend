@@ -1,6 +1,7 @@
 package test_model
 
 import (
+	"context"
 	"github.com/nulla-vis/golang-fiber-template/config/tables"
 	"github.com/nulla-vis/golang-fiber-template/core/database"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
@@ -39,7 +40,26 @@ func InsertCategory(data map[string]interface{}) int64{
 	return lastId
 }
 
-//Query WITH struct
+func InsertCategoryDatabase(query string, data InsertCategoryStruct) (int64, error) {
+    db  := database.GetConnectionDB()
+    defer db.Close()
+    ctx := context.Background()
+
+    result, err := db.ExecContext(ctx, query, data.Name, data.Created, data.Created_date)
+    if err != nil {
+        return 0, err
+    }
+
+    insertId, err := result.LastInsertId()
+    if err != nil {
+        return 0, err
+    }
+
+    return insertId, nil
+
+}
+
+//Query WITH struct WITH condition
 func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([]GetAllUserHandlerStruct, error) {
     // Initialize the SQL query
     sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM " + tables.Category + " AS cat"
@@ -59,7 +79,7 @@ func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([
 	return result, nil
 }
 
-//Query WITH struct
+//Query WITH struct WITHOUT condition
 func SelectAllFromCategoryWithoutCondition() ([]GetAllUserHandlerStruct, error) {
     sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM category AS cat"
 

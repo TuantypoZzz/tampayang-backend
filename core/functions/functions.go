@@ -38,22 +38,24 @@ func GetMessage(code string, replacements interface{}) map[string]interface{}{
 		mapMessage["id"] = fmt.Sprint(msgId)
 	}
 
+	if replacements == nil {
+		// do nothing
+	} else if replacements == "" {
+        //do nothing
+    } else {
+		replacementType := reflect.TypeOf(replacements).Kind()
 
-
-	replacementType := reflect.TypeOf(replacements).Kind()
-
-	if replacements == "" {
-		//do nothing
-	} else if replacementType == reflect.String {
-		mapMessage["en"] = strings.Replace(fmt.Sprint(mapMessage["en"]), "%s", fmt.Sprint(replacements), 1)
-		mapMessage["id"] = strings.Replace(fmt.Sprint(mapMessage["id"]), "%s", fmt.Sprint(replacements), 1)
-	} else if replacementType == reflect.Slice {
-		s := reflect.ValueOf(replacements)
-		ret := make([]interface{}, s.Len())
-		for i:=0; i<s.Len(); i++ {
-			ret[i] = s.Index(i).Interface()
-			mapMessage["en"] = strings.Replace(fmt.Sprint(mapMessage["en"]), "%s", fmt.Sprint(ret[i]), 1)
-			mapMessage["id"] = strings.Replace(fmt.Sprint(mapMessage["id"]), "%s", fmt.Sprint(ret[i]), 1)
+		if replacementType == reflect.String {
+			mapMessage["en"] = strings.Replace(fmt.Sprint(mapMessage["en"]), "%s", fmt.Sprint(replacements), 1)
+			mapMessage["id"] = strings.Replace(fmt.Sprint(mapMessage["id"]), "%s", fmt.Sprint(replacements), 1)
+		} else if replacementType == reflect.Slice {
+			s := reflect.ValueOf(replacements)
+			ret := make([]interface{}, s.Len())
+			for i := 0; i < s.Len(); i++ {
+				ret[i] = s.Index(i).Interface()
+				mapMessage["en"] = strings.Replace(fmt.Sprint(mapMessage["en"]), "%s", fmt.Sprint(ret[i]), 1)
+				mapMessage["id"] = strings.Replace(fmt.Sprint(mapMessage["id"]), "%s", fmt.Sprint(ret[i]), 1)
+			}
 		}
 	}
 

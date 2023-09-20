@@ -1,7 +1,6 @@
 package response
 
 import (
-	"reflect"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -43,7 +42,7 @@ func SuccessResponse(ctx *fiber.Ctx, data interface{}) error{
         return ErrorResponse(ctx, message)
     }
 
-	if reflect.ValueOf(data).IsNil() {
+	if data == nil {
 		data = map[string]string{}
 	}
 

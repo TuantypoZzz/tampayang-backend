@@ -9,13 +9,18 @@ import (
 	// gorest_api "github.com/nulla-vis/golang-fiber-template/app/libs/gorest"
 	test_model "github.com/nulla-vis/golang-fiber-template/app/models/test_model"
 	"github.com/nulla-vis/golang-fiber-template/config/constant"
+	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 	// "encoding/base64"
 )
 
 func CreateUserHandler(ctx *fiber.Ctx) error {
 
-	name := ctx.Params("name")
+	var name string
+	var created string
+	var created_date string
+	
+	name = ctx.Params("name")
 
 	if name == "error" {
 
@@ -25,23 +30,25 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 		// 	"id": "Koneksi Error",
 		// 	"en": "Connection Error",
 		// }
-		return response.ErrorResponse(ctx, "sebuah error coy")
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err001", nil))
 		// panic(ctx.JSON(errorMessage))
 		// panic("Something went wrong")
 	}
 
 	now := time.Now()
-	data := map[string]interface{}{
-		"name": name,
-		"created": now.Format(constant.NOW_TIME_FORMAT),
-		"created_date": now.Format(constant.NOW_DATE_TIME_FORMAT),
-	}
+	created = now.Format(constant.NOW_TIME_FORMAT)
+	created_date = now.Format(constant.NOW_DATE_TIME_FORMAT)
+	// data := map[string]interface{}{
+	// 	"name": name,
+	// 	"created": created,
+	// 	"created_date": created_date,
+	// }
 
-	lastId := test_model.InsertCategory(data)
+	// lastId := test_model.InsertCategory(data)
 
-	responseData := map[string]interface{}{
-		"last_id": lastId,
-	}
+	// responseData := map[string]interface{}{
+	// 	"last_id": lastId,
+	// }
 
 	// someData := map[string]interface{} {
 	// 	"code": 123,
@@ -53,7 +60,36 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 	// // responseData = globalFunction.GetMessage(someData,"")
 
 
+	// return response.SuccessResponse(ctx, responseData)
+
+
+
+	sqlQuery := "INSERT INTO category(name, created, created_date) VALUES (?,?,?)"
+	insertData := test_model.InsertCategoryStruct{
+		Name: name,
+		Created: created,
+		Created_date: created_date,
+	}
+
+	dbResult, err := test_model.InsertCategoryDatabase(sqlQuery, insertData)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	type lastIdResponse struct {
+		Message string `json:"message"`
+		LastId	int64	`json:"lastId"`
+	}
+
+	responseData := lastIdResponse{
+		Message: "Ini string",
+		LastId: dbResult,
+	}
+
 	return response.SuccessResponse(ctx, responseData)
+
+
+
 }
 
 func GetAllUserHandler(ctx *fiber.Ctx) error {
@@ -89,7 +125,7 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	
 	dbResult,err := test_model.SelectAllFromCategoryWithoutCondition()
 	if err != nil {
-		return response.ErrorResponse(ctx, err)
+		return response.ErrorResponse(ctx,err)
 	}
 
 	return response.SuccessResponse(ctx, dbResult)
