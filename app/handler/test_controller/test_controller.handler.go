@@ -3,10 +3,12 @@ package test_controller
 import (
 	// "golang-fiber-template/app/models"
 	// globalFunction "golang-fiber-template/core/functions"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	// gorest_api "github.com/nulla-vis/golang-fiber-template/app/libs/gorest"
+	elasticsearchLib "github.com/nulla-vis/golang-fiber-template/app/libs/elasticsearch"
 	test_model "github.com/nulla-vis/golang-fiber-template/app/models/test_model"
 	"github.com/nulla-vis/golang-fiber-template/config/constant"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
@@ -126,6 +128,46 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	dbResult,err := test_model.SelectAllFromCategoryWithoutCondition()
 	if err != nil {
 		return response.ErrorResponse(ctx,err)
+	}
+
+	// check elasticsearch connection
+	// 1. Get esClient
+	esClient := elasticsearchLib.EsClient
+	// 2. Check ES ping
+	esPing := elasticsearchLib.CheckPing(esClient)
+	// 3. If ping ok, create an index example
+
+	if esPing {
+		// Define the index name and properties
+		indexName := "my_index"
+		// properties := map[string]interface{}{
+		// 	"field1": map[string]interface{}{
+		// 		"type": "text",
+		// 		// You can add other mapping properties for field1 here if needed
+		// 	},
+		// 	"field2": map[string]interface{}{
+		// 		"type": "integer",
+		// 		// You can add other mapping properties for field2 here if needed
+		// 	},
+		// 	// Add mappings for other fields as needed
+		// }
+
+		// // Create the Elasticsearch index
+		// _, err := elasticsearchLib.CreateIndex(indexName, properties)
+		// if err != nil {
+		// 	// Handle the error
+		// 	return response.ErrorResponse(ctx, err)
+		// }
+
+		result, err := elasticsearchLib.DeleteIndex(esClient, indexName)
+		if err != nil {
+			return response.ErrorResponse(ctx, err)
+		}
+
+		return response.SuccessResponse(ctx, result)
+
+	} else {
+		fmt.Println("Connection Error")
 	}
 
 	return response.SuccessResponse(ctx, dbResult)

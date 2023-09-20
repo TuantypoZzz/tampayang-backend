@@ -12,5 +12,16 @@
         "database": "golang_restful_api",
         "host": "localhost",
         "dialect": "mysql"
+    },    
+    "elasticsearch": {
+        "server" : {
+            "scheme": "http",
+            "host": "localhost",
+            "port": "9200"
+        },
+        "auth" : {
+            "username": "",
+            "password": ""
+        }
     }
 }

@@ -1,9 +1,12 @@
 package helper
 
 import (
+	"bytes"
 	"encoding/json"
-	"github.com/nulla-vis/golang-fiber-template/config"
+	"io"
 	"os"
+
+	"github.com/nulla-vis/golang-fiber-template/config"
 	// "path/filepath"
 )
 
@@ -44,4 +47,15 @@ func LangEn() map[string]interface{} {
 	// fmt.Println(result["development"].(map[string]interface{})["database"])
 	return result
 
+}
+
+// MakeReader converts a map to an io.Reader containing JSON data.
+func MakeReader(data map[string]interface{}) io.Reader {
+    // Serialize the data to JSON
+    jsonData, _ := json.Marshal(data)
+    
+    // Create a reader from the JSON data
+    reader := bytes.NewReader(jsonData)
+    
+    return reader
 }
