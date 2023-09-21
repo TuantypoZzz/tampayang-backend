@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"strconv"
 
@@ -25,11 +24,7 @@ func main() {
 
 	// INITIALIZE ROUTE
 	routes.RouteInit(app)
-	
-	if isPortInUse(config.PORT) {
-        fmt.Printf("\x1b[97;41mPort %s is already in use or invalid.\033[0m \n", config.PORT)
-        os.Exit(1)
-    }
+
 
     port, err := strconv.Atoi(config.PORT)
     if err != nil {
@@ -43,19 +38,4 @@ func main() {
         fmt.Printf("Error starting the server: %v\n", err)
         os.Exit(1)
     }
-}
-
-func isPortInUse(port string) bool {
-    portInt, err := strconv.Atoi(port)
-    if err != nil {
-        fmt.Printf("Invalid port number: %v\n", err)
-        return true
-    }
-
-    listener, err := net.Listen("tcp", fmt.Sprintf(":%d", portInt))
-    if err != nil {
-        return true
-    }
-    defer listener.Close()
-    return false
 }
