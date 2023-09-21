@@ -56,9 +56,9 @@ func InitElasticsearchClient() error {
 * Dokumentasi :
 *   > Mappings Object : https://www.elastic.co/guide/en/elasticsearch/reference/7.x/mapping.html
 */
-func CheckPing(client *elasticsearch.Client) bool {
+func CheckPing() bool {
     // Use the client's Ping method to check Elasticsearch's availability.
-    res, err := client.Ping()
+    res, err := EsClient.Ping()
     if err != nil {
         // An error occurred while pinging Elasticsearch, indicating it's not available.
         return false

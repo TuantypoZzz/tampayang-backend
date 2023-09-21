@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"strconv"
@@ -26,7 +25,7 @@ func CoreInit(app *fiber.App) {
 
     // Initialize Elasticsearch connection
     if err := elasticsearchLib.InitElasticsearchClient(); err != nil {
-        log.Fatalf("Error initializing Elasticsearch: %v", err)
+        fmt.Println("\x1b[97;41mElasticsearch FAILED to RUN.\033[0m")
     }
 }
 

@@ -131,11 +131,9 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	}
 
 	// check elasticsearch connection
-	// 1. Get esClient
-	esClient := elasticsearchLib.EsClient
-	// 2. Check ES ping
-	esPing := elasticsearchLib.CheckPing(esClient)
-	// 3. If ping ok, create an index example
+	// 1. Check ES ping
+	esPing := elasticsearchLib.CheckPing()
+	// 2. If ping ok, create an index example
 
 	if esPing {
 		// Define the index name and properties
