@@ -3,6 +3,7 @@
         "username": "root",
         "password": "root",
         "database": "golang_restful_api",
+        "port": "3306",
         "host": "localhost",
         "dialect": "mysql"
     },
@@ -11,6 +12,7 @@
         "password": "root",
         "database": "golang_restful_api",
         "host": "localhost",
+        "port": "3306",
         "dialect": "mysql"
     },    
     "elasticsearch": {

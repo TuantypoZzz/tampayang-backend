@@ -24,7 +24,7 @@ func GetConnectionDB() *sql.DB {
 		configuration := helper.ConfigJson()
 
         var (
-            user_name, password, database, host interface{}
+            user_name, password, database, host, port interface{}
             fullUrl string
         )
             
@@ -35,7 +35,8 @@ func GetConnectionDB() *sql.DB {
             password = configuration["development"].(map[string]interface{})["password"]
             database = configuration["development"].(map[string]interface{})["database"]
             host = configuration["development"].(map[string]interface{})["host"]
-            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":3306)/" + fmt.Sprint(database)
+            port = configuration["development"].(map[string]interface{})["port"]
+            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":"+ fmt.Sprint(port)+ ")/" + fmt.Sprint(database)
         }
 
         if config.GO_ENV == "production" {
@@ -43,7 +44,8 @@ func GetConnectionDB() *sql.DB {
             password = configuration["production"].(map[string]interface{})["password"]
             database = configuration["production"].(map[string]interface{})["database"]
             host = configuration["production"].(map[string]interface{})["host"]
-            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":3306)/" + fmt.Sprint(database)
+            port = configuration["production"].(map[string]interface{})["port"]
+            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":"+ fmt.Sprint(port)+ ")/" + fmt.Sprint(database)
         }
 
 		// SET DB VARIABLES
