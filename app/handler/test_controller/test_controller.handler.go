@@ -139,7 +139,9 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 
 	if esPing {
 		// Define the index name and properties
-		indexName := "my_index"
+		indexName := "story"
+		documentId := "333-0"
+		// CREATE INDEX-----------------------------------------------------------
 		// properties := map[string]interface{}{
 		// 	"field1": map[string]interface{}{
 		// 		"type": "text",
@@ -152,18 +154,76 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 		// 	// Add mappings for other fields as needed
 		// }
 
-		// // Create the Elasticsearch index
-		// _, err := elasticsearchLib.CreateIndex(indexName, properties)
+		// Create the Elasticsearch index
+		// result, err := elasticsearchLib.CreateIndex(indexName, properties)
 		// if err != nil {
 		// 	// Handle the error
 		// 	return response.ErrorResponse(ctx, err)
 		// }
+		// CREATE INDEX-----------------------------------------------------------
 
-		result, err := elasticsearchLib.DeleteIndex(esClient, indexName)
+		// DELETE INDEX-----------------------------------------------------------
+		// result, err := elasticsearchLib.DeleteIndex(esClient, indexName)
+		// if err != nil {
+		// 	return response.ErrorResponse(ctx, err)
+		// }
+		// DELETE INDEX-----------------------------------------------------------
+
+		// INSER DATA-------------------------------------------------------------
+		// documentID := "4"
+		// data := map[string]interface{}{
+		// 	"field1": "123",
+		// 	"field2": "456",
+		// }
+
+		// // Insert the data into Elasticsearch
+		// result, err := elasticsearchLib.InsertData(indexName, documentID, data)
+		// if err != nil {
+		// 	response.ErrorResponse(ctx, err)
+		// }
+		// INSER DATA-------------------------------------------------------------
+
+		// UPDATE DATA-------------------------------------------------------------
+		// documentID := "4"
+		// data := map[string]interface{}{
+		// 	"field1": "444",
+		// 	"field2": "444",
+		// }
+
+		// update the data into Elasticsearch
+		// result, err := elasticsearchLib.UpdateIndex(indexName, documentID, data)
+		// if err != nil {
+		// 	response.ErrorResponse(ctx, err)
+		// }
+		// UPDATE DATA-------------------------------------------------------------
+
+		// EXIST INDEX-------------------------------------------------------------
+		// result, err := elasticsearchLib.IndexExists(indexName)
+		// if err != nil {
+		// 	response.ErrorResponse(ctx, err)
+		// }
+		// EXIST INDEX-------------------------------------------------------------
+
+		// EXIST DOCUMENT----------------------------------------------------------
+		// result, err := elasticsearchLib.DocumentExists(indexName, documentId)
+		// if err != nil {
+		// 	response.ErrorResponse(ctx, err)
+		// }
+		// EXIST DOCUMENT----------------------------------------------------------
+
+		// DELETE DOCUMENT----------------------------------------------------------
+		// result, err := elasticsearchLib.DeleteDocument(indexName, documentId)
+		// if err != nil {
+		// 	response.ErrorResponse(ctx, err)
+		// }
+		// DELETE DOCUMENT----------------------------------------------------------
+
+		// GET A DOCUMENT----------------------------------------------------------
+		result, err := elasticsearchLib.GetDocument(indexName, documentId)
 		if err != nil {
-			return response.ErrorResponse(ctx, err)
+			response.ErrorResponse(ctx, err)
 		}
-
+		// GET A DOCUMENT----------------------------------------------------------
 		return response.SuccessResponse(ctx, result)
 
 	} else {
