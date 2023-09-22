@@ -106,7 +106,6 @@ func InserData(tblName string, data map[string]interface{}) int64{
 	}
 
 	return insertId
-
 }
 
 func QuerySelectWitCondition(sqlQuery string, bindings []interface{}, ) ([]map[string]interface{}, error) {

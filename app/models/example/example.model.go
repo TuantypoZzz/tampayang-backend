@@ -16,12 +16,12 @@ func InsertExample(query string, exampleData InsertExampleStruct) (int64, error)
 		panic(err)
 	}
 
-	insertId, err := result.LastInsertId()
-	if err != nil {
-		panic(err)
-	}
+    insertId, err := result.LastInsertId()
+    if err != nil {
+        panic(err)
+    }
 
-	return insertId, nil
+    return insertId, nil
 }
 
 func UpdateExample(query string, exampleData UpdateExampleStruct) *GetExampleByIdStruct {

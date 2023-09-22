@@ -11,3 +11,15 @@ func ExampleRoute(app *fiber.App) {
 	app.Get("/example/all_example/", example_controller.GetAllExample)
 	app.Put("/example/update_example/", example_controller.UpdateExample)
 }
+
+
+func Middleware(ctx *fiber.Ctx) error {
+
+	// headers authorization
+	token := ctx.Get("x-token")
+	if token == "" || token != "secret" {
+		panic("Authorization Failed")
+	}
+	
+	return ctx.Next()
+}
