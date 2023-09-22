@@ -4,5 +4,11 @@
     "sys001": "Something wrong with our %s. Please try again or contact customer service",
     "sys002": "Something wrong with our %s. Please try again or contact customer %s",
 
-    "dbins001": "Insert Query Error! Data should be a Map"
+    "dbins001": "Insert Query Error! Data should be a Map",
+    "ex0001": "Example name cannot be empty",
+    "ex0002": "Example created cannot be empty",
+    "ex0003": "Example rating cannot be empty",
+    "ex0004": "Example booleandesu cannot be empty",
+    "ex0005": "Example created_date cannot be empty",
+    "ex0006": "Example name already registered"
 }   

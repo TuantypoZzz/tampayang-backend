@@ -4,5 +4,11 @@
     "sys001": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer service",
     "sys002": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer %s",
 
-    "dbins001": "Insert Query Error! Data should be a Map"
+    "dbins001": "Insert Query Error! Data should be a Map",
+    "ex0001": "Example name tidak boleh kosong",
+    "ex0002": "Example created tidak boleh kosong",
+    "ex0003": "Example rating tidak boleh kosong",
+    "ex0004": "Example booleandesu tidak boleh kosong",
+    "ex0005": "Example created date tidak boleh kosong",
+    "ex0006": "Example name telah digunakan"
 }
