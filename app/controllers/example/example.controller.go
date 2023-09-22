@@ -23,8 +23,8 @@ func CreateExample(ctx *fiber.Ctx) error{
 	}
 
 	// name must unique
-	query := "SELECT exa.name FROM example AS exa WHERE exa.name = ? LIMIT 1"
-	nameExist:= example_model.ExampleNameIsUnique(query, example.Name)
+	query_get := "SELECT exa.name FROM example AS exa WHERE exa.name = ? LIMIT 1"
+	nameExist:= example_model.ExampleNameIsUnique(query_get, example.Name)
 	if example.Name == nameExist {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0006", nil))
 	}
@@ -49,7 +49,7 @@ func CreateExample(ctx *fiber.Ctx) error{
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0005", nil))
 	}
 	// String sql query
-	sqlQuery := "INSERT INTO example(name, created, rating, booleandesu, created_date) VALUES(?,?,?,?,?)"
+	query_insert := "INSERT INTO example(name, created, rating, booleandesu, created_date) VALUES(?,?,?,?,?)"
 	
 	// Set data based on MODEL struct
 	exampleData := example_model.InsertExampleStruct{
@@ -60,7 +60,7 @@ func CreateExample(ctx *fiber.Ctx) error{
 		Created_date: example.Created_date,
 	}
 
-	dbResult, err := example_model.InsertExample(sqlQuery, exampleData)
+	dbResult, err := example_model.InsertExample(query_insert, exampleData)
 	if err != nil {
 		response.ErrorResponse(ctx, err)
 	}
