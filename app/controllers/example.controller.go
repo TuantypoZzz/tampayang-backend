@@ -1,17 +1,18 @@
-package example_controller
+package controllers
 
 import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	example_model "github.com/nulla-vis/golang-fiber-template/app/models/example"
+	"github.com/nulla-vis/golang-fiber-template/app/models"
+	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
 func CreateExample(ctx *fiber.Ctx) error {
 	// Data from Body POST
-	example := new(CreateExampleStruct)
+	example := new(entity.Example)
 	if err := ctx.BodyParser(example); err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
@@ -24,7 +25,7 @@ func CreateExample(ctx *fiber.Ctx) error {
 
 	// name must unique
 	query_get := "SELECT exa.name FROM example AS exa WHERE exa.name = ? LIMIT 1"
-	nameExist := example_model.ExampleNameIsUnique(query_get, example.Name)
+	nameExist := models.ExampleNameIsUnique(query_get, example.Name)
 	if example.Name == nameExist {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0006", nil))
 	}
@@ -52,7 +53,7 @@ func CreateExample(ctx *fiber.Ctx) error {
 	query_insert := "INSERT INTO example(name, created, rating, booleandesu, created_date) VALUES(?,?,?,?,?)"
 
 	// Set data based on MODEL struct
-	exampleData := example_model.InsertExampleStruct{
+	exampleData := entity.Example{
 		Name:         example.Name,
 		Created:      example.Created,
 		Rating:       example.Rating,
@@ -60,12 +61,12 @@ func CreateExample(ctx *fiber.Ctx) error {
 		Created_date: example.Created_date,
 	}
 
-	dbResult, err := example_model.InsertExample(query_insert, exampleData)
+	dbResult, err := models.InsertExample(query_insert, exampleData)
 	if err != nil {
 		response.ErrorResponse(ctx, err)
 	}
 
-	result := CreateExampleResponse{
+	result := entity.ExampleId{
 		ExampleId: dbResult,
 	}
 
@@ -81,7 +82,7 @@ func GetExampleById(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err002", nil))
 	}
 
-	dbResult := example_model.GetExampleById(int_example_id)
+	dbResult := models.GetExampleById(int_example_id)
 
 	if globalFunction.IsEmpty(dbResult.Name) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0007", nil))
@@ -91,14 +92,14 @@ func GetExampleById(ctx *fiber.Ctx) error {
 }
 
 func GetAllExample(ctx *fiber.Ctx) error {
-	dbResult := example_model.GetAllExample()
+	dbResult := models.GetAllExample()
 
 	return response.SuccessResponse(ctx, dbResult)
 }
 
 func UpdateExample(ctx *fiber.Ctx) error {
 
-	example := new(UpdateExampleStruct)
+	example := new(entity.ExampleWithId)
 	if err := ctx.BodyParser(example); err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
@@ -108,7 +109,7 @@ func UpdateExample(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0008", nil))
 	}
 
-	dbResult := example_model.GetExampleById(example.Id)
+	dbResult := models.GetExampleById(example.Id)
 	if globalFunction.IsEmpty(dbResult.Id) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0007", nil))
 	}
@@ -141,7 +142,7 @@ func UpdateExample(ctx *fiber.Ctx) error {
 	query_example_update := "UPDATE example SET name = ?, created = ?, rating = ?, booleandesu = ?, created_date = ? WHERE id = ?"
 
 	// Set data based on MODEL struct
-	exampleData := example_model.UpdateExampleStruct{
+	exampleData := entity.ExampleWithId{
 		Id:           example.Id,
 		Name:         example.Name,
 		Created:      example.Created,
@@ -150,7 +151,7 @@ func UpdateExample(ctx *fiber.Ctx) error {
 		Created_date: example.Created_date,
 	}
 
-	UpdateResult := example_model.UpdateExample(query_example_update, exampleData)
+	UpdateResult := models.UpdateExample(query_example_update, exampleData)
 
 	return response.SuccessResponse(ctx, UpdateResult)
 }

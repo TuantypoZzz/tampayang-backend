@@ -1,12 +1,13 @@
-package employeemodel_model
+package models
 
 import (
 	"context"
 
+	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
 	"github.com/nulla-vis/golang-fiber-template/core/database"
 )
 
-func InsertNewEmployeeDatabase(query string, data InsertNewEmployeeStruct) (int64, error) {
+func InsertNewEmployeeDatabase(query string, data entity.Employee) (int64, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()

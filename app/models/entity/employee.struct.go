@@ -1,6 +1,6 @@
-package employeemodel_model
+package entity
 
-type InsertNewEmployeeStruct struct {
+type Employee struct {
 	Name         string `json:"name"`
 	Nip          string `json:"nip"`
 	Bidang       string `json:"bidang"`
@@ -13,3 +13,5 @@ type InsertNewEmployeeStruct struct {
 	Email        string `json:"email"`
 	Created_date string `json:"created_date"`
 }
+
+

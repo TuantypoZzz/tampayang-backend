@@ -1,12 +1,13 @@
-package example_model
+package models
 
 import (
 	"context"
 
+	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
 	"github.com/nulla-vis/golang-fiber-template/core/database"
 )
 
-func InsertExample(query string, exampleData InsertExampleStruct) (int64, error) {
+func InsertExample(query string, exampleData entity.Example) (int64, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -24,7 +25,7 @@ func InsertExample(query string, exampleData InsertExampleStruct) (int64, error)
     return insertId, nil
 }
 
-func UpdateExample(query string, exampleData UpdateExampleStruct) *GetExampleByIdStruct {
+func UpdateExample(query string, exampleData entity.ExampleWithId) *entity.ExampleWithId {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	// ctx := context.Background()
@@ -37,7 +38,7 @@ func UpdateExample(query string, exampleData UpdateExampleStruct) *GetExampleByI
 	query = "SELECT exa.* FROM example AS exa WHERE exa.id = ?"
 	result := db.QueryRow(query, exampleData.Id)
 
-	var example GetExampleByIdStruct
+	var example entity.ExampleWithId
 	err = result.Scan(
 		&example.Id,
 		&example.Name,
@@ -72,12 +73,12 @@ func ExampleNameIsUnique(query string, name string) string {
 	return nameExist
 }
 
-func GetExampleById(exampleId int) GetExampleByIdStruct {
+func GetExampleById(exampleId int) entity.ExampleWithId {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
 
-	var exampleResult GetExampleByIdStruct
+	var exampleResult entity.ExampleWithId
 
 	sqlQuery := "SELECT exa.* FROM example AS exa WHERE exa.id = ?"
 	result, err := db.QueryContext(ctx, sqlQuery, exampleId)
@@ -102,12 +103,12 @@ func GetExampleById(exampleId int) GetExampleByIdStruct {
 	return exampleResult
 }
 
-func GetAllExample() []GetAllExampleStruct {
+func GetAllExample() []entity.ExampleWithId {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
 
-	var exampleResults []GetAllExampleStruct
+	var exampleResults []entity.ExampleWithId
 
 	sqlQuery := "SELECT exa.* FROM example AS exa"
 
@@ -117,7 +118,7 @@ func GetAllExample() []GetAllExampleStruct {
 	}
 
 	if result.Next() {
-		var example GetAllExampleStruct
+		var example entity.ExampleWithId
 		err := result.Scan(
 			&example.Id,
 			&example.Name,

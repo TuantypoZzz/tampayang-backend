@@ -1,15 +1,16 @@
-package employeecontroller_handler
+package controllers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	employeemodel_model "github.com/nulla-vis/golang-fiber-template/app/models/employee_model"
+	"github.com/nulla-vis/golang-fiber-template/app/models"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
+	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
 func CreateEmployeeHandler(ctx *fiber.Ctx) error {
 
-	newEmployee := new(CreateEmployeeHandlerStruct)
+	newEmployee := new(entity.Employee)
 
 	if err := ctx.BodyParser(newEmployee); err != nil {
 		return response.ErrorResponse(ctx, err)
@@ -17,7 +18,7 @@ func CreateEmployeeHandler(ctx *fiber.Ctx) error {
 
 	sqlQuery := " INSERT INTO employee(name, nip, bidang, seksi, unit_kerja, gender, birth_place, birth_date, phone, email, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
 
-	insertData := employeemodel_model.InsertNewEmployeeStruct{
+	insertData := entity.Employee{
 		Name:         newEmployee.Name,
 		Nip:          newEmployee.Nip,
 		Bidang:       newEmployee.Bidang,
@@ -31,7 +32,7 @@ func CreateEmployeeHandler(ctx *fiber.Ctx) error {
 		Created_date: newEmployee.Created_date,
 	}
 
-	_, err := employeemodel_model.InsertNewEmployeeDatabase(sqlQuery, insertData)
+	_, err := models.InsertNewEmployeeDatabase(sqlQuery, insertData)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
