@@ -10,5 +10,11 @@
     "ex0003": "Example rating tidak boleh kosong",
     "ex0004": "Example booleandesu tidak boleh kosong",
     "ex0005": "Example created date tidak boleh kosong",
-    "ex0006": "Example name telah digunakan"
+    "ex0006": "Example name telah digunakan",
+    "ex0007": "Example tidak ditemukan",
+    "ex0008": "Example Id tidak ditemukan",
+    "user001": "User berhasil dibuat",
+    "emply001": "Pegawai berhasil dibuat",
+    "err002": "Format Id salah"
+    
 }

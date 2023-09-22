@@ -20,7 +20,7 @@ Setup
 4. update file according to your local configuration
 5. install node js (optional to enable live reload/hot reload)
 6. npm -g install nodemon (optional to enable live reload/hot reload)
-7. if follow step 4 and 5, run app with : nodemon --exec go run main.go --signal SIGTERM 
+7. if follow step 4 and 5, run app with : nodemon --exec go run main.go --signal SIGTERM
 8. if not follow step 4 and 5, run app with : go run main.go
 9. hit http://localhost:3000
 

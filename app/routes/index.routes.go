@@ -7,4 +7,6 @@ import (
 func RouteInit(app *fiber.App) {
 	TestRoute(app)
 	ExampleRoute(app)
+	UserRoute(app)
+	EmployeeRoute(app)
 }

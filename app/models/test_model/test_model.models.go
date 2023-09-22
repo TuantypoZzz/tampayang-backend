@@ -2,6 +2,7 @@ package test_model
 
 import (
 	"context"
+
 	"github.com/nulla-vis/golang-fiber-template/config/tables"
 	"github.com/nulla-vis/golang-fiber-template/core/database"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
@@ -35,85 +36,83 @@ import (
 
 */
 
-func InsertCategory(data map[string]interface{}) int64{
+func InsertCategory(data map[string]interface{}) int64 {
 	lastId := database.InserData("category", data)
 	return lastId
 }
 
 func InsertCategoryDatabase(query string, data InsertCategoryStruct) (int64, error) {
-    db  := database.GetConnectionDB()
-    defer db.Close()
-    ctx := context.Background()
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
 
-    result, err := db.ExecContext(ctx, query, data.Name, data.Created, data.Created_date)
-    if err != nil {
-        return 0, err
-    }
+	result, err := db.ExecContext(ctx, query, data.Name, data.Created, data.Created_date)
+	if err != nil {
+		return 0, err
+	}
 
-    insertId, err := result.LastInsertId()
-    if err != nil {
-        return 0, err
-    }
+	insertId, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
 
-    return insertId, nil
+	return insertId, nil
 
 }
 
-//Query WITH struct WITH condition
+// Query WITH struct WITH condition
 func SelectAllFromCategoryWithCondition(where string, bindings []interface{}) ([]GetAllUserHandlerStruct, error) {
-    // Initialize the SQL query
-    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM " + tables.Category + " AS cat"
+	// Initialize the SQL query
+	sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM " + tables.Category + " AS cat"
 
-    // Add the WHERE clause if provided
-    if where != "" {
-        sqlQuery += " WHERE " + where
-    }
+	// Add the WHERE clause if provided
+	if where != "" {
+		sqlQuery += " WHERE " + where
+	}
 
-    dbResult, err := database.QuerySelectWitCondition(sqlQuery, bindings)
-    if err != nil {
-        panic(err)
-    }
+	dbResult, err := database.QuerySelectWitCondition(sqlQuery, bindings)
+	if err != nil {
+		panic(err)
+	}
 
-    result := ConvertToGetAllUserHandlerStruct(dbResult)
+	result := ConvertToGetAllUserHandlerStruct(dbResult)
 
 	return result, nil
 }
 
-//Query WITH struct WITHOUT condition
+// Query WITH struct WITHOUT condition
 func SelectAllFromCategoryWithoutCondition() ([]GetAllUserHandlerStruct, error) {
-    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM category AS cat"
+	sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created, cat.created_date FROM category AS cat"
 
-    var result []GetAllUserHandlerStruct
-    
-    if err := database.QuerySelectWithoutCondition(sqlQuery, &result); err != nil {
-        // Handle error
-        return nil, err
-    }
+	var result []GetAllUserHandlerStruct
+
+	if err := database.QuerySelectWithoutCondition(sqlQuery, &result); err != nil {
+		// Handle error
+		return nil, err
+	}
 
 	return result, nil
 }
 
-//Query WITHOUT struct (NOT RECOMMENDED)--------------------------------------------------------------------------------------------
+// Query WITHOUT struct (NOT RECOMMENDED)--------------------------------------------------------------------------------------------
 func SelectAllFromCategoryWithConditionWithouStruct(where string, bindings []interface{}) ([]map[string]interface{}, error) {
-    // Initialize the SQL query
-    sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM " + tables.Category + " AS cat"
+	// Initialize the SQL query
+	sqlQuery := "SELECT cat.id, cat.name, cat.rating, cat.booleandesu, cat.created FROM " + tables.Category + " AS cat"
 
-    // Add the WHERE clause if provided
-    if where != "" {
-        sqlQuery += " WHERE " + where
-    }
+	// Add the WHERE clause if provided
+	if where != "" {
+		sqlQuery += " WHERE " + where
+	}
 
-    result, err := database.QuerySelectWitCondition(sqlQuery, bindings)
-    if err != nil {
-        panic(err)
-    }
+	result, err := database.QuerySelectWitCondition(sqlQuery, bindings)
+	if err != nil {
+		panic(err)
+	}
 
-    // convert data from database (if Query WITHOUT struct)
+	// convert data from database (if Query WITHOUT struct)
 	globalFunction.ConvertByteSlicesToStrings(result)
 
 	return result, nil
 }
+
 //Query WITHOUT struct (NOT RECOMMENDED)--------------------------------------------------------------------------------------------
-
-
-

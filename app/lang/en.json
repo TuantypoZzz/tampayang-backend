@@ -10,5 +10,10 @@
     "ex0003": "Example rating cannot be empty",
     "ex0004": "Example booleandesu cannot be empty",
     "ex0005": "Example created_date cannot be empty",
-    "ex0006": "Example name already registered"
+    "ex0006": "Example name already registered",
+    "ex0007": "Example not found",
+    "ex0008": "Example Id not found",
+    "user001": "User successfully created",
+    "emply001": "Employee successfully created",
+    "err002": "Wrong Format Id"
 }   

@@ -7,40 +7,132 @@ import (
 )
 
 func InsertExample(query string, exampleData InsertExampleStruct) (int64, error) {
-    db  := database.GetConnectionDB()
-    defer db.Close()
-    ctx := context.Background()
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
 
 	result, err := db.ExecContext(ctx, query, exampleData.Name, exampleData.Created, exampleData.Rating, exampleData.Booleandesu, exampleData.Created_date)
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
-    insertId, err := result.LastInsertId()
-    if err != nil {
-        panic(err)
-    }
+	insertId, err := result.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
 
-    return insertId, nil
-
+	return insertId, nil
 }
 
-func ExampleNameIsUnique(query string, name string)(string) {
-    db := database.GetConnectionDB()
-    defer db.Close()
-    ctx := context.Background()
+func UpdateExample(query string, exampleData UpdateExampleStruct) *GetExampleByIdStruct {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	// ctx := context.Background()
 
-    var nameExist string = ""
-    result, err := db.QueryContext(ctx, query, name)
-    if err != nil {
-        panic(err)
-    }
+	_, err := db.Exec(query, exampleData.Name, exampleData.Created, exampleData.Rating, exampleData.Booleandesu, exampleData.Created_date, exampleData.Id)
+	if err != nil {
+		panic(err)
+	}
 
-    if result.Next() {
-        if err := result.Scan(&nameExist); err != nil {
-            panic(err)
-        }
-    }
+	query = "SELECT exa.* FROM example AS exa WHERE exa.id = ?"
+	result := db.QueryRow(query, exampleData.Id)
 
-    return nameExist
+	var example GetExampleByIdStruct
+	err = result.Scan(
+		&example.Id,
+		&example.Name,
+		&example.Created,
+		&example.Rating,
+		&example.Booleandesu,
+		&example.Created_date)
+
+	if err != nil {
+		panic(err)
+	}
+	return &example
+}
+
+func ExampleNameIsUnique(query string, name string) string {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var nameExist string = ""
+	result, err := db.QueryContext(ctx, query, name)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.Next() {
+		if err := result.Scan(&nameExist); err != nil {
+			panic(err)
+		}
+	}
+
+	return nameExist
+}
+
+func GetExampleById(exampleId int) GetExampleByIdStruct {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var exampleResult GetExampleByIdStruct
+
+	sqlQuery := "SELECT exa.* FROM example AS exa WHERE exa.id = ?"
+	result, err := db.QueryContext(ctx, sqlQuery, exampleId)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.Next() {
+		err := result.Scan(
+			&exampleResult.Id,
+			&exampleResult.Name,
+			&exampleResult.Created,
+			&exampleResult.Rating,
+			&exampleResult.Booleandesu,
+			&exampleResult.Created_date)
+
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return exampleResult
+}
+
+func GetAllExample() []GetAllExampleStruct {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var exampleResults []GetAllExampleStruct
+
+	sqlQuery := "SELECT exa.* FROM example AS exa"
+
+	result, err := db.QueryContext(ctx, sqlQuery)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.Next() {
+		var example GetAllExampleStruct
+		err := result.Scan(
+			&example.Id,
+			&example.Name,
+			&example.Rating,
+			&example.Booleandesu,
+			&example.Created,
+			&example.Created_date)
+
+		if err != nil {
+			panic(err)
+		}
+		return exampleResults
+	}
+	if err := result.Err(); err != nil {
+		panic(err)
+	}
+	return exampleResults
 }

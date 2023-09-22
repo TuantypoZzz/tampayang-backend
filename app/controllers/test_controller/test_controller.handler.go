@@ -3,7 +3,7 @@ package test_controller
 import (
 	// "golang-fiber-template/app/models"
 	// globalFunction "golang-fiber-template/core/functions"
-	"fmt"
+
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +21,7 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 	var name string
 	var created string
 	var created_date string
-	
+
 	name = ctx.Params("name")
 
 	if name == "error" {
@@ -61,15 +61,12 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 
 	// // responseData = globalFunction.GetMessage(someData,"")
 
-
 	// return response.SuccessResponse(ctx, responseData)
-
-
 
 	sqlQuery := "INSERT INTO category(name, created, created_date) VALUES (?,?,?)"
 	insertData := test_model.InsertCategoryStruct{
-		Name: name,
-		Created: created,
+		Name:         name,
+		Created:      created,
 		Created_date: created_date,
 	}
 
@@ -80,17 +77,15 @@ func CreateUserHandler(ctx *fiber.Ctx) error {
 
 	type lastIdResponse struct {
 		Message string `json:"message"`
-		LastId	int64	`json:"lastId"`
+		LastId  int64  `json:"lastId"`
 	}
 
 	responseData := lastIdResponse{
 		Message: "Ini string",
-		LastId: dbResult,
+		LastId:  dbResult,
 	}
 
 	return response.SuccessResponse(ctx, responseData)
-
-
 
 }
 
@@ -124,10 +119,10 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	*/
 
 	//USING NO CONDITION IN QUERY--------------
-	
-	dbResult,err := test_model.SelectAllFromCategoryWithoutCondition()
+
+	dbResult, err := test_model.SelectAllFromCategoryWithoutCondition()
 	if err != nil {
-		return response.ErrorResponse(ctx,err)
+		return response.ErrorResponse(ctx, err)
 	}
 
 	// check elasticsearch connection
@@ -224,12 +219,9 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 		// GET A DOCUMENT----------------------------------------------------------
 		return response.SuccessResponse(ctx, result)
 
-	} else {
-		fmt.Println("Connection Error")
 	}
 
 	return response.SuccessResponse(ctx, dbResult)
-	
 
 	// 3rd party API Call / Fetct API
 	/**
@@ -240,6 +232,3 @@ func GetAllUserHandler(ctx *fiber.Ctx) error {
 	return response.SuccessResponse(ctx, result)
 	*/
 }
-
-
-
