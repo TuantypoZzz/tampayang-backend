@@ -153,10 +153,8 @@ func AuthCookie(ctx *fiber.Ctx) error {
 	if unixTimestamp < currentTime {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
-
-	if ctx.Locals("userInfo") == nil {
-		ctx.Locals("userInfo", claims)
-	}
+	
+	ctx.Locals("userInfo", claims)
 	
 	return ctx.Next()
 }
