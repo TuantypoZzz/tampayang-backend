@@ -47,14 +47,15 @@ func LoadMidleWares(app *fiber.App) {
 					},
 				})
 			}
-			if c.Response().StatusCode() == 200 {
-				fmt.Println(" - \033[32m200\033[0m")
-			}
-			if c.Response().StatusCode() == 500 {
-				fmt.Println(" - \033[31m500\033[0m")
-			}
-			if c.Response().StatusCode() == 404 {
-				fmt.Println(" - \033[33m404\033[0m")
+			if config.GO_ENV == "development" {
+				switch statusCode := c.Response().StatusCode(); statusCode {
+				case fiber.StatusOK:
+					fmt.Println(" - \033[32m200\033[0m")
+				case fiber.StatusInternalServerError:
+					fmt.Println(" - \033[31m500\033[0m")
+				case fiber.StatusNotFound:
+					fmt.Println(" - \033[33m404\033[0m")
+				}
 			}
 		}()
 		return c.Next()
@@ -77,6 +78,7 @@ func RouteValidation(app *fiber.App, registeredRoutes map[string]bool) {
 		// Check if the current path is a valid route
 		if _, exists := registeredRoutes[c.Path()]; !exists {
 			// Handle the case where the path is not a valid route
+			fmt.Print(" (ROUTE NOT FOUND)")
 			return response.ErrorResponse(c, globalFunction.GetMessage("err003", nil))
 		}
 		// Handle the case where the path is a valid route
