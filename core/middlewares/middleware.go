@@ -54,7 +54,7 @@ func LoadMidleWares(app *fiber.App) {
 				fmt.Println(" - \033[31m500\033[0m")
 			}
 			if c.Response().StatusCode() == 404 {
-				fmt.Println("- \033[33m404\033[0m")
+				fmt.Println(" - \033[33m404\033[0m")
 			}
 		}()
 		return c.Next()
