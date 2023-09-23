@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/nulla-vis/golang-fiber-template/config"
 	"github.com/nulla-vis/golang-fiber-template/config/constant"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
@@ -14,6 +15,10 @@ import (
 )
 
 func LoadMidleWares(app *fiber.App) {
+	// Cors Middleware
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+	}))
 
 	// Custom middleware to recover from panics and send a custom error response
 	app.Use(func(c *fiber.Ctx) error {
@@ -85,7 +90,6 @@ func Auth(ctx *fiber.Ctx) error {
 	if token == "" {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
-
 	// _, err := helper.VerfyToken(token)
 	claims, err := helper.DecodeToken(token)
 	if err != nil {
@@ -111,16 +115,79 @@ func Auth(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
 
-	ctx.Locals("userInfo", claims)
-	ctx.Locals("user_role", claims["user_role"])
+	if ctx.Locals("userInfo") == nil {
+		ctx.Locals("userInfo", claims)
+	}
 	
 	
 	return ctx.Next()
 }
 
+func AuthCookie(ctx *fiber.Ctx) error {
+	token := ctx.Cookies(constant.JWT_COOKIE_NAME)
+
+	if token == "" {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+
+	claims, err := helper.DecodeToken(token)
+	if err != nil {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+
+	role := claims["user_role"].(string)
+	if role != constant.ADMIN_ROLE {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth007", nil))
+	}
+
+	// Unix timestamp in scientific notation
+	scientificNotation := claims["expire"].(float64)
+
+	// Convert scientific notation to a regular Unix timestamp
+	unixTimestamp := int64(scientificNotation)
+
+	// Get the current Unix timestamp
+	currentTime := time.Now().Unix()
+
+	// Check if the timestamp has passed the current time
+	if unixTimestamp < currentTime {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+
+	if ctx.Locals("userInfo") == nil {
+		ctx.Locals("userInfo", claims)
+	}
+	
+	return ctx.Next()
+}
 
 
+func IsLogin(ctx *fiber.Ctx) error {
+	// Set initial value for isLogin validation
+	isLogin := false
+	// Check if user already has a valid JWT cookie
+	jwtCookie := ctx.Cookies(constant.JWT_COOKIE_NAME);
+	if jwtCookie != "" {
+		// User is already logged in
+		isLogin = true
+		// return response.ErrorResponse(ctx, globalFunction.GetMessage("auth008", nil))
+	}
 
+	// Parse the expiration time from the cookie
+	expirationTime, _ := time.Parse(time.RFC3339, jwtCookie)
+
+	// Check if the cookie has expired
+	if time.Now().Before(expirationTime) {
+		// Cookie not yet expired
+		isLogin = true
+		// return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+
+	ctx.Locals("isLogin", isLogin)
+
+	// Continue processing the request
+	return ctx.Next()
+}
 
 type CustomErrorResponse struct {
 	Status     string      `json:"status"`

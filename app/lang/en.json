@@ -31,5 +31,6 @@
     "auth004": "Password cannot be empty",
     "auth005": "User with email %s not registered",
     "auth006": "Incorrect password",
-    "auth007": "Unauthorized"
+    "auth007": "Unauthorized",
+    "auth008": "You are already logged in"
 }   

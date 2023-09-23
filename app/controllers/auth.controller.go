@@ -14,7 +14,11 @@ import (
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
-func Login(ctx *fiber.Ctx) error {
+func Login(ctx *fiber.Ctx) error {	
+	if ctx.Locals("isLogin") != nil && ctx.Locals("isLogin") == true {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth008", nil))
+	}
+
 	// Data from Body POST
 	loginReq := new(entity.LoginRequest)
 	if err := ctx.BodyParser(loginReq); err != nil {
@@ -22,7 +26,6 @@ func Login(ctx *fiber.Ctx) error {
 	}
 
 	// Field validation...
-
 	// Validate email dikirim datanya
 	if globalFunction.IsEmpty(loginReq.Email) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth003", nil))
@@ -63,10 +66,37 @@ func Login(ctx *fiber.Ctx) error {
 
 	token := helper.GenerateToken(&claims)
 
+	// Set the JWT token as a cookie
+	ctx.Cookie(&fiber.Cookie{
+		Name:     constant.JWT_COOKIE_NAME,
+		Value:    token,
+		HTTPOnly: true,
+		SameSite: "Strict",
+		Expires:  time.Now().Add(time.Minute * constant.TOKEN_EXPIRE_MINUTE),
+	})
+
 	result := entity.ResultToken {
 		Access_token: token,
 	}
 
 
 	return response.SuccessResponse(ctx, result)
+}
+
+func Logout(ctx *fiber.Ctx) error {
+	if ctx.Locals("isLogin") != nil && ctx.Locals("isLogin") == false {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+
+	// Remove the JWT cookie to log the user out
+	ctx.Cookie(&fiber.Cookie{
+		Name:     constant.JWT_COOKIE_NAME,
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour), // Expire the cookie immediately
+		HTTPOnly: true,
+		SameSite: "Strict",
+	})
+
+
+	return response.SuccessResponse(ctx, globalFunction.GetMessage("success", nil))
 }

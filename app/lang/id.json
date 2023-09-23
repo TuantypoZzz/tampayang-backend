@@ -31,7 +31,9 @@
     "auth004": "Password tidak boleh kosong",
     "auth005": "User dengan email %s belum terdaftar",
     "auth006": "Password salah",
-    "auth007": "Unauthorize"
+    "auth007": "Unauthorize",
+    "auth008": "Anda telah login",
+    "auth009": "You are already logged in"
     
     
 }

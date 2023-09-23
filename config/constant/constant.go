@@ -7,4 +7,5 @@ const (
 	DEFAULT_TIMEOUT = 5000
 	TOKEN_EXPIRE_MINUTE = 10
 	ADMIN_ROLE = "admin"
+	JWT_COOKIE_NAME = "jwt_token"
 )

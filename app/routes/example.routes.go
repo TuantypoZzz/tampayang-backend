@@ -7,9 +7,9 @@ import (
 )
 
 func ExampleRoute(app *fiber.App) {
-	app.Post("/example/", controllers.CreateExample)
-	app.Get("/example/all_example/", middlewares.Auth, controllers.GetAllExample)
-	app.Get("/example/get_example/:example_id", controllers.GetExampleById)
-	app.Put("/example/update_example/", controllers.UpdateExample)
-	app.Delete("/example/delete_example/:example_id", controllers.DeleteExample)
+	app.Post("/example/", middlewares.AuthCookie, controllers.CreateExample)
+	app.Get("/example/all_example/", middlewares.AuthCookie, controllers.GetAllExample)
+	app.Get("/example/get_example/:example_id", middlewares.AuthCookie, controllers.GetExampleById)
+	app.Put("/example/update_example/", middlewares.AuthCookie, controllers.UpdateExample)
+	app.Delete("/example/delete_example/:example_id", middlewares.AuthCookie, controllers.DeleteExample)
 }

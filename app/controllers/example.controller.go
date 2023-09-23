@@ -96,9 +96,7 @@ func GetExampleById(ctx *fiber.Ctx) error {
 func GetAllExample(ctx *fiber.Ctx) error {
 	// access userInfo onject from jwt.MapClaims------------------
 	userInfo := ctx.Locals("userInfo").(jwt.MapClaims)
-	userRole := ctx.Locals("user_role").(string)
 	fmt.Println("ROLE USER ADALAH " + userInfo["user_role"].(string))
-	fmt.Println("USER ROLE IS " + userRole)
 	// access userInfo onject from jwt.MapClaims------------------
 
 
