@@ -17,10 +17,7 @@ func LoadMidleWares(app *fiber.App) {
 		defer func() {
 			// route := c.Route()
 			// fmt.Println(route.Path)
-			if r := recover(); r != nil {
-				if config.GO_ENV == "development" {
-					fmt.Println(" - \033[31m500\033[0m")
-				}			
+			if r := recover(); r != nil {			
 				// Recovered from a panic, send a custom error response
 				errorMessage := fmt.Sprintf("%v", r) // Create a custom error message
 				// Check if r is a map[string]interface{}
@@ -49,6 +46,15 @@ func LoadMidleWares(app *fiber.App) {
 						"error": errorMessage, // Include the custom error message
 					},
 				})
+			}
+			if c.Response().StatusCode() == 200 {
+				fmt.Println(" - \033[32m200\033[0m")
+			}
+			if c.Response().StatusCode() == 500 {
+				fmt.Println(" - \033[31m500\033[0m")
+			}
+			if c.Response().StatusCode() == 404 {
+				fmt.Println("- \033[33m404\033[0m")
 			}
 		}()
 		return c.Next()

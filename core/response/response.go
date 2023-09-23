@@ -1,10 +1,7 @@
 package response
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/nulla-vis/golang-fiber-template/config"
 )
 
 /*
@@ -30,9 +27,6 @@ let getLogData = (req, data) => {
 */
 
 func SuccessResponse(ctx *fiber.Ctx, data interface{}) error{
-    if config.GO_ENV == "development" {
-        fmt.Println(" - \033[32m200\033[0m")
-	}
 	type SuccessResponse struct {
 		Status     string      `json:"status"`
 		StatusCode int         `json:"statusCode"`
@@ -70,8 +64,7 @@ func SuccessResponse(ctx *fiber.Ctx, data interface{}) error{
 }
 
 func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
-    stringErr := " - \033[31m500\033[0m"
-
+    httpCodeErr := fiber.StatusInternalServerError
     type ErrorResponse struct {
         Status     string      `json:"status"`
         StatusCode int         `json:"statusCode"`
@@ -97,7 +90,7 @@ func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
         if code, ok := v["code"].(string); ok {
             payload["code"] = code
             if payload["code"] == "err003" {
-                stringErr = "- \033[33m404\033[0m"
+                httpCodeErr = fiber.StatusNotFound
             }
             codeOk = true
         }
@@ -128,12 +121,8 @@ func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
         Payload:    payload,
     }
 
-    if config.GO_ENV == "development" {
-        fmt.Println(stringErr)
-	}
-
     // Set the status and JSON response data and return ctx
-    return ctx.Status(fiber.StatusInternalServerError).JSON(errorData)
+    return ctx.Status(httpCodeErr).JSON(errorData)
 }
 
 
