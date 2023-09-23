@@ -5,7 +5,8 @@
         "database": "golang_restful_api",
         "port": "3306",
         "host": "localhost",
-        "dialect": "mysql"
+        "dialect": "mysql",
+        "key": "secret_key123"
     },
     "production": {
         "username": "root",
@@ -13,7 +14,8 @@
         "database": "golang_restful_api",
         "host": "localhost",
         "port": "3306",
-        "dialect": "mysql"
+        "dialect": "mysql",
+        "key": ""
     },    
     "elasticsearch": {
         "server" : {

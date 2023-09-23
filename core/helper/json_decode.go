@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/nulla-vis/golang-fiber-template/config"
-	// "path/filepath"
 )
 
 func ConfigJson() map[string]interface{} {

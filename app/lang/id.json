@@ -28,7 +28,10 @@
     "auth001": "Access token anda salah atau telah kadaluarsa",
     "auth002": "Email tidak valid",
     "auth003": "Email tidak boleh kosong",
-    "auth004": "Password tidak boleh kosong"
+    "auth004": "Password tidak boleh kosong",
+    "auth005": "User dengan email %s belum terdaftar",
+    "auth006": "Password salah",
+    "auth007": "Unauthorize"
     
     
 }

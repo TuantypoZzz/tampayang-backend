@@ -3,10 +3,13 @@ package middlewares
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nulla-vis/golang-fiber-template/config"
+	"github.com/nulla-vis/golang-fiber-template/config/constant"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
+	"github.com/nulla-vis/golang-fiber-template/core/helper"
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
@@ -15,8 +18,6 @@ func LoadMidleWares(app *fiber.App) {
 	// Custom middleware to recover from panics and send a custom error response
 	app.Use(func(c *fiber.Ctx) error {
 		defer func() {
-			// route := c.Route()
-			// fmt.Println(route.Path)
 			if r := recover(); r != nil {			
 				// Recovered from a panic, send a custom error response
 				errorMessage := fmt.Sprintf("%v", r) // Create a custom error message
@@ -47,7 +48,9 @@ func LoadMidleWares(app *fiber.App) {
 					},
 				})
 			}
+
 			if config.GO_ENV == "development" {
+				fmt.Print("Request Route:", c.Path())
 				switch statusCode := c.Response().StatusCode(); statusCode {
 				case fiber.StatusOK:
 					fmt.Println(" - \033[32m200\033[0m")
@@ -60,16 +63,6 @@ func LoadMidleWares(app *fiber.App) {
 		}()
 		return c.Next()
 	})
-
-	if config.GO_ENV == "development" {
-		app.Use(func(c *fiber.Ctx) error {
-			// Print the path for all incoming requests
-			fmt.Print("Request Route:", c.Path())
-			
-			// Continue processing the request
-			return c.Next()
-		})
-	}
 }
 
 func RouteValidation(app *fiber.App, registeredRoutes map[string]bool) {
@@ -78,7 +71,7 @@ func RouteValidation(app *fiber.App, registeredRoutes map[string]bool) {
 		// Check if the current path is a valid route
 		if _, exists := registeredRoutes[c.Path()]; !exists {
 			// Handle the case where the path is not a valid route
-			fmt.Print(" (ROUTE NOT FOUND)")
+			fmt.Print("(ROUTE NOT FOUND) ")
 			return response.ErrorResponse(c, globalFunction.GetMessage("err003", nil))
 		}
 		// Handle the case where the path is a valid route
@@ -87,12 +80,40 @@ func RouteValidation(app *fiber.App, registeredRoutes map[string]bool) {
 }
 
 func Auth(ctx *fiber.Ctx) error {
-
 	// headers authorization
 	token := ctx.Get("x-token")
-	if token == "" || token != "secret" {
+	if token == "" {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
+
+	// _, err := helper.VerfyToken(token)
+	claims, err := helper.DecodeToken(token)
+	if err != nil {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+
+	role := claims["user_role"].(string)
+	if role != constant.ADMIN_ROLE {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth007", nil))
+	}
+
+	// Unix timestamp in scientific notation
+	scientificNotation := claims["expire"].(float64)
+
+	// Convert scientific notation to a regular Unix timestamp
+	unixTimestamp := int64(scientificNotation)
+
+	// Get the current Unix timestamp
+	currentTime := time.Now().Unix()
+
+	// Check if the timestamp has passed the current time
+	if unixTimestamp < currentTime {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+
+	ctx.Locals("userInfo", claims)
+	ctx.Locals("user_role", claims["user_role"])
+	
 	
 	return ctx.Next()
 }
