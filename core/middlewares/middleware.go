@@ -1,13 +1,16 @@
-package core
+package middlewares
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/nulla-vis/golang-fiber-template/config"
+	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
+	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
-func loadMidleWares(app *fiber.App) {
+func LoadMidleWares(app *fiber.App) {
 
 	// Custom middleware to recover from panics and send a custom error response
 	app.Use(func(c *fiber.Ctx) error {
@@ -15,6 +18,9 @@ func loadMidleWares(app *fiber.App) {
 			// route := c.Route()
 			// fmt.Println(route.Path)
 			if r := recover(); r != nil {
+				if config.GO_ENV == "development" {
+					fmt.Println(" - \033[31m500\033[0m")
+				}			
 				// Recovered from a panic, send a custom error response
 				errorMessage := fmt.Sprintf("%v", r) // Create a custom error message
 				// Check if r is a map[string]interface{}
@@ -48,7 +54,44 @@ func loadMidleWares(app *fiber.App) {
 		return c.Next()
 	})
 
+	if config.GO_ENV == "development" {
+		app.Use(func(c *fiber.Ctx) error {
+			// Print the path for all incoming requests
+			fmt.Print("Request Route:", c.Path())
+			
+			// Continue processing the request
+			return c.Next()
+		})
+	}
 }
+
+func RouteValidation(app *fiber.App, registeredRoutes map[string]bool) {
+	// Custom middleware to check if the current path is a valid route
+	app.Use(func(c *fiber.Ctx) error {
+		// Check if the current path is a valid route
+		if _, exists := registeredRoutes[c.Path()]; !exists {
+			// Handle the case where the path is not a valid route
+			return response.ErrorResponse(c, globalFunction.GetMessage("err003", nil))
+		}
+		// Handle the case where the path is a valid route
+		return c.Next()
+	})
+}
+
+func Auth(ctx *fiber.Ctx) error {
+
+	// headers authorization
+	token := ctx.Get("x-token")
+	if token == "" || token != "secret" {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+	
+	return ctx.Next()
+}
+
+
+
+
 
 type CustomErrorResponse struct {
 	Status     string      `json:"status"`

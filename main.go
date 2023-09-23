@@ -8,6 +8,7 @@ import (
 	"github.com/nulla-vis/golang-fiber-template/app/routes"
 	"github.com/nulla-vis/golang-fiber-template/config"
 	"github.com/nulla-vis/golang-fiber-template/core"
+	"github.com/nulla-vis/golang-fiber-template/core/middlewares"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -22,9 +23,12 @@ func main() {
 	// INITIALIZE CORE
 	core.CoreInit(app)
 
+	// KEEP TRACK OF REGISTERED ROUTES
+	registeredRoutes := make(map[string]bool)
 	// INITIALIZE ROUTE
 	routes.RouteInit(app)
-
+	// ROUTE VALIDATION
+	middlewares.RouteValidation(app, registeredRoutes)
 
     port, err := strconv.Atoi(config.PORT)
     if err != nil {

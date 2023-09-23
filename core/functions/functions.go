@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -108,19 +109,19 @@ func MakeAPIRequest(data map[string]interface{}) (*http.Response, error) {
     // Type assertion for method
     method, ok := data["method"].(string)
     if !ok {
-        return nil, fmt.Errorf("Method is not a string")
+        panic("MakeAPIRequest - Method is not a string")
     }
 
     // Type assertion for URL
     url, ok := data["url"].(string)
     if !ok {
-        return nil, fmt.Errorf("URL is not a string")
+        panic("MakeAPIRequest - URL is not a string")
     }
 
     // Type assertion for headers
     headersMap, ok := data["headers"].(map[string]interface{})
     if !ok {
-        return nil, fmt.Errorf("Headers is not a map")
+        panic("MakeAPIRequest - Headers is not a map")
     }
 
     headers := make(map[string]string)
@@ -129,7 +130,7 @@ func MakeAPIRequest(data map[string]interface{}) (*http.Response, error) {
         if strValue, ok := value.(string); ok {
             headers[key] = strValue
         } else {
-            return nil, fmt.Errorf("Header value is not a string")
+            panic("MakeAPIRequest - Header value is not a string")
         }
     }
 
@@ -219,6 +220,20 @@ func IsEmpty(value interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func IsValidEmail(email string) bool {
+    // Define a regular expression pattern for a valid email address
+    pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+    
+    // Compile the regular expression
+    regex, err := regexp.Compile(pattern)
+    if err != nil {
+        return false
+    }
+    
+    // Use the regular expression to match the email
+    return regex.MatchString(email)
 }
 
 

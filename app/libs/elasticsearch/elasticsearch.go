@@ -1,5 +1,3 @@
-// myelasticsearch/elasticsearch.go
-
 package elasticsearchLib
 
 import (

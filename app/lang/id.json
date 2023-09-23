@@ -1,10 +1,15 @@
 {
     "success": "Sukses",
+
     "err001": "Oops sorry, something went wrong!",
+    "err002": "Format Id salah",
+    "err003": "Path tidak ditemukan",
+
     "sys001": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer service",
     "sys002": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer %s",
 
     "dbins001": "Insert Query Error! Data should be a Map",
+
     "ex0001": "Example name tidak boleh kosong",
     "ex0002": "Example created tidak boleh kosong",
     "ex0003": "Example rating tidak boleh kosong",
@@ -13,8 +18,17 @@
     "ex0006": "Example name telah digunakan",
     "ex0007": "Example tidak ditemukan",
     "ex0008": "Example Id tidak ditemukan",
+    "ex0009": "Berhasil menghapus Example",
+    "ex0010": "Gagal menghapus Example",
+
     "user001": "User berhasil dibuat",
+
     "emply001": "Pegawai berhasil dibuat",
-    "err002": "Format Id salah"
+
+    "auth001": "Access token anda salah atau telah kadaluarsa",
+    "auth002": "Email tidak valid",
+    "auth003": "Email tidak boleh kosong",
+    "auth004": "Password tidak boleh kosong"
+    
     
 }

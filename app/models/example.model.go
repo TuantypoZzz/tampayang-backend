@@ -25,10 +25,100 @@ func InsertExample(query string, exampleData entity.Example) (int64, error) {
     return insertId, nil
 }
 
-func UpdateExample(query string, exampleData entity.ExampleWithId) *entity.ExampleWithId {
+func GetAllExample() []entity.ExampleWithId {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var exampleResults []entity.ExampleWithId
+
+	sqlQuery := "SELECT exa.* FROM example AS exa"
+
+	result, err := db.QueryContext(ctx, sqlQuery)
+	if err != nil {
+		panic(err)
+	}
+
+	for result.Next() {
+		var example entity.ExampleWithId
+		err := result.Scan(
+			&example.Id,
+			&example.Name,
+			&example.Created,
+			&example.Rating,
+			&example.Booleandesu,
+			&example.Created_date)
+
+		if err != nil {
+			panic(err)
+		}
+
+		exampleResults = append(exampleResults, example)
+	}
+	if err := result.Err(); err != nil {
+		panic(err)
+	}
+	
+	return exampleResults
+}
+
+func GetExampleById(exampleId int) entity.ExampleWithId {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var exampleResult entity.ExampleWithId
+	
+	sqlQuery := "SELECT exa.* FROM example AS exa WHERE exa.id = ?"
+	result, err := db.QueryContext(ctx, sqlQuery, exampleId)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.Next() {
+		err := result.Scan(
+			&exampleResult.Id,
+			&exampleResult.Name,
+			&exampleResult.Created,
+			&exampleResult.Rating,
+			&exampleResult.Booleandesu,
+			&exampleResult.Created_date)
+
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return exampleResult
+}
+
+func ExampleNameIsUnique(query string, name string) string {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var nameExist string = ""
+	result, err := db.QueryContext(ctx, query, name)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.Next() {
+		if err := result.Scan(&nameExist); err != nil {
+			panic(err)
+		}
+	}
+
+	return nameExist
+}
+
+func UpdateExample(exampleData entity.ExampleWithId) *entity.ExampleWithId {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	// ctx := context.Background()
+
+	// String sql query
+	query := "UPDATE example SET name = ?, created = ?, rating = ?, booleandesu = ?, created_date = ? WHERE id = ?"
 
 	_, err := db.Exec(query, exampleData.Name, exampleData.Created, exampleData.Rating, exampleData.Booleandesu, exampleData.Created_date, exampleData.Id)
 	if err != nil {
@@ -53,87 +143,20 @@ func UpdateExample(query string, exampleData entity.ExampleWithId) *entity.Examp
 	return &example
 }
 
-func ExampleNameIsUnique(query string, name string) string {
-	db := database.GetConnectionDB()
-	defer db.Close()
-	ctx := context.Background()
+func DeleteExampleByID(id int) bool {
+    db := database.GetConnectionDB()
+    defer db.Close()
+    ctx := context.Background()
 
-	var nameExist string = ""
-	result, err := db.QueryContext(ctx, query, name)
-	if err != nil {
-		panic(err)
-	}
+    // Define the SQL DELETE query
+    sqlQuery := "DELETE FROM example WHERE id = ?"
 
-	if result.Next() {
-		if err := result.Scan(&nameExist); err != nil {
-			panic(err)
-		}
-	}
+    // Execute the DELETE query
+    _, err := db.ExecContext(ctx, sqlQuery, id)
+    if err != nil {
+        panic(err)
+    }
 
-	return nameExist
-}
-
-func GetExampleById(exampleId int) entity.ExampleWithId {
-	db := database.GetConnectionDB()
-	defer db.Close()
-	ctx := context.Background()
-
-	var exampleResult entity.ExampleWithId
-
-	sqlQuery := "SELECT exa.* FROM example AS exa WHERE exa.id = ?"
-	result, err := db.QueryContext(ctx, sqlQuery, exampleId)
-	if err != nil {
-		panic(err)
-	}
-
-	if result.Next() {
-		err := result.Scan(
-			&exampleResult.Id,
-			&exampleResult.Name,
-			&exampleResult.Created,
-			&exampleResult.Rating,
-			&exampleResult.Booleandesu,
-			&exampleResult.Created_date)
-
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return exampleResult
-}
-
-func GetAllExample() []entity.ExampleWithId {
-	db := database.GetConnectionDB()
-	defer db.Close()
-	ctx := context.Background()
-
-	var exampleResults []entity.ExampleWithId
-
-	sqlQuery := "SELECT exa.* FROM example AS exa"
-
-	result, err := db.QueryContext(ctx, sqlQuery)
-	if err != nil {
-		panic(err)
-	}
-
-	if result.Next() {
-		var example entity.ExampleWithId
-		err := result.Scan(
-			&example.Id,
-			&example.Name,
-			&example.Rating,
-			&example.Booleandesu,
-			&example.Created,
-			&example.Created_date)
-
-		if err != nil {
-			panic(err)
-		}
-		return exampleResults
-	}
-	if err := result.Err(); err != nil {
-		panic(err)
-	}
-	return exampleResults
+    // If the DELETE operation is successful, return true
+    return true
 }

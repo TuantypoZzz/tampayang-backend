@@ -1,10 +1,15 @@
 {
     "success": "Success",
+
     "err001": "Oops sorry, something went wrong!",
+    "err002": "Wrong Format Id",
+    "err003": "Path not found",
+
     "sys001": "Something wrong with our %s. Please try again or contact customer service",
     "sys002": "Something wrong with our %s. Please try again or contact customer %s",
 
     "dbins001": "Insert Query Error! Data should be a Map",
+
     "ex0001": "Example name cannot be empty",
     "ex0002": "Example created cannot be empty",
     "ex0003": "Example rating cannot be empty",
@@ -13,7 +18,15 @@
     "ex0006": "Example name already registered",
     "ex0007": "Example not found",
     "ex0008": "Example Id not found",
+    "ex0009": "Success delete Example",
+    "ex0010": "Failed delete Example",
+
     "user001": "User successfully created",
+
     "emply001": "Employee successfully created",
-    "err002": "Wrong Format Id"
+    
+    "auth001": "Your access token is invalid or already expired",
+    "auth002": "Email is invalid",
+    "auth003": "Email cannot be empty",
+    "auth004": "Password cannot be empty"
 }   

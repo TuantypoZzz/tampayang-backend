@@ -138,8 +138,6 @@ func UpdateExample(ctx *fiber.Ctx) error {
 	if globalFunction.IsEmpty(example.Created_date) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0005", nil))
 	}
-	// String sql query
-	query_example_update := "UPDATE example SET name = ?, created = ?, rating = ?, booleandesu = ?, created_date = ? WHERE id = ?"
 
 	// Set data based on MODEL struct
 	exampleData := entity.ExampleWithId{
@@ -151,11 +149,30 @@ func UpdateExample(ctx *fiber.Ctx) error {
 		Created_date: example.Created_date,
 	}
 
-	UpdateResult := models.UpdateExample(query_example_update, exampleData)
+	UpdateResult := models.UpdateExample(exampleData)
 
 	return response.SuccessResponse(ctx, UpdateResult)
 }
 
 func DeleteExample(ctx *fiber.Ctx) error {
-	return nil
+	example_id := ctx.Params("example_id")
+
+	// validate example_id
+	int_example_id, err := strconv.Atoi(example_id)
+	if err != nil {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err002", nil))
+	}
+
+	dbResult := models.GetExampleById(int_example_id)
+	if globalFunction.IsEmpty(dbResult.Id) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0007", nil))
+	}
+
+	success_delete := models.DeleteExampleByID(int_example_id)
+
+	if !success_delete {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("ex0010", nil))
+	}
+
+	return response.SuccessResponse(ctx, globalFunction.GetMessage("ex0009", nil))
 }
