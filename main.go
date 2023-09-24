@@ -27,8 +27,10 @@ func main() {
 	registeredRoutes := make(map[string]bool)
 	// INITIALIZE ROUTE
 	routes.RouteInit(app)
-	// ROUTE VALIDATION
-	middlewares.RouteValidation(app, registeredRoutes)
+	// ROUTE VALIDATION (ONLY DEV ENV)
+	if config.GO_ENV == "development" {
+		middlewares.RouteValidation(app, registeredRoutes)
+	}
 
     port, err := strconv.Atoi(config.PORT)
     if err != nil {
