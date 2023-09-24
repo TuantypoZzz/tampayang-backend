@@ -49,7 +49,7 @@ func LoadMidleWares(app *fiber.App) {
 					Status:     "error",
 					StatusCode: fiber.StatusInternalServerError,
 					Payload: map[string]interface{}{
-						"error": errorMessage, // Include the custom error message
+						"error": errorMessage,
 					},
 				})
 			}
@@ -79,7 +79,6 @@ func RouteValidation(app *fiber.App, registeredRoutes map[string]bool) {
 			fmt.Print("(ROUTE NOT FOUND) ")
 			return response.ErrorResponse(c, globalFunction.GetMessage("err003", nil))
 		}
-		// Handle the case where the path is a valid route
 		return c.Next()
 	})
 }
@@ -153,7 +152,7 @@ func AuthCookie(ctx *fiber.Ctx) error {
 	if unixTimestamp < currentTime {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
-	
+
 	ctx.Locals("userInfo", claims)
 	
 	return ctx.Next()
@@ -168,7 +167,6 @@ func IsLogin(ctx *fiber.Ctx) error {
 	if jwtCookie != "" {
 		// User is already logged in
 		isLogin = true
-		// return response.ErrorResponse(ctx, globalFunction.GetMessage("auth008", nil))
 	}
 
 	// Parse the expiration time from the cookie
@@ -178,7 +176,6 @@ func IsLogin(ctx *fiber.Ctx) error {
 	if time.Now().Before(expirationTime) {
 		// Cookie not yet expired
 		isLogin = true
-		// return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
 
 	ctx.Locals("isLogin", isLogin)
