@@ -26,7 +26,14 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "x-token",
+								"value": "{{access-token}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"email\": \"admin@it.com\",\n    \"password\": \"administrator123\"\n}",
@@ -76,6 +83,21 @@
 							"body": "{\n    \"status\": \"success\",\n    \"statusCode\": 200,\n    \"payload\": {\n        \"hashedPass\": \"$2a$10$qnqMtAWO.X3QnrdDLj4hH.lbcU5bKyleBqco6qF2omd1jKD9TBXXO\"\n    }\n}"
 						}
 					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-token",
+								"value": "{{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{proto}}://{{domain}}/auth/logout/"
+					},
+					"response": []
 				}
 			]
 		},
@@ -86,7 +108,13 @@
 					"name": "Create Example",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "x-token",
+								"value": "{{access-token}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": \"aan7\",\n    \"created\": \"2023-09-22\",\n    \"rating\": 8.8,\n    \"booleandesu\": true,\n    \"created_date\": \"2023-09-22 09:00:00\"\n}",
@@ -227,7 +255,24 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": "{{proto}}://{{domain}}/example/get_example/1"
+						"url": {
+							"raw": "{{proto}}://{{domain}}/example/get_example/1?x-token={{access-token}}",
+							"protocol": "{{proto}}",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"example",
+								"get_example",
+								"1"
+							],
+							"query": [
+								{
+									"key": "x-token",
+									"value": "{{access-token}}"
+								}
+							]
+						}
 					},
 					"response": [
 						{
@@ -290,7 +335,13 @@
 					"name": "Update Example",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "x-token",
+								"value": "{{access-token}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"id\": 1,\n    \"name\": \"aan6\",\n    \"created\": \"2023-09-22\",\n    \"rating\": 8.8,\n    \"booleandesu\": true,\n    \"created_date\": \"2023-09-22 09:00:00\"\n}",
