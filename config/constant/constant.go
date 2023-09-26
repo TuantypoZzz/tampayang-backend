@@ -8,4 +8,6 @@ const (
 	TOKEN_EXPIRE_MINUTE = 10
 	ADMIN_ROLE = "admin"
 	JWT_COOKIE_NAME = "jwt_token"
+	PAGE_NO = 1
+	NO_PER_PAGE = 10
 )
