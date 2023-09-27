@@ -1,11 +1,11 @@
 package constant
 
 const (
-	NOW_TIME_FORMAT = "2006-01-02"
+	NOW_TIME_FORMAT      = "2006-01-02"
 	NOW_DATE_TIME_FORMAT = "2006-01-02 15:04:05"
-	SOME_NUMBER = 2023
-	DEFAULT_TIMEOUT = 5000
-	TOKEN_EXPIRE_MINUTE = 10
-	ADMIN_ROLE = "admin"
-	JWT_COOKIE_NAME = "jwt_token"
+	SOME_NUMBER          = 2023
+	DEFAULT_TIMEOUT      = 5000
+	TOKEN_EXPIRE_MINUTE  = 1440
+	ADMIN_ROLE           = "admin"
+	JWT_COOKIE_NAME      = "jwt_token"
 )

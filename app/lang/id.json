@@ -4,6 +4,8 @@
     "err001": "Oops sorry, something went wrong!",
     "err002": "Format Id salah",
     "err003": "Path tidak ditemukan",
+    "err004": "Tidak boleh mengandung spasi di awal atau akhir",
+    "err005": "Nomor telepon tidak valid",
 
     "sys001": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer service",
     "sys002": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer %s",
@@ -24,6 +26,17 @@
     "user001": "User berhasil dibuat",
 
     "emply001": "Pegawai berhasil dibuat",
+    "emply002": "Nama Pegawai tidak boleh kosong",
+    "emply003": "Nip Pegawai tidak boleh kosong",
+    "emply004": "Bidang Pegawai tidak boleh kosong",
+    "emply005": "Seksi Pegawai tidak boleh kosong",
+    "emply006": "Unit Kerja Pegawai tidak boleh kosong",
+    "emply007": "Jenis Kelamin Pegawai tidak boleh kosong",
+    "emply008": "Nip Pegawai sudah ada",
+    "emply009": "Jenis Kelamin Pegawai salah",
+    "emply010": "Format tanggal salah",
+    "emply011": "Format nip salah",
+    "emply012": "Pegawai tidak ditemukan",
 
     "auth001": "Access token anda salah atau telah kadaluarsa",
     "auth002": "Email tidak valid",

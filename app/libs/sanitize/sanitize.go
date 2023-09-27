@@ -1,7 +1,6 @@
 package sanitizeLib
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -24,10 +23,6 @@ func PhoneNumber(phoneNumber string) string {
 		}
 	}
 
-	// Print the cleaned phone number
-	fmt.Println("Cleaned Phone:", cleanPhone)
-
 	// Return cleaned phone number
-	return ""
-
+	return cleanPhone
 }

@@ -99,7 +99,6 @@ func GetAllExample(ctx *fiber.Ctx) error {
 	fmt.Println("ROLE USER ADALAH " + userInfo["user_role"].(string))
 	// access userInfo onject from jwt.MapClaims------------------
 
-
 	dbResult := models.GetAllExample()
 
 	return response.SuccessResponse(ctx, dbResult)
