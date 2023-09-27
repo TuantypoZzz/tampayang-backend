@@ -17,21 +17,20 @@ var (
 )
 
 var (
-    // Declare variables for environment variables
-    GO_ENV		string
-	PORT 		string
+	// Declare variables for environment variables
+	GO_ENV string
+	PORT   string
 )
 
 func LoadEnvVariables() error {
-    // Load environment variables from the .env file
-    if err := godotenv.Load(); err != nil {
-        return err
-    }
+	// Load environment variables from the .env file
+	if err := godotenv.Load(); err != nil {
+		return err
+	}
 
-    // Assign environment variables to variables
-    GO_ENV = os.Getenv("GO_ENV")
-    PORT   = os.Getenv("PORT")
+	// Assign environment variables to variables
+	GO_ENV = os.Getenv("GO_ENV")
+	PORT = os.Getenv("PORT")
 
-
-    return nil
+	return nil
 }
