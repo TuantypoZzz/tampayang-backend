@@ -11,6 +11,7 @@ import (
 	"github.com/nulla-vis/golang-fiber-template/config/constant"
 	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
 	"github.com/nulla-vis/golang-fiber-template/core/helper"
+	mylogger "github.com/nulla-vis/golang-fiber-template/core/logger"
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
@@ -44,6 +45,11 @@ func LoadMidleWares(app *fiber.App) {
 
 					errorMessage = string(jsonData)
 				}
+
+				// LOGGER HERE -----
+				logData := response.GetLogData(c, errorMessage)
+				mylogger.Error("panic_error", logData)
+				// LOGGER END ------
 				
 				c.Status(fiber.StatusInternalServerError).JSON(CustomErrorResponse{
 					Status:     "error",
