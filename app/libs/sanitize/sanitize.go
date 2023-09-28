@@ -32,19 +32,19 @@ func PhoneNumber(phoneNumber string) string {
 }
 
 func PagingNumber(pageNoStr string, noPerPageStr string) entity.PagingNumbers {
-    // Default values
-    pageNo := constant.PAGE_NO
-    noPerPage := constant.NO_PER_PAGE
+	// Default values
+	pageNo := constant.PAGE_NO
+	noPerPage := constant.NO_PER_PAGE
 
-    // Parse pageNoStr to int if it's a valid positive integer
-    if pageNoInt, err := strconv.Atoi(pageNoStr); err == nil && pageNoInt > 0 {
-        pageNo = pageNoInt
-    }
+	// Parse pageNoStr to int if it's a valid positive integer
+	if pageNoInt, err := strconv.Atoi(pageNoStr); err == nil && pageNoInt > 0 {
+		pageNo = pageNoInt
+	}
 
-    // Parse noPerPageStr to int if it's a valid positive integer
-    if noPerPageInt, err := strconv.Atoi(noPerPageStr); err == nil && noPerPageInt > 0 {
-        noPerPage = noPerPageInt
-    }
+	// Parse noPerPageStr to int if it's a valid positive integer
+	if noPerPageInt, err := strconv.Atoi(noPerPageStr); err == nil && noPerPageInt > 0 {
+		noPerPage = noPerPageInt
+	}
 
-    return entity.PagingNumbers{PageNo: pageNo, NoPerPage: noPerPage}
+	return entity.PagingNumbers{PageNo: pageNo, NoPerPage: noPerPage}
 }
