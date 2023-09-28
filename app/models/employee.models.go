@@ -110,7 +110,7 @@ func GetEmployeeById(employeeId int) entity.EmployeeWithId {
 	sqlQuery := "SELECT emply.employee_id, emply.name, emply.nip, emply.bidang, emply.seksi, emply.unit_kerja, emply.gender, emply.birth_place, emply.birth_date, emply.phone, emply.email, emply.created_date FROM employee AS emply WHERE emply.employee_id = ?"
 	result, err := db.QueryContext(ctx, sqlQuery, employeeId)
 	if err != nil {
-		panic(err)
+		panic("models - GetEmployeeById, db.QueryContext: " + err.Error())
 	}
 
 	if result.Next() {
@@ -128,7 +128,7 @@ func GetEmployeeById(employeeId int) entity.EmployeeWithId {
 			&employeeResult.Email,
 			&employeeResult.Created_date)
 		if err != nil {
-			panic(err)
+			panic("models - GetEmployeeById, result.Scan: " + err.Error())
 		}
 	}
 

@@ -95,7 +95,7 @@ func GetEmployeeById(ctx *fiber.Ctx) error {
 
 	dbResult := models.GetEmployeeById(int_employee_id)
 
-	if globalFunction.IsEmpty(dbResult.Name) {
+	if globalFunction.IsEmpty(dbResult.Id) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("emply012", nil))
 	}
 

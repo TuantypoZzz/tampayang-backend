@@ -8,11 +8,6 @@ const (
 	TOKEN_EXPIRE_MINUTE  = 1440
 	ADMIN_ROLE           = "admin"
 	JWT_COOKIE_NAME      = "jwt_token"
-  SOME_NUMBER = 2023
-	DEFAULT_TIMEOUT = 5000
-	TOKEN_EXPIRE_MINUTE = 10
-	ADMIN_ROLE = "admin"
-	JWT_COOKIE_NAME = "jwt_token"
-	PAGE_NO = 1
-	NO_PER_PAGE = 10
+	PAGE_NO              = 1
+	NO_PER_PAGE          = 10
 )
