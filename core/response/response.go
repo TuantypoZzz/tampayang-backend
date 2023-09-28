@@ -1,7 +1,12 @@
 package response
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
+	mylogger "github.com/nulla-vis/golang-fiber-template/core/logger"
 )
 
 /*
@@ -26,6 +31,57 @@ let getLogData = (req, data) => {
 
 */
 
+func GetLogData(ctx *fiber.Ctx, data interface{}) string{
+    var queryData, reqHeadersData, bodyData, logData string
+    for key, value := range ctx.Queries() {
+        queryData += fmt.Sprintf("%s: %s,", key, value)
+    }
+    for key, value := range ctx.GetReqHeaders() {
+        reqHeadersData += fmt.Sprintf("%s: %s,", key, value)
+    }
+    if len(ctx.Body()) != 0 {
+        var buf bytes.Buffer
+        if err := json.Compact(&buf, ctx.Body()); err != nil {
+            panic("response - GetLogData, json.Compact: " + err.Error())
+        }
+        // Convert the buffer to a string
+        bodyData = buf.String()
+    
+        // Unmarshal the JSON string into a map
+        var jsonData map[string]interface{}
+        if err := json.Unmarshal([]byte(bodyData), &jsonData); err != nil {
+            panic("response - GetLogData, json.Compact: " + err.Error())
+        }
+    
+        // Marshal the map back into a string without escape characters
+        updatedJSONStr, err := json.Marshal(jsonData)
+        if err != nil {
+            panic("response - GetLogData, json.Compact: " + err.Error())
+        }
+    
+        // Convert the JSON byte slice to a string
+        bodyData = string(updatedJSONStr)
+    } else {
+        bodyData = ""
+    }
+
+    log := map[string]interface{} {
+        "ipAddress": ctx.IP(),
+        "route": ctx.Path(),
+        "method": ctx.Method(),
+        "headers": string(reqHeadersData),
+        "params": convertLoggerData(ctx.AllParams()),
+        "body": bodyData,
+        "query":string(queryData),
+        "response_data": convertLoggerData(data),
+    }
+
+    for key, value := range log {
+        logData += fmt.Sprintf("%s: %s,", key, value)
+    }
+    return string(logData)
+}
+
 func SuccessResponse(ctx *fiber.Ctx, data interface{}) error{
 	type SuccessResponse struct {
 		Status     string      `json:"status"`
@@ -46,14 +102,10 @@ func SuccessResponse(ctx *fiber.Ctx, data interface{}) error{
 	}
 
 	// LOGGER HERE -----
-		// Panggil function build log data
-			// reqHeaders := ctx.GetReqHeaders()
-			// fmt.Println(reqHeaders)
-
-		// insert data tersebut ke dalam log
+    logData := GetLogData(ctx, data)
+    mylogger.Trace("response_success", logData)
 	// LOGGER END ------
 	
-
 	successData := SuccessResponse {
 		Status: "success",
 		StatusCode: fiber.StatusOK,
@@ -115,6 +167,11 @@ func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
         payload["message"] = "An error occurred"
     }
 
+    // LOGGER HERE -----
+    logData := GetLogData(ctx, payload)
+    mylogger.Error("response_error", logData)
+    // LOGGER END ------
+
     errorData := ErrorResponse{
         Status:     "error",
         StatusCode: fiber.StatusInternalServerError,
@@ -123,6 +180,26 @@ func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
 
     // Set the status and JSON response data and return ctx
     return ctx.Status(httpCodeErr).JSON(errorData)
+}
+
+func convertLoggerData(data interface{}) string {
+    // Use a type switch to check the type of data
+    var result string
+    switch value := data.(type) {
+        case map[string]interface{}:
+            // Convert the map to a JSON string
+            jsonString, _ := json.Marshal(value)
+            result = string(jsonString)
+
+        case string:
+            // Value is already a string, no need to convert
+            result = value
+        default:
+            jsonString, _ := json.Marshal(value)
+            result = string(jsonString)
+    }
+
+    return result
 }
 
 
