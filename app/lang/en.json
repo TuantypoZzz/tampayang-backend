@@ -37,6 +37,11 @@
     "emply010": "Format date is wrong",
     "emply011": "Format nip is wrong",
     "emply012": "Employee not found",
+
+    "gol001": "Golongan successfully created",
+    "gol002": "Golongan name cannot be empty",
+    "gol003": "Golongan format not valid. Example format I/a",
+    "gol004": "Golongan name already registered",
     
     "auth001": "Your access token is invalid or already expired",
     "auth002": "Email is invalid",

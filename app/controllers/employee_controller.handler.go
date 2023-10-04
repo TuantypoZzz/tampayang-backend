@@ -22,20 +22,11 @@ func CreateEmployeeHandler(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, err)
 	}
 
-	// validasi nip tidak boleh sama
-	queryGet := "SELECT emply.nip FROM employee AS emply WHERE emply.nip = ? LIMIT 1"
-	isEmplyUniq := isEmployeeNipIsUnique(queryGet, newEmployee.Nip)
-	if newEmployee.Nip == isEmplyUniq {
-		return response.ErrorResponse(ctx, globalFunction.GetMessage("emply008", nil))
-	}
-
 	// Validasi No telpon
 	sanitizePhoneNumber := sanitizeLib.PhoneNumber(newEmployee.Phone)
 	if !validationLib.IsValidPhoneNumber(sanitizePhoneNumber) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err005", nil))
 	}
-
-	sqlQuery := " INSERT INTO employee(name, nip, bidang, seksi, unit_kerja, gender, birth_place, birth_date, phone, email, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
 
 	insertData := entity.Employee{
 		Name:         newEmployee.Name,
@@ -55,6 +46,15 @@ func CreateEmployeeHandler(ctx *fiber.Ctx) error {
 	if errValidasi != nil {
 		return response.ErrorResponse(ctx, errValidasi)
 	}
+
+	// validasi nip tidak boleh sama
+	queryGet := "SELECT emply.nip FROM employee AS emply WHERE emply.nip = ? LIMIT 1"
+	isEmplyUniq := isEmployeeNipIsUnique(queryGet, newEmployee.Nip)
+	if newEmployee.Nip == isEmplyUniq {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("emply008", nil))
+	}
+
+	sqlQuery := " INSERT INTO employee(name, nip, bidang, seksi, unit_kerja, gender, birth_place, birth_date, phone, email, created_date) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
 
 	_, err := models.InsertNewEmployeeDatabase(sqlQuery, insertData)
 	if err != nil {
