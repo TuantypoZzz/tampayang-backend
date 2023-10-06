@@ -17,12 +17,12 @@ func InsertExample(query string, exampleData entity.Example) (int64, error) {
 		panic(err)
 	}
 
-    insertId, err := result.LastInsertId()
-    if err != nil {
-        panic(err)
-    }
+	insertId, err := result.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
 
-    return insertId, nil
+	return insertId, nil
 }
 
 func GetAllExample() []entity.ExampleWithId {
@@ -58,7 +58,7 @@ func GetAllExample() []entity.ExampleWithId {
 	if err := result.Err(); err != nil {
 		panic(err)
 	}
-	
+
 	return exampleResults
 }
 
@@ -68,7 +68,7 @@ func GetExampleById(exampleId int) entity.ExampleWithId {
 	ctx := context.Background()
 
 	var exampleResult entity.ExampleWithId
-	
+
 	sqlQuery := "SELECT exa.* FROM example AS exa WHERE exa.id = ?"
 	result, err := db.QueryContext(ctx, sqlQuery, exampleId)
 	if err != nil {
@@ -144,19 +144,19 @@ func UpdateExample(exampleData entity.ExampleWithId) *entity.ExampleWithId {
 }
 
 func DeleteExampleByID(id int) bool {
-    db := database.GetConnectionDB()
-    defer db.Close()
-    ctx := context.Background()
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
 
-    // Define the SQL DELETE query
-    sqlQuery := "DELETE FROM example WHERE id = ?"
+	// Define the SQL DELETE query
+	sqlQuery := "DELETE FROM example WHERE id = ?"
 
-    // Execute the DELETE query
-    _, err := db.ExecContext(ctx, sqlQuery, id)
-    if err != nil {
-        panic(err)
-    }
+	// Execute the DELETE query
+	_, err := db.ExecContext(ctx, sqlQuery, id)
+	if err != nil {
+		panic(err)
+	}
 
-    // If the DELETE operation is successful, return true
-    return true
+	// If the DELETE operation is successful, return true
+	return true
 }

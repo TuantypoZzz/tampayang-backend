@@ -4,6 +4,8 @@
     "err001": "Oops sorry, something went wrong!",
     "err002": "Wrong Format Id",
     "err003": "Path not found",
+    "err004": "Must not contain spaces at the beginning or end",
+    "err005": "Phone number is invalid",
 
     "sys001": "Something wrong with our %s. Please try again or contact customer service",
     "sys002": "Something wrong with our %s. Please try again or contact customer %s",
@@ -24,6 +26,23 @@
     "user001": "User successfully created",
 
     "emply001": "Employee successfully created",
+    "emply002": "Employee name cannot be empty",
+    "emply003": "Employee nip cannot be empty",
+    "emply004": "Employee bidang cannot be empty",
+    "emply005": "Employee seksi cannot be empty",
+    "emply006": "Employee unit kerja cannot be empty",
+    "emply007": "Employee gender cannot be empty",
+    "emply008": "Employee nip already used",
+    "emply009": "Input employee gender is wrong",
+    "emply010": "Format date is wrong",
+    "emply011": "Format nip is wrong",
+    "emply012": "Employee not found",
+
+    "gol001": "Golongan successfully created",
+    "gol002": "Golongan name cannot be empty",
+    "gol003": "Golongan format not valid. Example format I/a",
+    "gol004": "Golongan name already registered",
+    "gol005": "Golongan not found",
     
     "auth001": "Your access token is invalid or already expired",
     "auth002": "Email is invalid",

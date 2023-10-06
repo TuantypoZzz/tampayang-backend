@@ -14,7 +14,7 @@ import (
 	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
-func Login(ctx *fiber.Ctx) error {	
+func Login(ctx *fiber.Ctx) error {
 	if ctx.Locals("isLogin") != nil && ctx.Locals("isLogin") == true {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth008", nil))
 	}
@@ -38,14 +38,14 @@ func Login(ctx *fiber.Ctx) error {
 
 	// validasi format email
 	if !globalFunction.IsValidEmail(strings.TrimSpace(loginReq.Email)) {
-		response.ErrorResponse(ctx, globalFunction.GetMessage("auth002", nil))
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth002", nil))
 	}
 
 	// Get user from db
 	user := models.GetUserLoginByEmail(loginReq.Email)
 	// validasi data user terdaftar (menggunakan id)
 	if globalFunction.IsEmpty(user.User_id) {
-		replacements :=[]interface{} {loginReq.Email}
+		replacements := []interface{}{loginReq.Email}
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth005", replacements))
 	}
 
@@ -75,10 +75,9 @@ func Login(ctx *fiber.Ctx) error {
 		Expires:  time.Now().Add(time.Minute * constant.TOKEN_EXPIRE_MINUTE),
 	})
 
-	result := entity.ResultToken {
+	result := entity.ResultToken{
 		Access_token: token,
 	}
-
 
 	return response.SuccessResponse(ctx, result)
 }
@@ -96,7 +95,6 @@ func Logout(ctx *fiber.Ctx) error {
 		HTTPOnly: true,
 		SameSite: "Strict",
 	})
-
 
 	return response.SuccessResponse(ctx, globalFunction.GetMessage("success", nil))
 }
