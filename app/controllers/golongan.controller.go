@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/nulla-vis/golang-fiber-template/app/models"
 	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
@@ -40,4 +42,40 @@ func CreateGolongan(ctx *fiber.Ctx) error {
 	responseData := globalFunction.GetMessage("success", nil)
 
 	return response.SuccessResponse(ctx, responseData)
+}
+
+func GetAllGolongan(ctx *fiber.Ctx) error {
+	pageParam, _ := strconv.Atoi(ctx.Query("page", "1"))
+	limitParam, _ := strconv.Atoi(ctx.Query("limit", "10"))
+
+	// Pastikan "page" selalu lebih besar atau sama dengan 1
+	if pageParam < 1 {
+		pageParam = 1
+	}
+
+	// Memanggil fungsi GetAllEmployee dengan nilai "page" dan "limit" yang diterima
+	employees, err := models.GetAllGolonganPagenation(pageParam, limitParam)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	return response.SuccessResponse(ctx, employees)
+}
+
+func GetGolonganById(ctx *fiber.Ctx) error {
+	golonganId := ctx.Params("golongan_id")
+
+	// Validasi golongan_id
+	int_golongan_id, err := strconv.Atoi(golonganId)
+	if err != nil {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err002", nil))
+	}
+
+	dbResult := models.GetGolonganById(int_golongan_id)
+
+	if globalFunction.IsEmpty(dbResult.Id) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("gol005", nil))
+	}
+
+	return response.SuccessResponse(ctx, dbResult)
 }

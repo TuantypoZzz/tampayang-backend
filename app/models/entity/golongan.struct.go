@@ -12,6 +12,19 @@ type Golongan struct {
 	Created_date string `json:"created_date"`
 }
 
+type GolonganWithId struct {
+	Id           int    `json:"id"`
+	GolonganName string `json:"golongan_name"`
+	Created_date string `json:"created_date"`
+}
+
+type PageGolongan struct {
+	Data      []GolonganWithId `json:"data"`
+	TotalRow  int              `json:"total_row"`
+	TotalPage int              `json:"total_page"`
+	NoPerPage int              `json:"no_per_page"`
+}
+
 func (golongan Golongan) ValidationGolongan() map[string]interface{} {
 	var errMessage map[string]interface{}
 	// Validasi nama yang dikirim

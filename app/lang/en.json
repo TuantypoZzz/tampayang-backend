@@ -42,6 +42,7 @@
     "gol002": "Golongan name cannot be empty",
     "gol003": "Golongan format not valid. Example format I/a",
     "gol004": "Golongan name already registered",
+    "gol005": "Golongan not found",
     
     "auth001": "Your access token is invalid or already expired",
     "auth002": "Email is invalid",
