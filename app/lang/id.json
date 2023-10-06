@@ -42,6 +42,7 @@
     "gol002": "Nama Golongan tidak boleh kosong",
     "gol003": "Format golongan tidak valid. Contoh format I/a",
     "gol004": "Nama Golongan telah digunakan",
+    "gol005": "Golongan tidaK ditemukan",
 
     "auth001": "Access token anda salah atau telah kadaluarsa",
     "auth002": "Email tidak valid",

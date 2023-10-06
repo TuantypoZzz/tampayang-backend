@@ -8,4 +8,6 @@ import (
 
 func GolonganRoute(app *fiber.App) {
 	app.Post("/golongan/", middlewares.AuthCookie, controllers.CreateGolongan)
+	app.Get("/golongan/all-golongan", middlewares.AuthCookie, controllers.GetAllGolongan)
+	app.Get("/golongan/get-golongan/:golongan_id", middlewares.AuthCookie, controllers.GetGolonganById)
 }
