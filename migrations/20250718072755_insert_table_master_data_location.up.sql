@@ -1,300 +1,299 @@
+START TRANSACTION;
+
 -- Insert Provinsi Maluku
-INSERT INTO provinces (province_name, province_code) VALUES ('Maluku', 'MAL');
+INSERT INTO provinces (province_name, province_code, created_at) VALUES ('Maluku', 'MAL', NOW());
 
 -- Insert Kabupaten/Kota di Maluku
-INSERT INTO regencies (province_id, regencies_name, regencies_code, regencies_type) VALUES 
-(1, 'Kota Ambon', 'AMB', 'kota'),
-(1, 'Kabupaten Maluku Tengah', 'MAT', 'kabupaten'),
-(1, 'Kabupaten Seram Bagian Barat', 'SBB', 'kabupaten'),
-(1, 'Kabupaten Seram Bagian Timur', 'SBT', 'kabupaten'),
-(1, 'Kabupaten Kepulauan Aru', 'ARU', 'kabupaten'),
-(1, 'Kabupaten Maluku Barat Daya', 'MBD', 'kabupaten'),
-(1, 'Kabupaten Buru', 'BRU', 'kabupaten'),
-(1, 'Kabupaten Buru Selatan', 'BRS', 'kabupaten'),
-(1, 'Kabupaten Kepulauan Tanimbar', 'KPT', 'kabupaten'),
-(1, 'Kota Tual', 'TUL', 'kota'),
-(1, 'Kabupaten Maluku Tenggara', 'MAT', 'kabupaten'),
-(1, 'Kabupaten Maluku Tenggara Barat', 'MTB', 'kabupaten');
+-- Menggunakan subquery untuk mendapatkan province_id dari 'Maluku' yang baru saja disisipkan.
+INSERT INTO regencies (province_id, regency_name, regency_code, regency_type, created_at) VALUES
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kota Ambon', 'AMB', 'kota', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Maluku Tengah', 'MAT', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Seram Bagian Barat', 'SBB', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Seram Bagian Timur', 'SBT', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Kepulauan Aru', 'ARU', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Maluku Barat Daya', 'MBD', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Buru', 'BRU', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Buru Selatan', 'BRS', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Kepulauan Tanimbar', 'KPT', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kota Tual', 'TUL', 'kota', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Maluku Tenggara', 'MAT', 'kabupaten', NOW()),
+((SELECT province_id FROM provinces WHERE province_name = 'Maluku'), 'Kabupaten Maluku Tenggara Barat', 'MTB', 'kabupaten', NOW());
 
 -- Insert Kecamatan (Districts) untuk setiap Kabupaten/Kota
--- Kota Ambon (regencies_id = 1)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(1, 'Nusaniwe', 'NSW'),
-(1, 'Sirimau', 'SRM'),
-(1, 'Teluk Ambon', 'TAM'),
-(1, 'Baguala', 'BGL'),
-(1, 'Teluk Ambon Baguala', 'TAB'),
-(1, 'Leitimur Selatan', 'LTS');
--- Kabupaten Kepulauan Tanimbar (regencies_id = 9)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(9, 'Saumlaki', 'SML'),
-(9, 'Tanimbar Selatan', 'TMS'),
-(9, 'Tanimbar Utara', 'TMU'),
-(9, 'Selaru', 'SLR'),
-(9, 'Wer Tamrian', 'WTM'),
-(9, 'Wer Maktian', 'WMK'),
-(9, 'Nirunmas', 'NRM'),
-(9, 'Molu Maru', 'MLM'),
-(9, 'Wuar Labobar', 'WLB'),
-(9, 'Kormomolin', 'KRM'),
-(9, 'Nuswotar', 'NWT'),
-(9, 'Wertamrian', 'WTR'),
-(9, 'Tanimbar Utara', 'TNU');
+-- Menggunakan subquery untuk mendapatkan regency_id yang sesuai.
+-- Kota Ambon
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Nusaniwe', 'NSW', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Sirimau', 'SRM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Teluk Ambon', 'TAM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Baguala', 'BGL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Teluk Ambon Baguala', 'TAB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Leitimur Selatan', 'LTS', NOW());
 
--- Kabupaten Maluku Tengah (regencies_id = 2)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(2, 'Salahutu', 'SLH'),
-(2, 'Leihitu', 'LHT'),
-(2, 'Leihitu Barat', 'LHB'),
-(2, 'Kota Masohi', 'MSH'),
-(2, 'Amahai', 'AMH'),
-(2, 'Teon Nila Serua', 'TNS'),
-(2, 'Tehoru', 'THR'),
-(2, 'Namlea', 'NML'),
-(2, 'Bula', 'BUL'),
-(2, 'Waplau', 'WPL'),
-(2, 'Kepulauan Banda', 'KBD'),
-(2, 'Banda', 'BND'),
-(2, 'Nusalaut', 'NSL'),
-(2, 'Saparua', 'SPR'),
-(2, 'Pulau Haruku', 'PHR'),
-(2, 'Seit Kaitetu', 'SKT'),
-(2, 'Teluk Dalam', 'TDL'),
-(2, 'TNS Timur', 'TNT'),
-(2, 'Elpaputih', 'EPT');
+-- Kabupaten Kepulauan Tanimbar
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Saumlaki', 'SML', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Selatan', 'TMS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Utara', 'TMU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Selaru', 'SLR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wer Tamrian', 'WTM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wer Maktian', 'WMK', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Nirunmas', 'NRM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Molu Maru', 'MLM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wuar Labobar', 'WLB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kormomolin', 'KRM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Nuswotar', 'NWT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wertamrian', 'WTR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Tanimbar' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Utara', 'TNU', NOW());
 
--- Kabupaten Seram Bagian Barat (regencies_id = 3)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(3, 'Kairatu', 'KRT'),
-(3, 'Kairatu Barat', 'KRB'),
-(3, 'Seram Utara', 'SRU'),
-(3, 'Taniwel', 'TNW'),
-(3, 'Huamual', 'HML'),
-(3, 'Huamual Belakang', 'HMB'),
-(3, 'Amalatu', 'AML'),
-(3, 'Inamosol', 'INM'),
-(3, 'Elpaputih', 'EPH'),
-(3, 'Huamual Utara', 'HMU'),
-(3, 'Kepulauan Manipa', 'KMP'),
-(3, 'Piru', 'PIR');
+-- Kabupaten Maluku Tengah
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Salahutu', 'SLH', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Leihitu', 'LHT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Leihitu Barat', 'LHB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kota Masohi', 'MSH', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Amahai', 'AMH', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Teon Nila Serua', 'TNS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tehoru', 'THR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Namlea', 'NML', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Bula', 'BUL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Waplau', 'WPL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kepulauan Banda', 'KBD', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Banda', 'BND', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Nusalaut', 'NSL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Saparua', 'SPR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau Haruku', 'PHR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Seit Kaitetu', 'SKT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Teluk Dalam', 'TDL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'TNS Timur', 'TNT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Elpaputih', 'EPT', NOW());
 
--- Kabupaten Seram Bagian Timur (regencies_id = 4)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(4, 'Bula', 'BLA'),
-(4, 'Werinama', 'WRN'),
-(4, 'Pulau Gorom', 'PGR'),
-(4, 'Wakate', 'WKT'),
-(4, 'Tutuk Tolu', 'TTL'),
-(4, 'Siwalalat', 'SWL'),
-(4, 'Kilmury', 'KLM'),
-(4, 'Teluk Waru', 'TWR'),
-(4, 'Gorom Timur', 'GTM'),
-(4, 'Bula Barat', 'BLB'),
-(4, 'Kota Bula', 'KBL'),
-(4, 'Teluk Elpaputih', 'TEP'),
-(4, 'Ujung Latu', 'UJL'),
-(4, 'Banda', 'BDA'),
-(4, 'Tehoru', 'THO');
+-- Kabupaten Seram Bagian Barat
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kairatu', 'KRT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kairatu Barat', 'KRB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Seram Utara', 'SRU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Taniwel', 'TNW', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Huamual', 'HML', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Huamual Belakang', 'HMB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Amalatu', 'AML', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Inamosol', 'INM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Elpaputih', 'EPH', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Huamual Utara', 'HMU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kepulauan Manipa', 'KMP', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Piru', 'PIR', NOW());
 
--- Kabupaten Kepulauan Aru (regencies_id = 5)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(5, 'Dobo', 'DOB'),
-(5, 'Aru Selatan', 'ARS'),
-(5, 'Aru Tengah', 'ART'),
-(5, 'Aru Utara', 'ARU'),
-(5, 'Aru Tengah Timur', 'ATT'),
-(5, 'Aru Tengah Selatan', 'ATS'),
-(5, 'Aru Utara Timur Batuley', 'ATB'),
-(5, 'Sir-Sir', 'SIR'),
-(5, 'Pulau-Pulau Aru', 'PPA');
+-- Kabupaten Seram Bagian Timur
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Bula', 'BLA', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Werinama', 'WRN', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau Gorom', 'PGR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wakate', 'WKT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tutuk Tolu', 'TTL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Siwalalat', 'SWL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kilmury', 'KLM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Teluk Waru', 'TWR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Gorom Timur', 'GTM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Bula Barat', 'BLB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kota Bula', 'KBL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Teluk Elpaputih', 'TEP', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Ujung Latu', 'UJL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Banda', 'BDA', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Timur' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tehoru', 'THO', NOW());
 
--- Kabupaten Maluku Barat Daya (regencies_id = 6)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(6, 'Tanimbar Selatan', 'TMS'),
-(6, 'Tanimbar Utara', 'TMU'),
-(6, 'Selaru', 'SLR'),
-(6, 'Wer Tamrian', 'WTM'),
-(6, 'Wer Maktian', 'WMK'),
-(6, 'Nirunmas', 'NRM'),
-(6, 'Molu Maru', 'MLM'),
-(6, 'Wetar', 'WTR'),
-(6, 'Wetar Barat', 'WTB'),
-(6, 'Wetar Timur', 'WTT'),
-(6, 'Wetar Utara', 'WTU'),
-(6, 'Kisar Utara', 'KSU'),
-(6, 'Pulau Leti', 'PLT'),
-(6, 'Pulau Lakor', 'PLK'),
-(6, 'Dawelor Dawera', 'DWD'),
-(6, 'Pulau Moa', 'PMO'),
-(6, 'Babar', 'BBR'),
-(6, 'Babar Timur', 'BBT'),
-(6, 'Dai', 'DAI'),
-(6, 'Masela', 'MSL'),
-(6, 'Batarkusu', 'BTK'),
-(6, 'Romang', 'RMG'),
-(6, 'Leti Moa Lakor', 'LML'),
-(6, 'Mdona Hiera', 'MDH'),
-(6, 'Tanimbar Utara', 'TNB');
+-- Kabupaten Kepulauan Aru
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Dobo', 'DOB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Aru Selatan', 'ARS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Aru Tengah', 'ART', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Aru Utara', 'ARU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Aru Tengah Timur', 'ATT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Aru Tengah Selatan', 'ATS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Aru Utara Timur Batuley', 'ATB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Sir-Sir', 'SIR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Kepulauan Aru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau-Pulau Aru', 'PPA', NOW());
 
--- Kabupaten Buru (regencies_id = 7)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(7, 'Namlea', 'NAM'),
-(7, 'Air Buaya', 'ABY'),
-(7, 'Waeapo', 'WAP'),
-(7, 'Waplau', 'WPL'),
-(7, 'Batabual', 'BTB'),
-(7, 'Lolong Guba', 'LGB'),
-(7, 'Teluk Kaiely', 'TKL'),
-(7, 'Lilialy', 'LIL'),
-(7, 'Waelata', 'WLT'),
-(7, 'Fena Leisela', 'FLS'),
-(7, 'Kepala Madan', 'KMD'),
-(7, 'Waesama', 'WSM'),
-(7, 'Dayamurni', 'DYM');
+-- Kabupaten Maluku Barat Daya
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Selatan', 'TMS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Utara', 'TMU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Selaru', 'SLR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wer Tamrian', 'WTM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wer Maktian', 'WMK', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Nirunmas', 'NRM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Molu Maru', 'MLM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wetar', 'WTR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wetar Barat', 'WTB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wetar Timur', 'WTT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wetar Utara', 'WTU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kisar Utara', 'KSU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau Leti', 'PLT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau Lakor', 'PLK', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Dawelor Dawera', 'DWD', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau Moa', 'PMO', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Babar', 'BBR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Babar Timur', 'BBT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Dai', 'DAI', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Masela', 'MSL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Batarkusu', 'BTK', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Romang', 'RMG', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Leti Moa Lakor', 'LML', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Mdona Hiera', 'MDH', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Barat Daya' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Utara', 'TNB', NOW());
 
--- Kabupaten Buru Selatan (regencies_id = 8)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(8, 'Namrole', 'NMR'),
-(8, 'Leksula', 'LKS'),
-(8, 'Kepala Madan', 'KPM'),
-(8, 'Waesama', 'WSA'),
-(8, 'Ambalau', 'AMB'),
-(8, 'Buru Selatan', 'BRS');
+-- Kabupaten Buru
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Namlea', 'NAM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Air Buaya', 'ABY', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Waeapo', 'WAP', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Waplau', 'WPL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Batabual', 'BTB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Lolong Guba', 'LGB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Teluk Kaiely', 'TKL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Lilialy', 'LIL', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Waelata', 'WLT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Fena Leisela', 'FLS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kepala Madan', 'KMD', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Waesama', 'WSM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Dayamurni', 'DYM', NOW());
 
--- Kota Tual (regencies_id = 9)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(9, 'Dullah Utara', 'DLU'),
-(9, 'Dullah Selatan', 'DLS'),
-(9, 'Tayando', 'TYD'),
-(9, 'Pulau Dullah Utara', 'PDU'),
-(9, 'Kur Selatan', 'KRS');
+-- Kabupaten Buru Selatan
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru Selatan' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Namrole', 'NMR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru Selatan' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Leksula', 'LKS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru Selatan' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kepala Madan', 'KPM', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru Selatan' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Waesama', 'WSA', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru Selatan' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Ambalau', 'AMB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru Selatan' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Buru Selatan', 'BRS', NOW());
 
--- Kabupaten Maluku Tenggara (regencies_id = 10)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(10, 'Kei Kecil', 'KKC'),
-(10, 'Kei Besar', 'KBS'),
-(10, 'Kei Kecil Timur', 'KKT'),
-(10, 'Kei Besar Selatan', 'KBS'),
-(10, 'Kei Kecil Barat', 'KKB'),
-(10, 'Kei Besar Utara Timur', 'KBT'),
-(10, 'Hoat Sorbay', 'HSB'),
-(10, 'Manyeuw', 'MYW'),
-(10, 'Kei Besar Utara', 'KBU'),
-(10, 'Kei Kecil Timur Selatan', 'KTS'),
-(10, 'Pulau Kur', 'PKR'),
-(10, 'Kur Selatan', 'KUR');
+-- Kota Tual
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Dullah Utara', 'DLU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Dullah Selatan', 'DLS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tayando', 'TYD', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau Dullah Utara', 'PDU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kur Selatan', 'KRS', NOW());
 
--- Kabupaten Maluku Tenggara Barat (regencies_id = 11)
-INSERT INTO districts (regencies_id, districts_name, districts_code) VALUES 
-(11, 'Tanimbar Selatan', 'TNS'),
-(11, 'Tanimbar Utara', 'TNU'),
-(11, 'Selaru', 'SLU'),
-(11, 'Wer Tamrian', 'WTN'),
-(11, 'Wer Maktian', 'WMN'),
-(11, 'Nirunmas', 'NRN'),
-(11, 'Molu Maru', 'MLR'),
-(11, 'Yaru', 'YRU'),
-(11, 'Kormomolin', 'KML'),
-(11, 'Fordata', 'FDT');
+-- Kabupaten Maluku Tenggara
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Kecil', 'KKC', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Besar', 'KBS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Kecil Timur', 'KKT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Besar Selatan', 'KBS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Kecil Barat', 'KKB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Besar Utara Timur', 'KBT', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Hoat Sorbay', 'HSB', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Manyeuw', 'MYW', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Besar Utara', 'KBU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kei Kecil Timur Selatan', 'KTS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Pulau Kur', 'PKR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kur Selatan', 'KUR', NOW());
+
+-- Kabupaten Maluku Tenggara Barat
+INSERT INTO districts (regency_id, district_name, district_code, created_at) VALUES
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Selatan', 'TNS', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Tanimbar Utara', 'TNU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Selaru', 'SLU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wer Tamrian', 'WTN', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Wer Maktian', 'WMN', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Nirunmas', 'NRN', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Molu Maru', 'MLR', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Yaru', 'YRU', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Kormomolin', 'KML', NOW()),
+((SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tenggara Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku')), 'Fordata', 'FDT', NOW());
+
 
 -- Insert Desa/Kelurahan untuk beberapa kecamatan utama
+-- Menggunakan subquery untuk mendapatkan districts_id yang sesuai.
 -- Kota Ambon - Kecamatan Sirimau
-INSERT INTO villages (districts_id, villages_name, villages_code, villages_type) VALUES 
-(2, 'Mardika', 'MDK', 'kelurahan'),
-(2, 'Batu Merah', 'BTM', 'kelurahan'),
-(2, 'Benteng', 'BTG', 'kelurahan'),
-(2, 'Wainitu', 'WNT', 'kelurahan'),
-(2, 'Honipopu', 'HNP', 'kelurahan'),
-(2, 'Rijali', 'RJL', 'kelurahan'),
-(2, 'Karang Panjang', 'KPJ', 'kelurahan'),
-(2, 'Ahusen', 'AHS', 'kelurahan'),
-(2, 'Galala', 'GLL', 'kelurahan'),
-(2, 'Soya', 'SOY', 'kelurahan');
+INSERT INTO villages (districts_id, village_name, village_code, village_type, created_at) VALUES
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Mardika', 'MDK', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Batu Merah', 'BTM', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Benteng', 'BTG', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Wainitu', 'WNT', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Honipopu', 'HNP', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Rijali', 'RJL', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Karang Panjang', 'KPJ', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Ahusen', 'AHS', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Galala', 'GLL', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Sirimau' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Soya', 'SOY', 'kelurahan', NOW());
 
 -- Kota Ambon - Kecamatan Nusaniwe
-INSERT INTO villages (districts_id, villages_name, villages_code, villages_type) VALUES 
-(1, 'Nusaniwe', 'NSW', 'kelurahan'),
-(1, 'Waihaong', 'WHG', 'kelurahan'),
-(1, 'Batu Gajah', 'BTG', 'kelurahan'),
-(1, 'Kudamati', 'KDM', 'kelurahan'),
-(1, 'Hatalae', 'HTL', 'kelurahan'),
-(1, 'Waiheru', 'WHR', 'kelurahan'),
-(1, 'Lateri', 'LTR', 'kelurahan'),
-(1, 'Urimessing', 'URM', 'kelurahan'),
-(1, 'Passo', 'PSO', 'kelurahan'),
-(1, 'Hukurila', 'HKR', 'kelurahan');
+INSERT INTO villages (districts_id, village_name, village_code, village_type, created_at) VALUES
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Nusaniwe', 'NSW', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Waihaong', 'WHG', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Batu Gajah', 'BTG', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Kudamati', 'KDM', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hatalae', 'HTL', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Waiheru', 'WHR', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Lateri', 'LTR', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Urimessing', 'URM', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Passo', 'PSO', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Nusaniwe' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Ambon' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hukurila', 'HKR', 'kelurahan', NOW());
 
 -- Maluku Tengah - Kecamatan Salahutu
-INSERT INTO villages (districts_id, villages_name, villages_code, villages_type) VALUES 
-(7, 'Tulehu', 'TLH', 'desa'),
-(7, 'Liang', 'LNG', 'desa'),
-(7, 'Waai', 'WAI', 'desa'),
-(7, 'Tial', 'TIL', 'desa'),
-(7, 'Rutong', 'RTG', 'desa'),
-(7, 'Tengah-Tengah', 'TTG', 'desa'),
-(7, 'Morella', 'MRL', 'desa'),
-(7, 'Mamala', 'MML', 'desa'),
-(7, 'Hitu', 'HTU', 'desa'),
-(7, 'Hila', 'HLA', 'desa');
+INSERT INTO villages (districts_id, village_name, village_code, village_type, created_at) VALUES
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Tulehu', 'TLH', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Liang', 'LNG', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Waai', 'WAI', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Tial', 'TIL', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Rutong', 'RTG', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Tengah-Tengah', 'TTG', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Morella', 'MRL', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Mamala', 'MML', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hitu', 'HTU', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Salahutu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hila', 'HLA', 'desa', NOW());
 
 -- Maluku Tengah - Kecamatan Leihitu
-INSERT INTO villages (districts_id, villages_name, villages_code, villages_type) VALUES 
-(8, 'Allang', 'ALG', 'desa'),
-(8, 'Batu Merah', 'BTM', 'desa'),
-(8, 'Hitu', 'HTU', 'desa'),
-(8, 'Kaitetu', 'KTT', 'desa'),
-(8, 'Mamala', 'MML', 'desa'),
-(8, 'Seith', 'STH', 'desa'),
-(8, 'Hitumessing', 'HTM', 'desa'),
-(8, 'Hila', 'HLA', 'desa'),
-(8, 'Kaitetu', 'KTT', 'desa'),
-(8, 'Lilibooi', 'LLB', 'desa');
+INSERT INTO villages (districts_id, village_name, village_code, village_type, created_at) VALUES
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Allang', 'ALG', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Batu Merah', 'BTM', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hitu', 'HTU', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Kaitetu', 'KTT', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Mamala', 'MML', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Seith', 'STH', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hitumessing', 'HTM', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hila', 'HLA', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Kaitetu', 'KTT', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Leihitu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Maluku Tengah' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Lilibooi', 'LLB', 'desa', NOW());
 
 -- Seram Bagian Barat - Kecamatan Kairatu
-INSERT INTO villages (districts_id, villages_name, villages_code, villages_type) VALUES 
-(21, 'Kairatu', 'KRT', 'desa'),
-(21, 'Hatusua', 'HTS', 'desa'),
-(21, 'Buria', 'BRI', 'desa'),
-(21, 'Hatumeten', 'HTM', 'desa'),
-(21, 'Lohia Sapalewa', 'LSP', 'desa'),
-(21, 'Haturete', 'HTR', 'desa'),
-(21, 'Rumahkay', 'RMK', 'desa'),
-(21, 'Kamal', 'KML', 'desa'),
-(21, 'Murnaten', 'MRN', 'desa'),
-(21, 'Lohiatala', 'LHT', 'desa');
+INSERT INTO villages (districts_id, village_name, village_code, village_type, created_at) VALUES
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Kairatu', 'KRT', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hatusua', 'HTS', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Buria', 'BRI', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Hatumeten', 'HTM', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Lohia Sapalewa', 'LSP', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Haturete', 'HTR', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Rumahkay', 'RMK', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Kamal', 'KML', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Murnaten', 'MRN', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Kairatu' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Seram Bagian Barat' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Lohiatala', 'LHT', 'desa', NOW());
 
 -- Buru - Kecamatan Namlea
-INSERT INTO villages (districts_id, villages_name, villages_code, villages_type) VALUES 
-(47, 'Namlea', 'NML', 'kelurahan'),
-(47, 'Wamlana', 'WML', 'desa'),
-(47, 'Sawa', 'SWA', 'desa'),
-(47, 'Waenetat', 'WNT', 'desa'),
-(47, 'Wangongira', 'WGR', 'desa'),
-(47, 'Waekasar', 'WKS', 'desa'),
-(47, 'Jikumerasa', 'JKM', 'desa'),
-(47, 'Waegeren', 'WGR', 'desa'),
-(47, 'Waetawa', 'WTW', 'desa'),
-(47, 'Kampung Baru', 'KBR', 'desa');
+INSERT INTO villages (districts_id, village_name, village_code, village_type, created_at) VALUES
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Namlea', 'NML', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Wamlana', 'WML', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Sawa', 'SWA', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Waenetat', 'WNT', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Wangongira', 'WGR', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Waekasar', 'WKS', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Jikumerasa', 'JKM', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Waegeren', 'WGR', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Waetawa', 'WTW', 'desa', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Namlea' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kabupaten Buru' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Kampung Baru', 'KBR', 'desa', NOW());
 
 -- Kota Tual - Kecamatan Dullah Utara
-INSERT INTO villages (districts_id, villages_name, villages_code, villages_type) VALUES 
-(60, 'Langgur', 'LGR', 'kelurahan'),
-(60, 'Ohoijang', 'OHJ', 'kelurahan'),
-(60, 'Feer', 'FER', 'kelurahan'),
-(60, 'Bombay', 'BMY', 'kelurahan'),
-(60, 'Ruat', 'RUT', 'kelurahan'),
-(60, 'Watdek', 'WTD', 'kelurahan'),
-(60, 'Debut', 'DBT', 'kelurahan'),
-(60, 'Dullah Laut', 'DLL', 'kelurahan'),
-(60, 'Sathean', 'STH', 'kelurahan'),
-(60, 'Revav', 'RVV', 'kelurahan');-- Update created_at for provinces
-UPDATE provinces SET created_at = NOW();
+INSERT INTO villages (districts_id, village_name, village_code, village_type, created_at) VALUES
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Langgur', 'LGR', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Ohoijang', 'OHJ', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Feer', 'FER', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Bombay', 'BMY', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Ruat', 'RUT', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Watdek', 'WTD', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Debut', 'DBT', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Dullah Laut', 'DLL', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Sathean', 'STH', 'kelurahan', NOW()),
+((SELECT districts_id FROM districts WHERE district_name = 'Dullah Utara' AND regency_id = (SELECT regency_id FROM regencies WHERE regency_name = 'Kota Tual' AND province_id = (SELECT province_id FROM provinces WHERE province_name = 'Maluku'))), 'Revav', 'RVV', 'kelurahan', NOW());
 
--- Update created_at for regencies
-UPDATE regencies SET created_at = NOW();
-
--- Update created_at for districts
-UPDATE districts SET created_at = NOW();
-
--- Update created_at for villages
-UPDATE villages SET created_at = NOW();
+COMMIT;
