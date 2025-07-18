@@ -39,5 +39,5 @@ CREATE TABLE IF NOT EXISTS villages (
     created_at DATETIME NOT NULL,
     updated_at DATETIME,
     PRIMARY KEY (village_id),
-    CONSTRAINT fk_villages_districts FOREIGN KEY (districts_id) REFERENCES districts(districts_id)
+    CONSTRAINT fk_villages_districts FOREIGN KEY (district_id) REFERENCES districts(district_id)
 ) ENGINE = InnoDB;
