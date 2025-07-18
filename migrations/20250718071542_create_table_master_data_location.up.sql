@@ -1,54 +1,43 @@
-CREATE TABLE IF NOT EXISTS provinces 
-(
-    provinces_id         INT(11)         NOT NULL        AUTO_INCREMENT,
-    province_name        VARCHAR(100)    NOT NULL,
-    province_code        VARCHAR(10)    NOT NULL,
-    created_at           DATETIME        NOT NULL,
-    updated_at           DATETIME,
-    PRIMARY KEY (provinces_id)
-)ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS provinces (
+    province_id VARCHAR(36) NOT NULL DEFAULT (UUID()),
+    province_name VARCHAR(100) NOT NULL,
+    province_code VARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME,
+    PRIMARY KEY (province_id)
+) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS regencies 
-(
-    regencies_id         INT(11)         NOT NULL        AUTO_INCREMENT,
-    province_id          INT(11)    NOT NULL,
-    regencies_name       VARCHAR(100)    NOT NULL,
-    regencies_code       VARCHAR(10)    NOT NULL,
-    regencies_type       ENUM('kabupaten', 'kota') NOT NULL,
-    created_at           DATETIME        NOT NULL,
-    updated_at           DATETIME,
-    PRIMARY KEY (regencies_id)
-)ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS regencies (
+    regency_id VARCHAR(36) NOT NULL DEFAULT (UUID()),
+    province_id VARCHAR(36) NOT NULL,
+    regency_name VARCHAR(100) NOT NULL,
+    regency_code VARCHAR(10) NOT NULL,
+    regency_type ENUM('kabupaten', 'kota') NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME,
+    PRIMARY KEY (regency_id),
+    CONSTRAINT fk_regencies_provinces FOREIGN KEY (province_id) REFERENCES provinces(province_id)
+) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS districts 
-(
-    districts_id         INT(11)         NOT NULL        AUTO_INCREMENT,
-    regencies_id         INT(11)    NOT NULL,
-    districts_name       VARCHAR(100)    NOT NULL,
-    districts_code       VARCHAR(10)    NOT NULL,
-    created_at           DATETIME        NOT NULL,
-    updated_at           DATETIME,
-    PRIMARY KEY (districts_id)
-)ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS districts (
+    district_id VARCHAR(36) NOT NULL DEFAULT (UUID()),
+    regency_id VARCHAR(36) NOT NULL,
+    district_name VARCHAR(100) NOT NULL,
+    district_code VARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME,
+    PRIMARY KEY (district_id),
+    CONSTRAINT fk_districts_regencies FOREIGN KEY (regency_id) REFERENCES regencies(regency_id)
+) ENGINE = InnoDB;
 
-CREATE TABLE IF NOT EXISTS villages 
-(
-    villages_id         INT(11)         NOT NULL        AUTO_INCREMENT,
-    districts_id          INT(11)    NOT NULL,
-    villages_name       VARCHAR(100)    NOT NULL,
-    villages_code       VARCHAR(10)    NOT NULL,
-    villages_type       ENUM('desa', 'kelurahan') NOT NULL,
-    created_at           DATETIME        NOT NULL,
-    updated_at           DATETIME,
-    PRIMARY KEY (villages_id)
-)ENGINE = InnoDB;ALTER TABLE regencies
-ADD CONSTRAINT fk_regencies_provinces
-FOREIGN KEY (province_id) REFERENCES provinces(provinces_id);
-
-ALTER TABLE districts
-ADD CONSTRAINT fk_districts_regencies
-FOREIGN KEY (regencies_id) REFERENCES regencies(regencies_id);
-
-ALTER TABLE villages
-ADD CONSTRAINT fk_villages_districts
-FOREIGN KEY (districts_id) REFERENCES districts(districts_id);
+CREATE TABLE IF NOT EXISTS villages (
+    village_id VARCHAR(36) NOT NULL DEFAULT (UUID()),
+    district_id VARCHAR(36) NOT NULL,
+    village_name VARCHAR(100) NOT NULL,
+    village_code VARCHAR(10) NOT NULL,
+    village_type ENUM('desa', 'kelurahan') NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME,
+    PRIMARY KEY (village_id),
+    CONSTRAINT fk_villages_districts FOREIGN KEY (districts_id) REFERENCES districts(districts_id)
+) ENGINE = InnoDB;
