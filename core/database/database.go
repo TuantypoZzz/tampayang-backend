@@ -20,57 +20,53 @@ import (
 )
 
 func GetConnectionDB() *sql.DB {
-		// GET CONFIG DATA
-		configuration := helper.ConfigJson()
+	// GET CONFIG DATA
+	configuration := helper.ConfigJson()
 
-        var (
-            user_name, password, database, host, port interface{}
-            fullUrl string
-        )
-            
+	var (
+		user_name, password, database, host, port interface{}
+		fullUrl                                   string
+	)
 
+	if config.GO_ENV == "development" {
+		user_name = configuration["development"].(map[string]interface{})["username"]
+		password = configuration["development"].(map[string]interface{})["password"]
+		database = configuration["development"].(map[string]interface{})["database"]
+		host = configuration["development"].(map[string]interface{})["host"]
+		port = configuration["development"].(map[string]interface{})["port"]
+		fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":" + fmt.Sprint(port) + ")/" + fmt.Sprint(database)
+	}
 
-        if config.GO_ENV == "development" {
-            user_name = configuration["development"].(map[string]interface{})["username"]
-            password = configuration["development"].(map[string]interface{})["password"]
-            database = configuration["development"].(map[string]interface{})["database"]
-            host = configuration["development"].(map[string]interface{})["host"]
-            port = configuration["development"].(map[string]interface{})["port"]
-            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":"+ fmt.Sprint(port)+ ")/" + fmt.Sprint(database)
-        }
+	if config.GO_ENV == "production" {
+		user_name = configuration["production"].(map[string]interface{})["username"]
+		password = configuration["production"].(map[string]interface{})["password"]
+		database = configuration["production"].(map[string]interface{})["database"]
+		host = configuration["production"].(map[string]interface{})["host"]
+		port = configuration["production"].(map[string]interface{})["port"]
+		fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":" + fmt.Sprint(port) + ")/" + fmt.Sprint(database)
+	}
 
-        if config.GO_ENV == "production" {
-            user_name = configuration["production"].(map[string]interface{})["username"]
-            password = configuration["production"].(map[string]interface{})["password"]
-            database = configuration["production"].(map[string]interface{})["database"]
-            host = configuration["production"].(map[string]interface{})["host"]
-            port = configuration["production"].(map[string]interface{})["port"]
-            fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":"+ fmt.Sprint(port)+ ")/" + fmt.Sprint(database)
-        }
+	// SET DB VARIABLES
 
-		// SET DB VARIABLES
+	// OPEN DB CONNECTION
+	db, err := sql.Open("mysql", fullUrl)
+	if err != nil {
+		panic(err)
+	}
 
-	
-		// OPEN DB CONNECTION
-		db, err := sql.Open("mysql", fullUrl)
-		if err != nil {
-			panic(err)
-		}
+	// SET CONNECTION POOLING
+	// db.SetMaxIdleConns(10)
+	// db.SetMaxOpenConns(500)
+	// db.SetConnMaxIdleTime(5 * time.Minute)
+	// db.SetConnMaxLifetime(60 * time.Minute)
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
 
-		// SET CONNECTION POOLING
-		// db.SetMaxIdleConns(10)
-		// db.SetMaxOpenConns(500)
-		// db.SetConnMaxIdleTime(5 * time.Minute)
-		// db.SetConnMaxLifetime(60 * time.Minute)
-		db.SetConnMaxLifetime(time.Minute * 3)
-		db.SetMaxOpenConns(10)
-		db.SetMaxIdleConns(10)
-
-		return db
+	return db
 }
 
-
-func InserData(tblName string, data map[string]interface{}) int64{
+func InserData(tblName string, data map[string]interface{}) int64 {
 	// PREPARE CONNECTION AND VARIABLES
 	db := GetConnectionDB()
 	defer db.Close()
@@ -84,7 +80,7 @@ func InserData(tblName string, data map[string]interface{}) int64{
 		data_cols.WriteString(key + ",")
 		data_vals.WriteString("?,")
 		bindings = append(bindings, value)
-    }
+	}
 
 	cols := strings.TrimSuffix(data_cols.String(), ",")
 	vals := strings.TrimSuffix(data_vals.String(), ",")
@@ -92,9 +88,9 @@ func InserData(tblName string, data map[string]interface{}) int64{
 	sqlQuery := "INSERT INTO " + tblName + "(" + cols + ")" + " VALUES (" + vals + ")"
 
 	// Print query
-    if config.GO_ENV == "development" {
-        logQuery(sqlQuery, bindings)
-    }
+	if config.GO_ENV == "development" {
+		logQuery(sqlQuery, bindings)
+	}
 	result, err := db.ExecContext(ctx, sqlQuery, bindings...)
 	if err != nil {
 		panic(err)
@@ -108,126 +104,125 @@ func InserData(tblName string, data map[string]interface{}) int64{
 	return insertId
 }
 
-func QuerySelectWitCondition(sqlQuery string, bindings []interface{}, ) ([]map[string]interface{}, error) {
+func QuerySelectWitCondition(sqlQuery string, bindings []interface{}) ([]map[string]interface{}, error) {
 	// PREPARE CONNECTION AND VARIABLES
 	db := GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
 
-    if config.GO_ENV == "development" {
-        logQuery(sqlQuery, bindings)
-    }
+	if config.GO_ENV == "development" {
+		logQuery(sqlQuery, bindings)
+	}
 
 	// Execute the query with the provided bindings
-    rows, err := db.QueryContext(ctx, sqlQuery, bindings...)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	rows, err := db.QueryContext(ctx, sqlQuery, bindings...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    // Get the column names dynamically
-    columns, err := rows.Columns()
-    if err != nil {
-        return nil, err
-    }
+	// Get the column names dynamically
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
 
-    // Initialize a slice to store the result rows
-    var result []map[string]interface{}
+	// Initialize a slice to store the result rows
+	var result []map[string]interface{}
 
-    // Create a slice of interface pointers to hold the column values
-    values := make([]interface{}, len(columns))
-    for i := range values {
-        values[i] = new(interface{})
-    }
+	// Create a slice of interface pointers to hold the column values
+	values := make([]interface{}, len(columns))
+	for i := range values {
+		values[i] = new(interface{})
+	}
 
-    // Check if there are any rows in the result set
-    for rows.Next() {
-        // Scan the row into the values slice
-        if err := rows.Scan(values...); err != nil {
-            return nil, err
-        }
+	// Check if there are any rows in the result set
+	for rows.Next() {
+		// Scan the row into the values slice
+		if err := rows.Scan(values...); err != nil {
+			return nil, err
+		}
 
-        // Create a map to store the column values for each row
-        rowData := make(map[string]interface{})
+		// Create a map to store the column values for each row
+		rowData := make(map[string]interface{})
 
-        // Populate the rowData map with column names and values
-        for i, colName := range columns {
-            rowData[colName] = *values[i].(*interface{})
-        }
+		// Populate the rowData map with column names and values
+		for i, colName := range columns {
+			rowData[colName] = *values[i].(*interface{})
+		}
 
-        // Append the row data to the result slice
-        result = append(result, rowData)
-    }
+		// Append the row data to the result slice
+		result = append(result, rowData)
+	}
 
-    if err := rows.Err(); err != nil {
-        return nil, err
-    }
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
-    return result, nil
+	return result, nil
 }
 
 func QuerySelectWithoutCondition(query string, result interface{}) error {
-    // PREPARE CONNECTION AND VARIABLES
-    db := GetConnectionDB()
-    
-    defer db.Close()
+	// PREPARE CONNECTION AND VARIABLES
+	db := GetConnectionDB()
 
-    // Execute the query
-    rows, err := db.Query(query)
-    if err != nil {
-        return err
-    }
-    defer rows.Close()
+	defer db.Close()
 
-    // Use the ScanStruct function to scan data into the result slice
-    if err := ScanStruct(rows, result); err != nil {
-        return err
-    }
+	// Execute the query
+	rows, err := db.Query(query)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
 
-    return nil
+	// Use the ScanStruct function to scan data into the result slice
+	if err := ScanStruct(rows, result); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ScanStruct(rows *sql.Rows, dest interface{}) error {
-    // Ensure dest is a pointer to a slice of structs
-    destValue := reflect.ValueOf(dest)
-    if destValue.Kind() != reflect.Ptr || destValue.Elem().Kind() != reflect.Slice {
-        return fmt.Errorf("dest must be a pointer to a slice of structs")
-    }
+	// Ensure dest is a pointer to a slice of structs
+	destValue := reflect.ValueOf(dest)
+	if destValue.Kind() != reflect.Ptr || destValue.Elem().Kind() != reflect.Slice {
+		return fmt.Errorf("dest must be a pointer to a slice of structs")
+	}
 
-    // Get the type of the struct that each row will be scanned into
-    elementType := destValue.Elem().Type().Elem()
+	// Get the type of the struct that each row will be scanned into
+	elementType := destValue.Elem().Type().Elem()
 
-    // Create a slice of pointers to the fields of the struct
-    fieldPointers := make([]interface{}, elementType.NumField())
-    for i := 0; i < elementType.NumField(); i++ {
-        fieldPointers[i] = reflect.New(elementType.Field(i).Type).Interface()
-    }
+	// Create a slice of pointers to the fields of the struct
+	fieldPointers := make([]interface{}, elementType.NumField())
+	for i := 0; i < elementType.NumField(); i++ {
+		fieldPointers[i] = reflect.New(elementType.Field(i).Type).Interface()
+	}
 
-    // Iterate through the rows and scan each row into a new struct
-    for rows.Next() {
-        if err := rows.Scan(fieldPointers...); err != nil {
-            return err
-        }
+	// Iterate through the rows and scan each row into a new struct
+	for rows.Next() {
+		if err := rows.Scan(fieldPointers...); err != nil {
+			return err
+		}
 
-        // Create a new instance of the result struct
-        newItem := reflect.New(elementType).Elem()
+		// Create a new instance of the result struct
+		newItem := reflect.New(elementType).Elem()
 
-        // Set the struct fields with values from pointers
-        for i := 0; i < elementType.NumField(); i++ {
-            newItem.Field(i).Set(reflect.ValueOf(fieldPointers[i]).Elem())
-        }
+		// Set the struct fields with values from pointers
+		for i := 0; i < elementType.NumField(); i++ {
+			newItem.Field(i).Set(reflect.ValueOf(fieldPointers[i]).Elem())
+		}
 
-        // Append the new instance to the destination slice
-        destValue.Elem().Set(reflect.Append(destValue.Elem(), newItem))
-    }
+		// Append the new instance to the destination slice
+		destValue.Elem().Set(reflect.Append(destValue.Elem(), newItem))
+	}
 
-    if err := rows.Err(); err != nil {
-        return err
-    }
+	if err := rows.Err(); err != nil {
+		return err
+	}
 
-    return nil
+	return nil
 }
-
 
 /**
 //FAILED USING STRUCT
@@ -513,7 +508,3 @@ func selectAllFromTable(ctx context.Context, db *sql.DB, tableName string, colum
     return result, nil
 }
 */
-
-
-
-

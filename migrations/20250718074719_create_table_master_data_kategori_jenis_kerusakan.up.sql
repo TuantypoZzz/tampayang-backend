@@ -6,8 +6,9 @@ CREATE TABLE IF NOT EXISTS infrastructure_categories (
     icon VARCHAR(50),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (infrastructure_category_id)
+) ENGINE = InnoDB;
 
 -- Tabel Jenis Kerusakan
 CREATE TABLE IF NOT EXISTS damage_types (
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS damage_types (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (infrastructure_category_id) REFERENCES infrastructure_categories(id) ON DELETE CASCADE,
+    PRIMARY KEY (damage_type_id),
+    CONSTRAINT fk_damage_types_infrastructure_categories FOREIGN KEY (infrastructure_category_id) REFERENCES infrastructure_categories(infrastructure_category_id),
     INDEX idx_infrastructure_category_id (infrastructure_category_id)
-);
+) ENGINE = InnoDB;
