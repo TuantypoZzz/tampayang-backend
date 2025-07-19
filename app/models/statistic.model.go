@@ -77,7 +77,7 @@ func GetWeeklyReport() []entity.WeeklyReport {
 	}
 	defer result.Close()
 
-	if result.Next() {
+	for result.Next() {
 		var weeklyReport entity.WeeklyReport
 		err := result.Scan(
 			&weeklyReport.Date,
@@ -87,6 +87,9 @@ func GetWeeklyReport() []entity.WeeklyReport {
 		if err != nil {
 			panic("models - GetWeeklyReport, result.Scan " + err.Error())
 		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetLovInfrastructureCategory, result.Err " + err.Error())
 	}
 	return summary
 }
