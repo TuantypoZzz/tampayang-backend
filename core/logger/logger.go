@@ -3,7 +3,8 @@ package mylogger
 import (
 	"os"
 
-	"github.com/nulla-vis/golang-fiber-template/config"
+	"tampayang-backend/config"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,8 +16,8 @@ func Info(action string, data interface{}) {
 	logger.SetOutput(file)
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	logger.WithFields(logrus.Fields{
-		"action":action,
-		"data": data,
+		"action": action,
+		"data":   data,
 	}).Info("Logger Info")
 }
 
@@ -28,8 +29,8 @@ func Error(action string, data interface{}) {
 	logger.SetOutput(file)
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	logger.WithFields(logrus.Fields{
-		"action":action,
-		"data": data,
+		"action": action,
+		"data":   data,
 	}).Error("Logger Error")
 }
 
@@ -42,12 +43,12 @@ func Trace(action string, data interface{}) {
 	logger.SetOutput(file)
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	logger.WithFields(logrus.Fields{
-		"action":action,
-		"data": data,
+		"action": action,
+		"data":   data,
 	}).Trace("Logger Trace")
 }
 
-func logPath() string{
+func logPath() string {
 	rootPath := config.ProjectRootPath
 	logPath := rootPath + "/logs"
 

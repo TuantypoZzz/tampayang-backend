@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"tampayang-backend/app/controllers"
+	"tampayang-backend/core/middlewares"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/nulla-vis/golang-fiber-template/app/controllers"
-	"github.com/nulla-vis/golang-fiber-template/core/middlewares"
 )
 
 func AuthRoute(app *fiber.App) {

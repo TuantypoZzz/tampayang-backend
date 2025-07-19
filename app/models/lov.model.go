@@ -3,8 +3,8 @@ package models
 import (
 	"context"
 
-	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
-	"github.com/nulla-vis/golang-fiber-template/core/database"
+	"tampayang-backend/app/models/entity"
+	"tampayang-backend/core/database"
 )
 
 func GetLovInfrastructureCategory() []entity.Lov {
@@ -21,7 +21,7 @@ func GetLovInfrastructureCategory() []entity.Lov {
 	}
 	defer result.Close()
 
-	if result.Next() {
+	for result.Next() {
 		var value entity.Lov
 		err := result.Scan(
 			&value.Id,
@@ -31,6 +31,9 @@ func GetLovInfrastructureCategory() []entity.Lov {
 			panic("models - GetLovInfrastructureCategory, result.Scan " + err.Error())
 		}
 		lov = append(lov, value)
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetLovInfrastructureCategory, result.Err " + err.Error())
 	}
 	return lov
 }
@@ -49,7 +52,7 @@ func GetLovDamageType(infrastructureCategoryId string) []entity.Lov {
 	}
 	defer result.Close()
 
-	if result.Next() {
+	for result.Next() {
 		var value entity.Lov
 		err := result.Scan(
 			&value.Id,
@@ -59,6 +62,9 @@ func GetLovDamageType(infrastructureCategoryId string) []entity.Lov {
 			panic("models - GetLovDamageType, result.Scan " + err.Error())
 		}
 		lov = append(lov, value)
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetLovInfrastructureCategory, result.Err " + err.Error())
 	}
 	return lov
 }
@@ -106,7 +112,7 @@ func GetLovRegency(provinceId string) []entity.Lov {
 	}
 	defer result.Close()
 
-	if result.Next() {
+	for result.Next() {
 		var value entity.Lov
 		err := result.Scan(
 			&value.Id,
@@ -116,6 +122,9 @@ func GetLovRegency(provinceId string) []entity.Lov {
 		if err != nil {
 			panic("models - GetLovRegency, result.Scan " + err.Error())
 		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetLovInfrastructureCategory, result.Err " + err.Error())
 	}
 	return lov
 }
@@ -134,7 +143,7 @@ func GetLovDistrict(regencyId string) []entity.Lov {
 	}
 	defer result.Close()
 
-	if result.Next() {
+	for result.Next() {
 		var value entity.Lov
 		err := result.Scan(
 			&value.Id,
@@ -144,6 +153,9 @@ func GetLovDistrict(regencyId string) []entity.Lov {
 		if err != nil {
 			panic("models - GetLovDistrict, result.Scan " + err.Error())
 		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetLovInfrastructureCategory, result.Err " + err.Error())
 	}
 	return lov
 }
@@ -162,7 +174,7 @@ func GetLovVillage(districtId string) []entity.Lov {
 	}
 	defer result.Close()
 
-	if result.Next() {
+	for result.Next() {
 		var value entity.Lov
 		err := result.Scan(
 			&value.Id,
@@ -172,6 +184,9 @@ func GetLovVillage(districtId string) []entity.Lov {
 		if err != nil {
 			panic("models - GetLovVillage, result.Scan " + err.Error())
 		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetLovInfrastructureCategory, result.Err " + err.Error())
 	}
 	return lov
 }

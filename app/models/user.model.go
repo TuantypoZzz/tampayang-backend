@@ -3,11 +3,11 @@ package models
 import (
 	"context"
 
-	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
-	"github.com/nulla-vis/golang-fiber-template/core/database"
+	"tampayang-backend/app/models/entity"
+	"tampayang-backend/core/database"
 )
 
-func GetUserLoginByEmail(userEmail string) entity.UserLogin{
+func GetUserLoginByEmail(userEmail string) entity.UserLogin {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()

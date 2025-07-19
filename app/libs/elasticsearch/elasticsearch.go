@@ -7,19 +7,21 @@ import (
 	"net/http"
 	"strings"
 
+	"tampayang-backend/core/helper"
+
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/nulla-vis/golang-fiber-template/core/helper"
 )
 
 var EsClient *elasticsearch.Client
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 * Nama Fungsi   : InitElasticsearchClient
 * Kegunaan      : RAW ElasticSearch Function
 * Parameter     : -
 * Balikan       : Update variable Client
-*/
+ */
 func InitElasticsearchClient() error {
 	// Your configuration logic here
 	configuration := helper.ConfigJson()
@@ -43,6 +45,7 @@ func InitElasticsearchClient() error {
 	EsClient = client
 	return nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,24 +56,25 @@ func InitElasticsearchClient() error {
 * Balikan       : Bool
 * Dokumentasi :
 *   > Mappings Object : https://www.elastic.co/guide/en/elasticsearch/reference/7.x/mapping.html
-*/
+ */
 func CheckPing() bool {
-    // Use the client's Ping method to check Elasticsearch's availability.
-    res, err := EsClient.Ping()
-    if err != nil {
-        // An error occurred while pinging Elasticsearch, indicating it's not available.
-        return false
-    }
+	// Use the client's Ping method to check Elasticsearch's availability.
+	res, err := EsClient.Ping()
+	if err != nil {
+		// An error occurred while pinging Elasticsearch, indicating it's not available.
+		return false
+	}
 
-    // Check the response status code.
-    if res.StatusCode != http.StatusOK {
-        // Elasticsearch returned a non-OK status code, indicating it's not available.
-        return false
-    }
+	// Check the response status code.
+	if res.StatusCode != http.StatusOK {
+		// Elasticsearch returned a non-OK status code, indicating it's not available.
+		return false
+	}
 
-    // Elasticsearch is available.
-    return true
+	// Elasticsearch is available.
+	return true
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,47 +85,48 @@ func CheckPing() bool {
 * Balikan       : Object
 * Dokumentasi :
 *   > Mappings Object : https://www.elastic.co/guide/en/elasticsearch/reference/7.x/mapping.html
-*/
+ */
 // CreateIndex creates an Elasticsearch index with the specified name and properties.
 func CreateIndex(index string, properties map[string]interface{}) (map[string]interface{}, error) {
-    // Prepare the request body
-    reqBody := map[string]interface{}{
-        "mappings": map[string]interface{}{
-            "properties": properties,
-        },
-    }
+	// Prepare the request body
+	reqBody := map[string]interface{}{
+		"mappings": map[string]interface{}{
+			"properties": properties,
+		},
+	}
 
-    // Create the CreateIndex request
-    req := esapi.IndicesCreateRequest{
-        Index: index,
-        Body:  helper.MakeReader(reqBody), // Serialize the request body to JSON
-    }
+	// Create the CreateIndex request
+	req := esapi.IndicesCreateRequest{
+		Index: index,
+		Body:  helper.MakeReader(reqBody), // Serialize the request body to JSON
+	}
 
-    // Perform the request
-    res, err := req.Do(context.Background(), EsClient)
-    if err != nil {
-        return nil, err
-    }
-    defer res.Body.Close()
+	// Perform the request
+	res, err := req.Do(context.Background(), EsClient)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
 
-    // Read the response body to get more information about the result
-    var responseBody map[string]interface{}
-    if err := json.NewDecoder(res.Body).Decode(&responseBody); err != nil {
-        return nil, err
-    }
+	// Read the response body to get more information about the result
+	var responseBody map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&responseBody); err != nil {
+		return nil, err
+	}
 
-    if res.StatusCode != 200 {
+	if res.StatusCode != 200 {
 		panic(fmt.Sprint(responseBody["error"].(map[string]interface{})["reason"]))
-    }
+	}
 
-    // Prepare the result
-    result := map[string]interface{}{
-        "statusCode": res.StatusCode,
-        "result":     responseBody,
-    }
+	// Prepare the result
+	result := map[string]interface{}{
+		"statusCode": res.StatusCode,
+		"result":     responseBody,
+	}
 
-    return result, nil
+	return result, nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,39 +137,40 @@ func CreateIndex(index string, properties map[string]interface{}) (map[string]in
 * Balikan       : Object
 * Dokumentasi :
 *   > indices.delete : https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_indices_delete
-*/
+ */
 // DeleteIndex deletes an Elasticsearch index by name.
 func DeleteIndex(index string) (map[string]interface{}, error) {
-    // Create the DeleteIndex request
-    req := esapi.IndicesDeleteRequest{
-        Index: []string{index},
-    }
+	// Create the DeleteIndex request
+	req := esapi.IndicesDeleteRequest{
+		Index: []string{index},
+	}
 
-    // Perform the request
-    res, err := req.Do(context.Background(), EsClient)
-    if err != nil {
-        return nil, err
-    }
-    defer res.Body.Close()
+	// Perform the request
+	res, err := req.Do(context.Background(), EsClient)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
 
-    // Read the response body to get more information about the result
-    var responseBody map[string]interface{}
-    if err := json.NewDecoder(res.Body).Decode(&responseBody); err != nil {
-        return nil, err
-    }
+	// Read the response body to get more information about the result
+	var responseBody map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&responseBody); err != nil {
+		return nil, err
+	}
 
 	if res.StatusCode != 200 {
 		panic(fmt.Sprint(responseBody["error"].(map[string]interface{})["reason"]))
-    }
+	}
 
-    // Prepare the result
-    result := map[string]interface{}{
-        "statusCode": res.StatusCode,
-        "result":     "Index deleted successfully",
-    }
+	// Prepare the result
+	result := map[string]interface{}{
+		"statusCode": res.StatusCode,
+		"result":     "Index deleted successfully",
+	}
 
-    return result, nil
+	return result, nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +179,7 @@ func DeleteIndex(index string) (map[string]interface{}, error) {
 * Kegunaan      : untuk membuat index sekaligus menambahkan data kedalam index yang baru dibuat ATAU update data
 * Parameter     : index (string), id (string), data (object)
 * Balikan       : Object
-*/
+ */
 // InsertData inserts data into an Elasticsearch index with the specified ID.
 func InsertData(index string, id string, data map[string]interface{}) (map[string]interface{}, error) {
 	// Serialize the data to JSON
@@ -202,11 +208,11 @@ func InsertData(index string, id string, data map[string]interface{}) (map[strin
 		panic(err)
 	}
 
-    // panic(responseBody)
+	// panic(responseBody)
 
-	if res.StatusCode < 200 || res.StatusCode > 299{
-        // Handle the error here
-        panic(responseBody)
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		// Handle the error here
+		panic(responseBody)
 	}
 
 	// Prepare the result
@@ -217,6 +223,7 @@ func InsertData(index string, id string, data map[string]interface{}) (map[strin
 
 	return result, nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -225,7 +232,7 @@ func InsertData(index string, id string, data map[string]interface{}) (map[strin
 * Kegunaan      : untuk merubah index satu per satu
 * Parameter     : index (string), id (string), data (object)
 * Balikan       : Object
-*/
+ */
 // UpdateIndex updates a document in an Elasticsearch index with the specified ID.
 func UpdateIndex(index string, id string, data map[string]interface{}) (map[string]interface{}, error) {
 	// Serialize the data to JSON
@@ -272,6 +279,7 @@ func UpdateIndex(index string, id string, data map[string]interface{}) (map[stri
 
 	return result, nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,28 +288,29 @@ func UpdateIndex(index string, id string, data map[string]interface{}) (map[stri
 * Kegunaan      : untuk memeriksa apakah ada "index" yang dimaksud
 * Parameter     : index (string)
 * Balikan       : Bool
-*/
+ */
 // IndexExists checks if an index already exists in Elasticsearch.
 func IndexExists(indexName string) (bool, error) {
-    // Create the IndicesExistsRequest
-    req := esapi.IndicesExistsRequest{
-        Index: []string{indexName},
-    }
+	// Create the IndicesExistsRequest
+	req := esapi.IndicesExistsRequest{
+		Index: []string{indexName},
+	}
 
-    // Perform the request
-    res, err := req.Do(context.Background(), EsClient)
-    if err != nil {
-        return false, err
-    }
-    defer res.Body.Close()
+	// Perform the request
+	res, err := req.Do(context.Background(), EsClient)
+	if err != nil {
+		return false, err
+	}
+	defer res.Body.Close()
 
-    // Check the response status code
-    if res.IsError() {
-        return false, nil // Index does not exist
-    }
+	// Check the response status code
+	if res.IsError() {
+		return false, nil // Index does not exist
+	}
 
-    return true, nil // Index exists
+	return true, nil // Index exists
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +319,7 @@ func IndexExists(indexName string) (bool, error) {
 * Kegunaan      : untuk memeriksa apakah ada data / document di "index" dengan "id" yang dimaksud ?
 * Parameter     : index (string), id (string)
 * Balikan       : Bool
-*/
+ */
 // DocumentExists checks if a document with the specified ID exists in the given index.
 func DocumentExists(indexName, documentID string) (bool, error) {
 	// Create the Get request to retrieve the document by ID
@@ -327,12 +336,13 @@ func DocumentExists(indexName, documentID string) (bool, error) {
 	defer res.Body.Close()
 
 	// Check the response status code
-    if res.StatusCode < 200 || res.StatusCode > 299 {
-        return false, nil // Document does not exist
-    }
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		return false, nil // Document does not exist
+	}
 
-    return true, nil
+	return true, nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -341,7 +351,7 @@ func DocumentExists(indexName, documentID string) (bool, error) {
 * Kegunaan      : untuk menghapus data / dokumen dengan  "index" dan "id" yang dimaksud.
 * Parameter     : index (string), id (string)
 * Balikan       : Object
-*/
+ */
 // DeleteDocument deletes a document with the specified ID in the given index.
 func DeleteDocument(indexName, documentID string) (map[string]interface{}, error) {
 	// Create the Delete request to delete the document by ID
@@ -363,9 +373,9 @@ func DeleteDocument(indexName, documentID string) (map[string]interface{}, error
 		return nil, err
 	}
 
-    if res.StatusCode < 200 || res.StatusCode > 299 {
-        panic(responseBody)
-    }
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		panic(responseBody)
+	}
 
 	// Prepare the result
 	result := map[string]interface{}{
@@ -375,6 +385,7 @@ func DeleteDocument(indexName, documentID string) (map[string]interface{}, error
 
 	return result, nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -383,7 +394,7 @@ func DeleteDocument(indexName, documentID string) (map[string]interface{}, error
 * Kegunaan      : untuk mengambil satu dokumen dengan kirim nama index dan id dokumennya.
 * Parameter     : index (string), id (string).
 * Balikan       : Object
-*/
+ */
 // GetDocument retrieves a document from the specified index in Elasticsearch by ID.
 func GetDocument(indexName, documentID string) (map[string]interface{}, error) {
 	// Create the Get request to retrieve the document by ID
@@ -402,7 +413,7 @@ func GetDocument(indexName, documentID string) (map[string]interface{}, error) {
 	// Prepare the result
 	result := map[string]interface{}{
 		"statusCode": res.StatusCode,
-		"resultEs":    make(map[string]interface{}),
+		"resultEs":   make(map[string]interface{}),
 	}
 
 	if res.StatusCode < 200 || res.StatusCode > 299 {
@@ -423,4 +434,5 @@ func GetDocument(indexName, documentID string) (map[string]interface{}, error) {
 
 	return result, nil
 }
+
 // ////////////////////////////////////////////////////////////////////////////////////////////////////

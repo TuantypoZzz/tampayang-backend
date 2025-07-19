@@ -4,14 +4,15 @@ import (
 	"strings"
 	"time"
 
+	"tampayang-backend/app/models"
+	"tampayang-backend/app/models/entity"
+	"tampayang-backend/config/constant"
+	globalFunction "tampayang-backend/core/functions"
+	"tampayang-backend/core/helper"
+	"tampayang-backend/core/response"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nulla-vis/golang-fiber-template/app/models"
-	"github.com/nulla-vis/golang-fiber-template/app/models/entity"
-	"github.com/nulla-vis/golang-fiber-template/config/constant"
-	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
-	"github.com/nulla-vis/golang-fiber-template/core/helper"
-	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
 func Login(ctx *fiber.Ctx) error {

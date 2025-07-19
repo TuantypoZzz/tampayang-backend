@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nulla-vis/golang-fiber-template/config"
-	"github.com/nulla-vis/golang-fiber-template/core/helper"
+	"tampayang-backend/config"
+	"tampayang-backend/core/helper"
 
 	_ "github.com/go-sql-driver/mysql"
 )

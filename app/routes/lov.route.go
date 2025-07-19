@@ -1,8 +1,9 @@
 package routes
 
 import (
+	"tampayang-backend/app/controllers"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/nulla-vis/golang-fiber-template/app/controllers"
 )
 
 func LovRoute(app *fiber.App) {
