@@ -14,8 +14,23 @@ type ReportSummaryRequest struct {
 	EndDate   string `json:"end_date" validate:"dateformat"`
 }
 
-type WeeklyReport struct {
+type ReportWeekly struct {
 	Date  string `json:"date"`
 	Day   string `json:"day"`
 	Total int    `json:"total"`
+}
+
+type ReportMap struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Total     int    `json:"total"`
+	FilterKey string `json:"filter_key"`
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
+}
+
+type ReportMapRequest struct {
+	ProvinceId string `json:"province_id"`
+	RegencyId  string `json:"regency_id"`
+	DistrictId string `json:"district_id"`
 }

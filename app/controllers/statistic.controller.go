@@ -51,7 +51,39 @@ func ReportSummary(ctx *fiber.Ctx) error {
 	return response.SuccessResponse(ctx, summary)
 }
 
-func WeeklyReport(ctx *fiber.Ctx) error {
-	weeklyReport := models.GetWeeklyReport()
-	return response.SuccessResponse(ctx, weeklyReport)
+func ReportWeekly(ctx *fiber.Ctx) error {
+	reportWeekly := models.GetReportWeekly()
+	return response.SuccessResponse(ctx, reportWeekly)
+}
+
+func ReportMap(ctx *fiber.Ctx) error {
+	request := new(entity.ReportMapRequest)
+	if err := ctx.QueryParser(request); err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	err := validation.Validate.Struct(request)
+	if err != nil {
+		return response.ErrorResponse(ctx, fmt.Errorf("validation failed: %w", err))
+	}
+
+	var reportMap []entity.ReportMap
+
+	if request.DistrictId != "" {
+		reportMap = models.GetReportMapVillage(request.DistrictId)
+	}
+
+	if request.RegencyId != "" {
+		reportMap = models.GetReportMapDistrict(request.RegencyId)
+	}
+
+	if request.ProvinceId != "" {
+		reportMap = models.GetReportMapRegency(request.ProvinceId)
+	}
+
+	if request.ProvinceId == "" && request.RegencyId == "" && request.DistrictId == "" {
+		reportMap = models.GetReportMapProvince()
+	}
+
+	return response.SuccessResponse(ctx, reportMap)
 }

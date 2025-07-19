@@ -9,5 +9,6 @@ import (
 
 func StatisticRoute(app *fiber.App) {
 	app.Get("/statistic/report-summary", middlewares.IsLogin, controllers.ReportSummary)
-	app.Get("/statistic/weekly-report", controllers.WeeklyReport)
+	app.Get("/statistic/report-weekly", controllers.ReportWeekly)
+	app.Get("/statistic/report-map", controllers.ReportMap)
 }

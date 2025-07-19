@@ -47,12 +47,12 @@ func GetReportSummary(request entity.ReportSummaryRequest) entity.ReportSummary 
 	return summary
 }
 
-func GetWeeklyReport() []entity.WeeklyReport {
+func GetReportWeekly() []entity.ReportWeekly {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
 
-	var summary []entity.WeeklyReport
+	var summary []entity.ReportWeekly
 
 	sqlQuery := `
 		SELECT
@@ -79,18 +79,205 @@ func GetWeeklyReport() []entity.WeeklyReport {
 	defer result.Close()
 
 	for result.Next() {
-		var weeklyReport entity.WeeklyReport
+		var reportWeekly entity.ReportWeekly
 		err := result.Scan(
-			&weeklyReport.Date,
-			&weeklyReport.Day,
-			&weeklyReport.Total)
-		summary = append(summary, weeklyReport)
+			&reportWeekly.Date,
+			&reportWeekly.Day,
+			&reportWeekly.Total)
+		summary = append(summary, reportWeekly)
 		if err != nil {
 			panic("models - GetWeeklyReport, result.Scan " + err.Error())
 		}
 	}
 	if err := result.Err(); err != nil {
-		panic("models - GetLovInfrastructureCategory, result.Err " + err.Error())
+		panic("models - GetWeeklyReport, result.Err " + err.Error())
 	}
 	return summary
+}
+
+func GetReportMapProvince() []entity.ReportMap {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var locations []entity.ReportMap
+
+	sqlQuery := `
+		SELECT
+    		r.province_id AS id,
+    		l.province_name AS name,
+    		count(1) AS total,
+			'province_id' AS filter_key,
+    		'' AS latitude,
+    		'' AS longitude
+		FROM reports r 
+		INNER JOIN ON provinces l ON l.province_id = r.province_id
+		GROUP BY r.province_id
+		ORDER BY name; 
+	`
+	result, err := db.QueryContext(ctx, sqlQuery)
+	if err != nil {
+		panic("models - GetReportMapProvince, db.QueryContext " + err.Error())
+	}
+	defer result.Close()
+
+	for result.Next() {
+		var location entity.ReportMap
+		err := result.Scan(
+			&location.Id,
+			&location.Name,
+			&location.Total,
+			&location.FilterKey,
+			&location.Latitude,
+			&location.Longitude)
+		locations = append(locations, location)
+		if err != nil {
+			panic("models - GetReportMapProvince, result.Scan " + err.Error())
+		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetReportMapProvince, result.Err " + err.Error())
+	}
+	return locations
+}
+
+func GetReportMapRegency(provinceId string) []entity.ReportMap {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var locations []entity.ReportMap
+
+	sqlQuery := `
+		SELECT
+    		r.regency_id AS id,
+    		l.regency_name AS name,
+    		count(1) AS total,
+			'regency_id' AS filter_key,
+    		'' AS latitude,
+    		'' AS longitude
+		FROM reports r 
+		INNER JOIN ON regencies l ON l.regency_id = r.regency_id
+		WHERE l.province_id = ?
+		GROUP BY r.regency_id
+		ORDER BY name; 
+	`
+	result, err := db.QueryContext(ctx, sqlQuery, provinceId)
+	if err != nil {
+		panic("models - GetReportMapRegency, db.QueryContext " + err.Error())
+	}
+	defer result.Close()
+
+	for result.Next() {
+		var location entity.ReportMap
+		err := result.Scan(
+			&location.Id,
+			&location.Name,
+			&location.Total,
+			&location.FilterKey,
+			&location.Latitude,
+			&location.Longitude)
+		locations = append(locations, location)
+		if err != nil {
+			panic("models - GetReportMapRegency, result.Scan " + err.Error())
+		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetReportMapRegency, result.Err " + err.Error())
+	}
+	return locations
+}
+
+func GetReportMapDistrict(regencyId string) []entity.ReportMap {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var locations []entity.ReportMap
+
+	sqlQuery := `
+		SELECT
+    		r.district_id AS id,
+    		l.district_name AS name,
+    		count(1) AS total,
+			'district_id' AS filter_key,
+    		'' AS latitude,
+    		'' AS longitude
+		FROM reports r 
+		INNER JOIN ON districts l ON l.district_id = r.district_id
+		WHERE l.regency_id = ?
+		GROUP BY r.district_id
+		ORDER BY name; 
+	`
+	result, err := db.QueryContext(ctx, sqlQuery, regencyId)
+	if err != nil {
+		panic("models - GetReportMapDistrict, db.QueryContext " + err.Error())
+	}
+	defer result.Close()
+
+	for result.Next() {
+		var location entity.ReportMap
+		err := result.Scan(
+			&location.Id,
+			&location.Name,
+			&location.Total,
+			&location.FilterKey,
+			&location.Latitude,
+			&location.Longitude)
+		locations = append(locations, location)
+		if err != nil {
+			panic("models - GetReportMapDistrict, result.Scan " + err.Error())
+		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetReportMapDistrict, result.Err " + err.Error())
+	}
+	return locations
+}
+
+func GetReportMapVillage(districtId string) []entity.ReportMap {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var locations []entity.ReportMap
+
+	sqlQuery := `
+		SELECT
+    		r.village_id AS id,
+    		l.village_name AS name,
+    		count(1) AS total,
+			'' AS filter_key,
+    		'' AS latitude,
+    		'' AS longitude
+		FROM reports r 
+		INNER JOIN ON villages l ON l.village_id = r.village_id
+		WHERE l.district_id = ?
+		GROUP BY r.village_id
+		ORDER BY name; 
+	`
+	result, err := db.QueryContext(ctx, sqlQuery, districtId)
+	if err != nil {
+		panic("models - GetReportMapVillage, db.QueryContext " + err.Error())
+	}
+	defer result.Close()
+
+	for result.Next() {
+		var location entity.ReportMap
+		err := result.Scan(
+			&location.Id,
+			&location.Name,
+			&location.Total,
+			&location.FilterKey,
+			&location.Latitude,
+			&location.Longitude)
+		locations = append(locations, location)
+		if err != nil {
+			panic("models - GetReportMapVillage, result.Scan " + err.Error())
+		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetReportMapVillage, result.Err " + err.Error())
+	}
+	return locations
 }
