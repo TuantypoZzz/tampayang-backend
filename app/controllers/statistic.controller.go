@@ -20,11 +20,11 @@ func ReportSummary(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, err)
 	}
 
-	if request.StartDate == "" || ctx.Locals("isLogin") == nil {
+	if request.StartDate == "" || (ctx.Locals("isLogin") != nil && ctx.Locals("isLogin") == false) {
 		request.StartDate = time.Now().Format(constant.NOW_TIME_FORMAT)
 	}
 
-	if request.EndDate == "" || ctx.Locals("isLogin") == nil {
+	if request.EndDate == "" || (ctx.Locals("isLogin") != nil && ctx.Locals("isLogin") == false) {
 		request.EndDate = time.Now().Format(constant.NOW_TIME_FORMAT)
 	}
 
@@ -39,7 +39,7 @@ func ReportSummary(ctx *fiber.Ctx) error {
 
 	summary := models.GetReportSummary(*request)
 
-	if ctx.Locals("isLogin") == nil {
+	if ctx.Locals("isLogin") != nil && ctx.Locals("isLogin") == false {
 		summary = entity.ReportSummary{
 			TotalReport:           summary.TotalReport,
 			TotalReportDone:       summary.TotalReportDone,

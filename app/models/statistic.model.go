@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 
 	"tampayang-backend/app/models/entity"
 	"tampayang-backend/core/database"
@@ -16,16 +17,16 @@ func GetReportSummary(request entity.ReportSummaryRequest) entity.ReportSummary 
 
 	sqlQuery := `
 		SELECT 
-			count(1) AS total_report, 
-			SUM(IF(status = 'done', 1, 0)) AS total_report_done, 
-			SUM(IF(status = 'in_progress', 1, 0)) AS total_report_in_progress, 
-			SUM(IF(status IN ('new', 'verification', 'rejected'), 1, 0)) AS total_report_waiting, 
-			SUM(IF(status = 'new', 1, 0)) AS total_report_new, 
-			SUM(IF(status = 'verification', 1, 0)) AS total_report_verification
+			COUNT(1) AS total_report, 
+			COALESCE(SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END), 0) AS total_report_done,
+			COALESCE(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END), 0) AS total_report_in_progress,
+			COALESCE(SUM(CASE WHEN status IN ('new', 'verification', 'rejected') THEN 1 ELSE 0 END), 0) AS total_report_waiting,
+			COALESCE(SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END), 0) AS total_report_new,
+			COALESCE(SUM(CASE WHEN status = 'verification' THEN 1 ELSE 0 END), 0) AS total_report_verification
 		FROM reports
-		WHERE created_at BEETWEN '?' AND '?' 
+		WHERE created_at BETWEEN ? AND ?
 	`
-	result, err := db.QueryContext(ctx, sqlQuery, request.StartDate, request.EndDate)
+	result, err := db.QueryContext(ctx, sqlQuery, fmt.Sprintf("%s 00:00:00", request.StartDate), fmt.Sprintf("%s 23:59:59", request.EndDate))
 	if err != nil {
 		panic("models - GetReportSummary, db.QueryContext " + err.Error())
 	}
@@ -57,7 +58,7 @@ func GetWeeklyReport() []entity.WeeklyReport {
 		SELECT
     		weekly.day_date AS date,
     		DAYNAME(weekly.day_date) AS day,
-    		COUNT(1) AS total
+    		COUNT(r.created_at) AS total
 		FROM (
 			SELECT CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY AS day_date
 			UNION ALL SELECT CURDATE() - INTERVAL WEEKDAY(CURDATE()) - 1 DAY
@@ -68,7 +69,7 @@ func GetWeeklyReport() []entity.WeeklyReport {
 			UNION ALL SELECT CURDATE() - INTERVAL WEEKDAY(CURDATE()) - 6 DAY
 		) AS weekly
 		LEFT JOIN reports r ON weekly.day_date = DATE(r.created_at)
-		GROUP BY weekly.day_date, day_of_week
+		GROUP BY weekly.day_date, day
 		ORDER BY weekly.day_date; 
 	`
 	result, err := db.QueryContext(ctx, sqlQuery)
