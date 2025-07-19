@@ -56,7 +56,7 @@
 
     "lov001": "Id Kategori tidak boleh kosong",
     "lov002": "Id Kabupaten tidak boleh kosong",
-    "lov003": "Id Kecamatan tidak boleh kosong"
+    "lov003": "Id Kecamatan tidak boleh kosong",
     
-    
+    "date001": "Rentang Tanggal tidak valid"
 }
