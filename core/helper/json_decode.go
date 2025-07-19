@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/nulla-vis/golang-fiber-template/config"
+	"tampayang-backend/config"
 )
 
 func ConfigJson() map[string]interface{} {
@@ -50,11 +50,11 @@ func LangEn() map[string]interface{} {
 
 // MakeReader converts a map to an io.Reader containing JSON data.
 func MakeReader(data map[string]interface{}) io.Reader {
-    // Serialize the data to JSON
-    jsonData, _ := json.Marshal(data)
-    
-    // Create a reader from the JSON data
-    reader := bytes.NewReader(jsonData)
-    
-    return reader
+	// Serialize the data to JSON
+	jsonData, _ := json.Marshal(data)
+
+	// Create a reader from the JSON data
+	reader := bytes.NewReader(jsonData)
+
+	return reader
 }

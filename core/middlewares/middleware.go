@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	"tampayang-backend/config"
+	"tampayang-backend/config/constant"
+	globalFunction "tampayang-backend/core/functions"
+	"tampayang-backend/core/helper"
+	mylogger "tampayang-backend/core/logger"
+	"tampayang-backend/core/response"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/nulla-vis/golang-fiber-template/config"
-	"github.com/nulla-vis/golang-fiber-template/config/constant"
-	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
-	"github.com/nulla-vis/golang-fiber-template/core/helper"
-	mylogger "github.com/nulla-vis/golang-fiber-template/core/logger"
-	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
 func LoadMidleWares(app *fiber.App) {
@@ -24,7 +25,7 @@ func LoadMidleWares(app *fiber.App) {
 	// Custom middleware to recover from panics and send a custom error response
 	app.Use(func(c *fiber.Ctx) error {
 		defer func() {
-			if r := recover(); r != nil {			
+			if r := recover(); r != nil {
 				// Recovered from a panic, send a custom error response
 				errorMessage := fmt.Sprintf("%v", r) // Create a custom error message
 				// Check if r is a map[string]interface{}
@@ -50,7 +51,7 @@ func LoadMidleWares(app *fiber.App) {
 				logData := response.GetLogData(c, errorMessage)
 				mylogger.Error("panic_error", logData)
 				// LOGGER END ------
-				
+
 				c.Status(fiber.StatusInternalServerError).JSON(CustomErrorResponse{
 					Status:     "error",
 					StatusCode: fiber.StatusInternalServerError,
@@ -123,8 +124,7 @@ func Auth(ctx *fiber.Ctx) error {
 	if ctx.Locals("userInfo") == nil {
 		ctx.Locals("userInfo", claims)
 	}
-	
-	
+
 	return ctx.Next()
 }
 
@@ -160,16 +160,15 @@ func AuthCookie(ctx *fiber.Ctx) error {
 	}
 
 	ctx.Locals("userInfo", claims)
-	
+
 	return ctx.Next()
 }
-
 
 func IsLogin(ctx *fiber.Ctx) error {
 	// Set initial value for isLogin validation
 	isLogin := false
 	// Check if user already has a valid JWT cookie
-	jwtCookie := ctx.Cookies(constant.JWT_COOKIE_NAME);
+	jwtCookie := ctx.Cookies(constant.JWT_COOKIE_NAME)
 	if jwtCookie != "" {
 		// User is already logged in
 		isLogin = true

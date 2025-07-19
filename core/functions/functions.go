@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	// "github.com/nulla-vis/golang-fiber-template/config/constant"
-	"github.com/nulla-vis/golang-fiber-template/config/constant"
-	"github.com/nulla-vis/golang-fiber-template/core/helper"
+	// "tampayang-backend/config/constant"
+	"tampayang-backend/config/constant"
+	"tampayang-backend/core/helper"
 )
 
 func GetMessage(code string, replacements interface{}) map[string]interface{} {
@@ -234,4 +234,27 @@ func IsValidEmail(email string) bool {
 
 	// Use the regular expression to match the email
 	return regex.MatchString(email)
+}
+
+func IsValidDateRange(startDate string, endDate string) bool {
+	const dateFormat = "2006-01-02"
+
+	// Step 1: Validate the format of the start date.
+	start, err := time.Parse(dateFormat, startDate)
+	if err != nil {
+		return false
+	}
+
+	// Step 2: Validate the format of the end date.
+	end, err := time.Parse(dateFormat, endDate)
+	if err != nil {
+		return false
+	}
+
+	// Step 3: Check if the start date is before or equal to the end date.
+	if start.After(end) {
+		return false
+	}
+
+	return true
 }

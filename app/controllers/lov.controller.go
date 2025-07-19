@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"tampayang-backend/app/models"
+	globalFunction "tampayang-backend/core/functions"
+	"tampayang-backend/core/response"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/nulla-vis/golang-fiber-template/app/models"
-	globalFunction "github.com/nulla-vis/golang-fiber-template/core/functions"
-	"github.com/nulla-vis/golang-fiber-template/core/response"
 )
 
 func InfrastructureCategory(ctx *fiber.Ctx) error {
