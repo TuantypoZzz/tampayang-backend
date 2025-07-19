@@ -1,0 +1,57 @@
+package controllers
+
+import (
+	"fmt"
+	"time"
+
+	"tampayang-backend/app/models"
+	"tampayang-backend/app/models/entity"
+	"tampayang-backend/config/constant"
+	globalFunction "tampayang-backend/core/functions"
+	"tampayang-backend/core/response"
+	"tampayang-backend/core/validation"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+func ReportSummary(ctx *fiber.Ctx) error {
+	request := new(entity.ReportSummaryRequest)
+	if err := ctx.QueryParser(request); err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	if request.StartDate == "" || ctx.Locals("isLogin") == nil {
+		request.StartDate = time.Now().Format(constant.NOW_TIME_FORMAT)
+	}
+
+	if request.EndDate == "" || ctx.Locals("isLogin") == nil {
+		request.EndDate = time.Now().Format(constant.NOW_TIME_FORMAT)
+	}
+
+	err := validation.Validate.Struct(request)
+	if err != nil {
+		return response.ErrorResponse(ctx, fmt.Errorf("validation failed: %w", err))
+	}
+
+	if !globalFunction.IsValidDateRange(request.StartDate, request.EndDate) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("date001", nil))
+	}
+
+	summary := models.GetReportSummary(*request)
+
+	if ctx.Locals("isLogin") == nil {
+		summary = entity.ReportSummary{
+			TotalReport:           summary.TotalReport,
+			TotalReportDone:       summary.TotalReportDone,
+			TotalReportInProgress: summary.TotalReportInProgress,
+			TotalReportWaiting:    summary.TotalReportWaiting,
+		}
+	}
+
+	return response.SuccessResponse(ctx, summary)
+}
+
+func WeeklyReport(ctx *fiber.Ctx) error {
+	weeklyReport := models.GetWeeklyReport()
+	return response.SuccessResponse(ctx, weeklyReport)
+}

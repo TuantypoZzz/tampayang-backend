@@ -55,5 +55,7 @@
 
     "lov001": "Category Id cannot be empty",
     "lov002": "Regency Id cannot be empty",
-    "lov003": "District Id cannot be empty"
+    "lov003": "District Id cannot be empty",
+    
+    "date001": "Date range is invalid"
 }   
