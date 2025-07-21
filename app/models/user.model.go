@@ -14,7 +14,7 @@ func GetUserLoginByEmail(userEmail string) entity.UserLogin {
 
 	var userLogin entity.UserLogin
 
-	sqlQuery := "SELECT usr.user_id, usr.user_name, usr.user_email, usr.user_password, usr.user_role FROM user AS usr WHERE usr.user_email = ?"
+	sqlQuery := "SELECT usr.user_id, usr.user_name, usr.user_email, usr.user_password, usr.user_role FROM users AS usr WHERE usr.user_email = ?"
 	result, err := db.QueryContext(ctx, sqlQuery, userEmail)
 	if err != nil {
 		panic("models - GetUserLoginByEmail, db.QueryContext " + err.Error())

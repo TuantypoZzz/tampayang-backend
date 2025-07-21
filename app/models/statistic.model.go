@@ -17,14 +17,14 @@ func GetReportSummary(request entity.ReportSummaryRequest) entity.ReportSummary 
 
 	sqlQuery := `
 		SELECT 
-			COUNT(1) AS total_report, 
-			COALESCE(SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END), 0) AS total_report_done,
-			COALESCE(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END), 0) AS total_report_in_progress,
-			COALESCE(SUM(CASE WHEN status IN ('new', 'verification', 'rejected') THEN 1 ELSE 0 END), 0) AS total_report_waiting,
-			COALESCE(SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END), 0) AS total_report_new,
-			COALESCE(SUM(CASE WHEN status = 'verification' THEN 1 ELSE 0 END), 0) AS total_report_verification
+			count(1) AS total_report, 
+			SUM(IF(status = 'done', 1, 0)) AS total_report_done, 
+			SUM(IF(status = 'in_progress', 1, 0)) AS total_report_in_progress, 
+			SUM(IF(status IN ('baru', 'verification', 'rejected'), 1, 0)) AS total_report_waiting, 
+			SUM(IF(status = 'baru', 1, 0)) AS total_report_new, 
+			SUM(IF(status = 'verification', 1, 0)) AS total_report_verification
 		FROM reports
-		WHERE created_at BETWEEN ? AND ?
+		WHERE created_at BETWEEN ? AND ? 
 	`
 	result, err := db.QueryContext(ctx, sqlQuery, fmt.Sprintf("%s 00:00:00", request.StartDate), fmt.Sprintf("%s 23:59:59", request.EndDate))
 	if err != nil {
@@ -108,10 +108,10 @@ func GetReportMapProvince() []entity.ReportMap {
     		l.province_name AS name,
     		count(1) AS total,
 			'province_id' AS filter_key,
-    		'' AS latitude,
-    		'' AS longitude
+    		l.latitude AS latitude,
+    		l.longitude AS longitude
 		FROM reports r 
-		INNER JOIN ON provinces l ON l.province_id = r.province_id
+		INNER JOIN provinces l ON l.province_id = r.province_id
 		GROUP BY r.province_id
 		ORDER BY name; 
 	`
@@ -154,10 +154,10 @@ func GetReportMapRegency(provinceId string) []entity.ReportMap {
     		l.regency_name AS name,
     		count(1) AS total,
 			'regency_id' AS filter_key,
-    		'' AS latitude,
-    		'' AS longitude
+    		l.latitude AS latitude,
+    		l.longitude AS longitude
 		FROM reports r 
-		INNER JOIN ON regencies l ON l.regency_id = r.regency_id
+		INNER JOIN regencies l ON l.regency_id = r.regency_id
 		WHERE l.province_id = ?
 		GROUP BY r.regency_id
 		ORDER BY name; 
@@ -201,10 +201,10 @@ func GetReportMapDistrict(regencyId string) []entity.ReportMap {
     		l.district_name AS name,
     		count(1) AS total,
 			'district_id' AS filter_key,
-    		'' AS latitude,
-    		'' AS longitude
+    		l.latitude AS latitude,
+    		l.longitude AS longitude
 		FROM reports r 
-		INNER JOIN ON districts l ON l.district_id = r.district_id
+		INNER JOIN districts l ON l.district_id = r.district_id
 		WHERE l.regency_id = ?
 		GROUP BY r.district_id
 		ORDER BY name; 
@@ -248,10 +248,10 @@ func GetReportMapVillage(districtId string) []entity.ReportMap {
     		l.village_name AS name,
     		count(1) AS total,
 			'' AS filter_key,
-    		'' AS latitude,
-    		'' AS longitude
+    		l.latitude AS latitude,
+    		l.longitude AS longitude
 		FROM reports r 
-		INNER JOIN ON villages l ON l.village_id = r.village_id
+		INNER JOIN villages l ON l.village_id = r.village_id
 		WHERE l.district_id = ?
 		GROUP BY r.village_id
 		ORDER BY name; 

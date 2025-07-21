@@ -30,7 +30,7 @@ type ReportMap struct {
 }
 
 type ReportMapRequest struct {
-	ProvinceId string `json:"province_id"`
-	RegencyId  string `json:"regency_id"`
-	DistrictId string `json:"district_id"`
+	ProvinceId string `query:"province_id"`
+	RegencyId  string `query:"regency_id"`
+	DistrictId string `query:"district_id"`
 }
