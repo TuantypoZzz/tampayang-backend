@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -257,4 +258,26 @@ func IsValidDateRange(startDate string, endDate string) bool {
 	}
 
 	return true
+}
+
+const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+// GenerateReportNumber membuat nomor laporan unik dengan format RPT-YYYYMMDD-XXXXXX.
+// Contoh: RPT-20250719-A1B2C3
+func GenerateReportNumber() string {
+	// 1. Dapatkan tanggal hari ini dalam format YYYYMMDD.
+	// Format "20060102" adalah cara standar di Go untuk mendefinisikan YYYYMMDD.
+	datePart := time.Now().Format("20060102")
+
+	// 2. Buat bagian acak sebanyak 6 karakter.
+	// Penting: Inisialisasi (seed) generator angka acak agar hasilnya selalu berbeda.
+	rand.Seed(time.Now().UnixNano())
+
+	randomPart := make([]byte, 6)
+	for i := range randomPart {
+		randomPart[i] = charset[rand.Intn(len(charset))]
+	}
+
+	// 3. Gabungkan semua bagian menjadi satu string.
+	return fmt.Sprintf("RPT-%s-%s", datePart, string(randomPart))
 }

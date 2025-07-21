@@ -6,6 +6,8 @@
     "err003": "Path tidak ditemukan",
     "err004": "Tidak boleh mengandung spasi di awal atau akhir",
     "err005": "Nomor telepon tidak valid",
+    "err006": "Gagal menyimpan data",
+    "err007": "gagal menyimpan gambar",
 
     "sys001": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer service",
     "sys002": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer %s",
@@ -56,6 +58,26 @@
     "lov001": "Id Kategori tidak boleh kosong",
     "lov002": "Id Kabupaten tidak boleh kosong",
     "lov003": "Id Kecamatan tidak boleh kosong",
+
+    "rpt001": "Nama Reporter tidak boleh kosong",
+    "rpt002": "Nomor telepon Reporter tidak boleh kosong",
+    "rpt003": "Kategori Infrastruktur tidak boleh kosong",
+    "rpt004": "Kategori Infrastruktur tidak ditemukan",
+    "rpt005": "Jenis Kerusakan tidak boleh kosong",
+    "rpt006": "Jenis Kerusakan tidak ditemukan",
+    "rpt007": "Provinsi tidak boleh kosong",
+    "rpt008": "Provinsi tidak ditemukan",
+    "rpt009": "Kab/Kota tidak boleh kosong",
+    "rpt010": "Kab/Kota tidak ditemukan",
+    "rpt011": "Kecamatan tidak boleh kosong",
+    "rpt012": "Kecamatan tidak ditemukan",
+    "rpt013": "Desa/Kelurahan tidak boleh kosong",
+    "rpt014": "Desa/Kelurahan tidak ditemukan",
+    "rpt015": "Format latitude tidak valid",
+    "rpt016": "Format longitude tidak valid",
+    "rpt017": "Jumlah gambar yang diunggah tidak boleh lebih dari 3.",
+    "rpt018": "Ukuran setiap gambar tidak boleh melebihi 5MB.",
+    "rpt019": "Format gambar tidak valid. Hanya format JPEG, PNG, GIF, dan WEBP yang diizinkan.",
     
     "date001": "Rentang Tanggal tidak valid"
 }

@@ -3,7 +3,7 @@ package response
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"strings"
 
 	mylogger "tampayang-backend/core/logger"
 
@@ -32,55 +32,49 @@ let getLogData = (req, data) => {
 
 */
 
-func GetLogData(ctx *fiber.Ctx, data interface{}) string {
-	var queryData, reqHeadersData, bodyData, logData string
-	for key, value := range ctx.Queries() {
-		queryData += fmt.Sprintf("%s: %s,", key, value)
-	}
-	for key, value := range ctx.GetReqHeaders() {
-		reqHeadersData += fmt.Sprintf("%s: %s,", key, value)
-	}
-	if len(ctx.Body()) != 0 {
-		var buf bytes.Buffer
-		if err := json.Compact(&buf, ctx.Body()); err != nil {
-			panic("response - GetLogData, json.Compact: " + err.Error())
+func GetLogData(ctx *fiber.Ctx, responseData interface{}) string {
+	var bodyData string
+
+	// Periksa apakah ada body dalam request
+	if len(ctx.Body()) > 0 {
+		// Periksa Content-Type header
+		contentType := ctx.Get(fiber.HeaderContentType)
+
+		if strings.Contains(contentType, fiber.MIMEApplicationJSON) {
+			// Jika body adalah JSON, kita coba 'compact' agar rapi di log
+			var buf bytes.Buffer
+			if err := json.Compact(&buf, ctx.Body()); err == nil {
+				bodyData = buf.String()
+			} else {
+				// Jika gagal, catat sebagai string mentah
+				bodyData = string(ctx.Body())
+			}
+		} else {
+			// Jika BUKAN JSON (misalnya: form-data), catat sebagai string mentah
+			bodyData = string(ctx.Body())
 		}
-		// Convert the buffer to a string
-		bodyData = buf.String()
-
-		// Unmarshal the JSON string into a map
-		var jsonData map[string]interface{}
-		if err := json.Unmarshal([]byte(bodyData), &jsonData); err != nil {
-			panic("response - GetLogData, json.Compact: " + err.Error())
-		}
-
-		// Marshal the map back into a string without escape characters
-		updatedJSONStr, err := json.Marshal(jsonData)
-		if err != nil {
-			panic("response - GetLogData, json.Compact: " + err.Error())
-		}
-
-		// Convert the JSON byte slice to a string
-		bodyData = string(updatedJSONStr)
-	} else {
-		bodyData = ""
 	}
 
-	log := map[string]interface{}{
-		"ipAddress":     ctx.IP(),
-		"route":         ctx.Path(),
-		"method":        ctx.Method(),
-		"headers":       string(reqHeadersData),
-		"params":        convertLoggerData(ctx.AllParams()),
-		"body":          bodyData,
-		"query":         string(queryData),
-		"response_data": convertLoggerData(data),
+	// Siapkan map untuk data log yang terstruktur
+	logMap := map[string]interface{}{
+		"ipAddress":    ctx.IP(),
+		"route":        ctx.Path(),
+		"method":       ctx.Method(),
+		"headers":      ctx.GetReqHeaders(), // Simpan sebagai map, bukan string
+		"params":       ctx.AllParams(),
+		"body":         bodyData,
+		"query":        ctx.Queries(),
+		"responseData": responseData, // Data respons dari handler
 	}
 
-	for key, value := range log {
-		logData += fmt.Sprintf("%s: %s,", key, value)
+	// Ubah seluruh map log menjadi satu string JSON
+	logBytes, err := json.Marshal(logMap)
+	if err != nil {
+		// Fallback jika proses marshal gagal
+		return `{"error": "failed to marshal log data"}`
 	}
-	return string(logData)
+
+	return string(logBytes)
 }
 
 func SuccessResponse(ctx *fiber.Ctx, data interface{}) error {

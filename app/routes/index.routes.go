@@ -8,4 +8,5 @@ func RouteInit(app *fiber.App) {
 	AuthRoute(app)
 	LovRoute(app)
 	StatisticRoute(app)
+	ReportRoute(app)
 }

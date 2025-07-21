@@ -6,6 +6,8 @@
     "err003": "Path not found",
     "err004": "Must not contain spaces at the beginning or end",
     "err005": "Phone number is invalid",
+    "err006": "Failed to save data",
+    "err007": "Failed to save image",
 
     "sys001": "Something wrong with our %s. Please try again or contact customer service",
     "sys002": "Something wrong with our %s. Please try again or contact customer %s",
@@ -56,6 +58,26 @@
     "lov001": "Category Id cannot be empty",
     "lov002": "Regency Id cannot be empty",
     "lov003": "District Id cannot be empty",
-    
+
+    "rpt001": "Reporter name cannot be empty",
+    "rpt002": "Reporter phone number cannot be empty",
+    "rpt003": "Infrastructure Category cannot be empty",
+    "rpt004": "Infrastructure Category not found",
+    "rpt005": "Damage Type cannot be empty",
+    "rpt006": "Damage Type not found",
+    "rpt007": "Province cannot be empty",
+    "rpt008": "Province not found",
+    "rpt009": "Regency/City cannot be empty",
+    "rpt010": "Regency/City not found",
+    "rpt011": "District cannot be empty",
+    "rpt012": "District not found",
+    "rpt013": "Village/Sub-district cannot be empty",
+    "rpt014": "Village/Sub-district not found",
+    "rpt015": "Latitude format is invalid",
+    "rpt016": "Longitude format is invalid",
+    "rpt017": "The number of uploaded images cannot exceed 3.",
+    "rpt018": "Each image size cannot exceed 5MB.",
+    "rpt019": "Image format is invalid. Only JPEG, PNG, GIF, and WEBP formats are allowed",
+
     "date001": "Date range is invalid"
 }   
