@@ -55,7 +55,52 @@ type ReportPhoto struct {
 	FileSize         int64     `json:"file_size"`
 	MimeType         string    `json:"mime_type"`
 	IsMain           bool      `json:"is_main"`
-	UploadedAt       time.Time `json:"uploaded_at"`
+	UploadedAt       string    `json:"uploaded_at"`
+}
+
+type UrgencyReportRequest struct {
+	ReportNumber   string `json:"report_number"`
+	DamageTypeName string `json:"damage_type_name"`
+	VillageName    string `json:"village_name"`
+	UrgencyLevel   string `json:"urgency_level"`
+}
+
+type ManageReport struct {
+	ReportNumber               string `json:"report_number"`
+	CreatedAt                  string `json:"created_at"`
+	ReporterName               string `json:"reporter_name"`
+	InfrastructureCategoryName string `json:"infrastructure_category_name"`
+	VillageName                string `json:"village_name"`
+	Status                     string `json:"status"`
+}
+
+type DetailReport struct {
+	ReportID                   string        `json:"report_id"`
+	ReportNumber               string        `json:"report_number"`
+	ReporterName               string        `json:"reporter_name"`
+	ReporterPhone              string        `json:"reporter_phone"`
+	InfrastructureCategoryName string        `json:"infrastructure_category_name"`
+	DamageTypeName             string        `json:"damage_type_name"`
+	DistrictName               string        `json:"district_name"`
+	VillageName                string        `json:"village_name"`
+	Description                string        `json:"description"`
+	Status                     string        `json:"status"`
+	UrgencyLevel               string        `json:"urgency_level"`
+	Latitude                   float64       `json:"latitude"`
+	Longitude                  float64       `json:"longitude"`
+	CreatedAt                  string        `json:"created_at"`
+	Photos                     []ReportPhoto `json:"photos"`
+}
+
+type UpdateReport struct {
+	Status                  string `json:"status"`
+	PicName                 string `json:"pic_name"`
+	PicPhone                string `json:"pic_phone"`
+	AdminNotes              string `json:"admin_notes"`
+	CompletionNotes         string `json:"completion_notes"`
+	EstimatedCompletionDate string `json:"estimated_completion_date"`
+	ComletedAt              string `json:"completed_at"`
+	UpdatedAt               string `json:"updated_at"`
 }
 
 func ValidateNewReport(newReport *Report) error {

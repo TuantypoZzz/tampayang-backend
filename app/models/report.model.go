@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -89,4 +90,277 @@ func InsertReportPhoto(ctx context.Context, photo *entity.ReportPhoto) error {
 	}
 
 	return nil
+}
+
+func GetUrgentlyReport() []entity.UrgencyReportRequest {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var reports []entity.UrgencyReportRequest
+
+	sqlQuery := `
+		SELECT 
+			r.report_number,
+			d.name,
+			v.village_name,
+			r.urgency_level
+		FROM reports r
+		INNER JOIN damage_types d ON d.damage_type_id = r.damage_type_id
+		INNER JOIN villages v ON v.village_id = r.village_id
+		ORDER BY r.urgency_level DESC,r.report_number DESC;
+	`
+
+	result, err := db.QueryContext(ctx, sqlQuery)
+	if err != nil {
+		panic("models - GetUrgentlyReport, db.QueryContext " + err.Error())
+	}
+	defer result.Close()
+
+	for result.Next() {
+		var urgentlyReport entity.UrgencyReportRequest
+		err := result.Scan(
+			&urgentlyReport.ReportNumber,
+			&urgentlyReport.DamageTypeName,
+			&urgentlyReport.VillageName,
+			&urgentlyReport.UrgencyLevel)
+		reports = append(reports, urgentlyReport)
+		if err != nil {
+			panic("models - GetUrgentlyReport, result.Scan " + err.Error())
+		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetUrgentlyReport, result.Err " + err.Error())
+	}
+	return reports
+}
+
+func GetManageReport(keyword, year, infCategory, status string, page int, limit int) ([]entity.ManageReport, int64, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var category []entity.ManageReport
+	var total int64
+	args := []interface{}{}
+
+	query := `
+	SELECT 
+		r.report_number,
+		DATE_FORMAT(r.created_at, '%m-%d') AS created_at,
+		r.reporter_name,
+		i.name,
+		v.village_name,
+		r.status,
+		COUNT(*) OVER() as total_rows
+	FROM reports r
+	INNER JOIN infrastructure_categories i ON i.infrastructure_category_id = r.infrastructure_category_id
+	INNER JOIN villages v ON v.village_id = r.village_id
+	WHERE 1=1
+	`
+	if keyword != "" {
+		query += ` AND (
+				LOWER(r.report_number) LIKE LOWER(?) OR
+				LOWER(r.reporter_name) LIKE LOWER(?) OR
+				LOWER(i.name) LIKE LOWER(?) OR
+				LOWER(v.village_name) LIKE LOWER(?)
+			)`
+		searchPattern := "%" + keyword + "%"
+		args = append(args, searchPattern, searchPattern, searchPattern, searchPattern)
+	}
+
+	if year != "" {
+		query += " AND YEAR(r.created_at) = ?"
+		args = append(args, year)
+	}
+
+	if infCategory != "" {
+		query += " AND i.infrastructure_category_id = ?"
+		args = append(args, infCategory)
+	}
+
+	if status != "" {
+		query += " AND LOWER(r.status) = LOWER(?)"
+		args = append(args, status)
+	}
+
+	query += " ORDER BY r.report_number ASC,r.created_at DESC, r.status ASC LIMIT ? OFFSET ?"
+	args = append(args, limit, (page-1)*limit)
+
+	rows, err := db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cat entity.ManageReport
+
+		err := rows.Scan(
+			&cat.ReportNumber,
+			&cat.CreatedAt,
+			&cat.ReporterName,
+			&cat.InfrastructureCategoryName,
+			&cat.VillageName,
+			&cat.Status,
+			&total,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		category = append(category, cat)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, 0, err
+	}
+
+	return category, total, nil
+}
+
+func GetReportPhotos(reportId string) ([]entity.ReportPhoto, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	query := `
+	SELECT 
+		rp.report_photo_id,
+		rp.report_id,
+		rp.filename,
+		rp.original_filename,
+		rp.file_path,
+		rp.file_size,
+		rp.mime_type,
+		rp.is_main,
+		rp.uploaded_at
+	FROM report_photos rp
+	JOIN reports r ON r.report_id = rp.report_id
+	WHERE r.report_id = ?
+	`
+
+	rows, err := db.QueryContext(ctx, query, reportId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var photos []entity.ReportPhoto
+	for rows.Next() {
+		var photo entity.ReportPhoto
+		err := rows.Scan(
+			&photo.ReportPhotoID,
+			&photo.ReportID,
+			&photo.Filename,
+			&photo.OriginalFilename,
+			&photo.FilePath,
+			&photo.FileSize,
+			&photo.MimeType,
+			&photo.IsMain,
+			&photo.UploadedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		photos = append(photos, photo)
+	}
+
+	return photos, nil
+}
+
+func GetDetailReport(reportId string) (entity.DetailReport, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var detailReport entity.DetailReport
+
+	query := `
+	SELECT 
+		r.report_id,
+		r.report_number,
+		r.created_at,
+		r.reporter_name,
+		r.reporter_phone,
+		i.name AS category,
+		d.name AS type,
+		v.village_name,
+		s.district_name,
+		r.status,
+		r.latitude,
+		r.longitude,
+		r.urgency_level,
+		r.description
+	FROM reports r
+	JOIN infrastructure_categories i ON i.infrastructure_category_id = r.infrastructure_category_id
+	JOIN damage_types d ON d.damage_type_id = r.damage_type_id
+	JOIN districts s ON s.district_id = r.district_id
+	JOIN villages v ON v.village_id = r.village_id
+	WHERE r.report_id = ?
+	`
+	err := db.QueryRowContext(ctx, query, reportId).Scan(
+		&detailReport.ReportID,
+		&detailReport.ReportNumber,
+		&detailReport.CreatedAt,
+		&detailReport.ReporterName,
+		&detailReport.ReporterPhone,
+		&detailReport.InfrastructureCategoryName,
+		&detailReport.DamageTypeName,
+		&detailReport.VillageName,
+		&detailReport.DistrictName,
+		&detailReport.Status,
+		&detailReport.Latitude,
+		&detailReport.Longitude,
+		&detailReport.UrgencyLevel,
+		&detailReport.Description,
+	)
+	if err != nil {
+		return detailReport, err
+	}
+
+	photos, err := GetReportPhotos(reportId)
+	if err != nil && err != sql.ErrNoRows {
+		return detailReport, err
+	}
+	if photos != nil {
+		detailReport.Photos = photos
+	}
+	return detailReport, nil
+}
+
+func UpdateReport(reportId string, data entity.UpdateReport) (entity.UpdateReport, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	query := `
+        UPDATE reports 
+        SET 
+			status = ?,
+            pic_name = ?,
+            pic_contact = ?,
+            admin_notes = ?,
+            completion_notes = ?,
+            estimated_completion = ?,
+            completed_at = ?,
+            updated_at = ?
+        WHERE report_id = ?
+    `
+
+	_, err := db.ExecContext(ctx, query,
+		data.Status,
+		data.PicName,
+		data.PicPhone,
+		data.AdminNotes,
+		data.CompletionNotes,
+		data.EstimatedCompletionDate,
+		data.ComletedAt,
+		data.UpdatedAt,
+		reportId)
+
+	if err != nil {
+		return data, err
+	}
+	return data, nil
 }

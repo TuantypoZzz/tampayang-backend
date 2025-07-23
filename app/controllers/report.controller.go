@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"tampayang-backend/app/models"
 	"tampayang-backend/app/models/entity"
+	"tampayang-backend/config/constant"
 	globalFunction "tampayang-backend/core/functions"
 	"tampayang-backend/core/response"
 
@@ -19,22 +21,18 @@ const (
 	UploadReportPhoto = "./public/uploads/reportphotos"
 )
 
-func CreateReports(ctx *fiber.Ctx) error {
+func CreateReport(ctx *fiber.Ctx) error {
 	latStr := ctx.FormValue("latitude", "0.0")
 	lonStr := ctx.FormValue("longitude", "0.0")
 
-	// Pastikan direktori upload ada
 	if err := os.MkdirAll(UploadReportPhoto, os.ModePerm); err != nil {
 		return response.ErrorResponse(ctx, "Gagal membuat direktori upload")
 	}
 
-	// Ambil file gambar dari form-data dengan key "report_images"
 	form, err := ctx.MultipartForm()
 	if err != nil {
-		// Tangani jika format form bukan multipart
 		return response.ErrorResponse(ctx, "Format request tidak valid")
 	}
-	// Dapatkan semua file dari field 'report_images'
 	files := form.File["report_images"]
 
 	newReport := &entity.Report{
@@ -58,7 +56,6 @@ func CreateReports(ctx *fiber.Ctx) error {
 		ReportImages:             files,
 	}
 
-	// Validasi semua data, termasuk gambar
 	if err := entity.ValidateNewReport(newReport); err != nil {
 		errorCode := err.Error()
 		return response.ErrorResponse(ctx, globalFunction.GetMessage(errorCode, nil))
@@ -69,16 +66,13 @@ func CreateReports(ctx *fiber.Ctx) error {
 	}
 
 	for i, file := range newReport.ReportImages {
-		// Buat nama file unik
 		fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(file.Filename))
 		savePath := filepath.Join(UploadReportPhoto, fileName)
 
-		// Simpan file fisik ke disk
 		if err := ctx.SaveFile(file, savePath); err != nil {
 			return response.ErrorResponse(ctx, globalFunction.GetMessage("err007", nil))
 		}
 
-		// Siapkan data metadata untuk disimpan ke DB
 		photoData := &entity.ReportPhoto{
 			ReportPhotoID:    uuid.New(),
 			ReportID:         newReport.ReportId,
@@ -98,5 +92,110 @@ func CreateReports(ctx *fiber.Ctx) error {
 	newReport.ReportImages = nil
 
 	return response.SuccessResponse(ctx, newReport)
+}
 
+func UrgencyReport(ctx *fiber.Ctx) error {
+	urgentlyReport := models.GetUrgentlyReport()
+	return response.SuccessResponse(ctx, urgentlyReport)
+}
+
+func ManageReport(ctx *fiber.Ctx) error {
+	keyword := ctx.Query("keyword", "")
+	page, _ := strconv.Atoi(ctx.Query("page", "1"))
+	limit, _ := strconv.Atoi(ctx.Query("limit", "10"))
+	year := ctx.Query("year", "")
+	infCategory := ctx.Query("category", "")
+	status := ctx.Query("status", "")
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+
+	ManageReport, total, err := models.GetManageReport(keyword, year, infCategory, status, page, limit)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	return response.SuccessResponse(ctx, fiber.Map{
+		"data": ManageReport,
+		"pagination": fiber.Map{
+			"total": total,
+			"page":  page,
+			"limit": limit,
+		},
+	})
+}
+
+func DetailReport(ctx *fiber.Ctx) error {
+	reportId := ctx.Query("report_id")
+	if globalFunction.IsEmpty(reportId) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
+	}
+
+	details, err := models.GetDetailReport(reportId)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	// Cek apakah data ditemukan
+	if globalFunction.IsEmpty(details.ReportNumber) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err003", nil))
+	}
+
+	return response.SuccessResponse(ctx, details)
+}
+
+func UpdateReport(ctx *fiber.Ctx) error {
+	reportId := ctx.Params("report_id")
+	reports := new(entity.UpdateReport)
+	if err := ctx.BodyParser(reports); err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	if globalFunction.IsEmpty(reportId) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err002", nil))
+	}
+
+	dbResult, err := models.GetDetailReport(reportId)
+	if err != nil {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
+	}
+	if dbResult.ReportID == "" {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err006", nil))
+	}
+
+	if globalFunction.IsEmpty(reports.Status) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("rpt020", nil))
+	}
+
+	if globalFunction.IsEmpty(reports.PicName) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("rpt021", nil))
+	}
+	if globalFunction.IsEmpty(reports.PicPhone) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("rpt022", nil))
+	}
+
+	now := time.Now()
+	updated_date := now.Format(constant.NOW_DATE_TIME_FORMAT)
+
+	updateData := entity.UpdateReport{
+		Status:                  reports.Status,
+		PicName:                 reports.PicName,
+		PicPhone:                reports.PicPhone,
+		AdminNotes:              reports.AdminNotes,
+		CompletionNotes:         reports.CompletionNotes,
+		EstimatedCompletionDate: reports.EstimatedCompletionDate,
+		ComletedAt:              reports.ComletedAt,
+		UpdatedAt:               updated_date,
+	}
+
+	updateResult, err := models.UpdateReport(reportId, updateData)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	return response.SuccessResponse(ctx, updateResult)
 }

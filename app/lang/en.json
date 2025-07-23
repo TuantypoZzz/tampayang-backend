@@ -8,6 +8,8 @@
     "err005": "Phone number is invalid",
     "err006": "Failed to save data",
     "err007": "Failed to save image",
+    "err008": "Id not found",
+
 
     "sys001": "Something wrong with our %s. Please try again or contact customer service",
     "sys002": "Something wrong with our %s. Please try again or contact customer %s",
@@ -78,6 +80,9 @@
     "rpt017": "The number of uploaded images cannot exceed 3.",
     "rpt018": "Each image size cannot exceed 5MB.",
     "rpt019": "Image format is invalid. Only JPEG, PNG, GIF, and WEBP formats are allowed",
+    "rpt020": "Status cannot be empty.",
+    "rpt021": "PIC name cannot be empty.",
+    "rpt022": "PIC phone number cannot be empty.",
 
     "date001": "Date range is invalid"
 }   

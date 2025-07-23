@@ -8,6 +8,7 @@
     "err005": "Nomor telepon tidak valid",
     "err006": "Gagal menyimpan data",
     "err007": "gagal menyimpan gambar",
+    "err008": "Id tidak ditemukan",
 
     "sys001": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer service",
     "sys002": "Terjadi sesuatu pada %s kami. Mohon coba lagi atau hubungi customer %s",
@@ -78,6 +79,9 @@
     "rpt017": "Jumlah gambar yang diunggah tidak boleh lebih dari 3.",
     "rpt018": "Ukuran setiap gambar tidak boleh melebihi 5MB.",
     "rpt019": "Format gambar tidak valid. Hanya format JPEG, PNG, GIF, dan WEBP yang diizinkan.",
+    "rpt020": "Status tidak bisa kosong.",
+    "rpt021": "Nama PIC tidak bisa kosong.",
+    "rpt022": "Nomor telepon PIC tidak bisa kosong.",
     
     "date001": "Rentang Tanggal tidak valid"
 }
