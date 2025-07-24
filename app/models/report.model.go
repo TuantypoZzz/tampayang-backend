@@ -123,6 +123,46 @@ func InsertReportPhoto(ctx context.Context, photo *entity.ReportPhoto) error {
 	return nil
 }
 
+func GetCheckStatus(reportNumber string) (entity.CheckStatus, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var checkStatus entity.CheckStatus
+
+	query := `
+	SELECT 
+		r.report_number,
+		r.created_at,
+		r.reporter_name,
+		i.name AS category,
+		v.village_name,
+		s.district_name,
+		r.status,
+		r.admin_notes
+	FROM reports r
+	JOIN infrastructure_categories i ON i.infrastructure_category_id = r.infrastructure_category_id
+	JOIN damage_types d ON d.damage_type_id = r.damage_type_id
+	JOIN districts s ON s.district_id = r.district_id
+	JOIN villages v ON v.village_id = r.village_id
+	WHERE r.report_number = ?
+	`
+	err := db.QueryRowContext(ctx, query, reportNumber).Scan(
+		&checkStatus.ReportNumber,
+		&checkStatus.CreatedAt,
+		&checkStatus.ReporterName,
+		&checkStatus.InfrastructureCategoryName,
+		&checkStatus.VillageName,
+		&checkStatus.DistrictName,
+		&checkStatus.Status,
+		&checkStatus.AdminNotes,
+	)
+	if err != nil {
+		return checkStatus, err
+	}
+	return checkStatus, nil
+}
+
 func GetUrgentlyReport() []entity.UrgencyReportRequest {
 	db := database.GetConnectionDB()
 	defer db.Close()

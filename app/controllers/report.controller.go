@@ -115,6 +115,25 @@ func CreateReport(ctx *fiber.Ctx) error {
 	return response.SuccessResponse(ctx, newReport)
 }
 
+func CheckStatus(ctx *fiber.Ctx) error {
+	reportNumber := ctx.Query("report_number")
+	if globalFunction.IsEmpty(reportNumber) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
+	}
+
+	details, err := models.GetCheckStatus(reportNumber)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	// Cek apakah data ditemukan
+	if globalFunction.IsEmpty(details.ReportNumber) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err003", nil))
+	}
+
+	return response.SuccessResponse(ctx, details)
+}
+
 func UrgencyReport(ctx *fiber.Ctx) error {
 	urgentlyReport := models.GetUrgentlyReport()
 	return response.SuccessResponse(ctx, urgentlyReport)
