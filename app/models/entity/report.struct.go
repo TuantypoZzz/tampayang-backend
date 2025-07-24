@@ -19,6 +19,7 @@ type Report struct {
 	ReportNumber             string                  `json:"report_number"`
 	ReporterName             string                  `json:"reporter_name"`
 	ReporterPhone            string                  `json:"reporter_phone"`
+	ReporterEmail            string                  `json:"reporter_email"`
 	InfrastructureCategoryId string                  `json:"infrastructure_category_id"`
 	DamageTypeID             string                  `json:"damage_type_id"`
 	ProviceID                string                  `json:"province_id"`

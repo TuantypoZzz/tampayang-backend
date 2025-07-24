@@ -9,6 +9,7 @@ import (
 
 	"tampayang-backend/app/models"
 	"tampayang-backend/app/models/entity"
+	"tampayang-backend/app/services"
 	"tampayang-backend/config/constant"
 	globalFunction "tampayang-backend/core/functions"
 	"tampayang-backend/core/response"
@@ -37,9 +38,10 @@ func CreateReport(ctx *fiber.Ctx) error {
 
 	newReport := &entity.Report{
 		ReportId:                 uuid.New(),
-		ReportNumber:             globalFunction.GenerateReportNumber(),
+		ReportNumber:             GenerateReportNumber(),
 		ReporterName:             ctx.FormValue("reporter_name"),
 		ReporterPhone:            ctx.FormValue("reporter_phone"),
+		ReporterEmail:            ctx.FormValue("reporter_email"),
 		InfrastructureCategoryId: ctx.FormValue("infrastructure_category_id"),
 		DamageTypeID:             ctx.FormValue("damage_type_id"),
 		ProviceID:                ctx.FormValue("province_id"),
@@ -66,11 +68,11 @@ func CreateReport(ctx *fiber.Ctx) error {
 	}
 
 	for i, file := range newReport.ReportImages {
-		fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(file.Filename))
+		fileName := fmt.Sprintf("%s.jpg", uuid.New().String())
 		savePath := filepath.Join(UploadReportPhoto, fileName)
 
-		if err := ctx.SaveFile(file, savePath); err != nil {
-			return response.ErrorResponse(ctx, globalFunction.GetMessage("err007", nil))
+		if err := globalFunction.CompressAndSaveImage(file, savePath); err != nil {
+			return response.ErrorResponse(ctx, "Gagal memproses dan mengompres gambar")
 		}
 
 		photoData := &entity.ReportPhoto{
@@ -90,6 +92,25 @@ func CreateReport(ctx *fiber.Ctx) error {
 		}
 	}
 	newReport.ReportImages = nil
+
+	// =============================================================
+	// >> PEMANGGILAN NOTIFIKASI <<
+	// =============================================================
+	go services.SendFonnteNotification(
+		newReport.ReporterName,
+		newReport.ReporterPhone,
+		newReport.ReportNumber,
+	)
+
+	if newReport.ReporterEmail != "" {
+		go services.SendEmailNotification(
+			newReport.ReporterName,
+			newReport.ReporterEmail,
+			newReport.ReportNumber,
+		)
+	}
+
+	// =============================================================
 
 	return response.SuccessResponse(ctx, newReport)
 }
@@ -130,12 +151,12 @@ func ManageReport(ctx *fiber.Ctx) error {
 }
 
 func DetailReport(ctx *fiber.Ctx) error {
-	reportId := ctx.Query("report_id")
-	if globalFunction.IsEmpty(reportId) {
+	reportNumber := ctx.Query("report_number")
+	if globalFunction.IsEmpty(reportNumber) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
 	}
 
-	details, err := models.GetDetailReport(reportId)
+	details, err := models.GetDetailReport(reportNumber)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
@@ -149,21 +170,21 @@ func DetailReport(ctx *fiber.Ctx) error {
 }
 
 func UpdateReport(ctx *fiber.Ctx) error {
-	reportId := ctx.Params("report_id")
+	reportNumber := ctx.Params("report_number")
 	reports := new(entity.UpdateReport)
 	if err := ctx.BodyParser(reports); err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
 
-	if globalFunction.IsEmpty(reportId) {
+	if globalFunction.IsEmpty(reportNumber) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err002", nil))
 	}
 
-	dbResult, err := models.GetDetailReport(reportId)
+	dbResult, err := models.GetDetailReport(reportNumber)
 	if err != nil {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
 	}
-	if dbResult.ReportID == "" {
+	if dbResult.ReportNumber == "" {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err006", nil))
 	}
 
@@ -192,10 +213,20 @@ func UpdateReport(ctx *fiber.Ctx) error {
 		UpdatedAt:               updated_date,
 	}
 
-	updateResult, err := models.UpdateReport(reportId, updateData)
+	updateResult, err := models.UpdateReport(reportNumber, updateData)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
 
 	return response.SuccessResponse(ctx, updateResult)
+}
+
+func GenerateReportNumber() string {
+	currentYear := time.Now().Year()
+	lastSequence, err := models.GetLastSequenceForYear(currentYear)
+	if err != nil {
+		return fmt.Sprintf("TMP-%d-ERR%d", currentYear, time.Now().Unix())
+	}
+	newSequence := lastSequence + 1
+	return fmt.Sprintf("TMP-%d-%06d", currentYear, newSequence)
 }

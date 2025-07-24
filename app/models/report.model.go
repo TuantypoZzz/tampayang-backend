@@ -11,16 +11,46 @@ import (
 	"tampayang-backend/core/database"
 )
 
+func GetLastSequenceForYear(year int) (int, error) {
+	db := database.GetConnectionDB()
+
+	// Query untuk mencari nomor urut (sequence) tertinggi di tahun berjalan.
+	// Contoh: 'TMP-2025-000001' -> kita ambil bagian '000001' dan ubah jadi angka.
+	query := `
+        SELECT MAX(CAST(SUBSTRING_INDEX(report_number, '-', -1) AS UNSIGNED)) 
+        FROM reports 
+        WHERE report_number LIKE ?`
+
+	// Parameter LIKE, contoh: 'TMP-2025-%'
+	likeParam := fmt.Sprintf("TMP-%d-%%", year)
+
+	var lastSequence sql.NullInt64 // Gunakan NullInt64 untuk menangani kasus jika belum ada laporan di tahun ini (hasilnya NULL).
+
+	err := db.QueryRow(query, likeParam).Scan(&lastSequence)
+	if err != nil && err != sql.ErrNoRows {
+		// Jika ada error selain karena tidak ada baris, kembalikan error.
+		return 0, fmt.Errorf("gagal query sequence terakhir: %w", err)
+	}
+
+	// Jika lastSequence valid (ada isinya), kembalikan nilainya.
+	if lastSequence.Valid {
+		return int(lastSequence.Int64), nil
+	}
+
+	// Jika tidak ada laporan di tahun ini (hasilnya NULL), kembalikan 0.
+	return 0, nil
+}
+
 func InsertNewReport(ctx context.Context, data *entity.Report) error {
 	db := database.GetConnectionDB()
 	sqlQuery := `
 		INSERT INTO reports (
-			report_id, report_number, reporter_name, reporter_phone, 
+			report_id, report_number, reporter_name, reporter_phone, reporter_email,
 			infrastructure_category_id, damage_type_id, province_id, regency_id, 
 			district_id, village_id, location_detail, description, 
 			urgency_level, status, latitude, longitude, created_at
 		) VALUES (
-			?, ?, ?, ?,
+			?, ?, ?, ?, ?,
 			?, ?, ?, ?,
 			?, ?, ?, ?,
 			?, ?, ?, ?, ?
@@ -31,6 +61,7 @@ func InsertNewReport(ctx context.Context, data *entity.Report) error {
 		data.ReportNumber,
 		data.ReporterName,
 		data.ReporterPhone,
+		data.ReporterEmail,
 		data.InfrastructureCategoryId,
 		data.DamageTypeID,
 		data.ProviceID,
@@ -108,7 +139,10 @@ func GetUrgentlyReport() []entity.UrgencyReportRequest {
 		FROM reports r
 		INNER JOIN damage_types d ON d.damage_type_id = r.damage_type_id
 		INNER JOIN villages v ON v.village_id = r.village_id
-		ORDER BY r.urgency_level DESC,r.report_number DESC;
+		WHERE r.status NOT IN ('selesai', 'batal')
+		ORDER BY r.urgency_level DESC,r.report_number DESC
+		LIMIT 10
+		;
 	`
 
 	result, err := db.QueryContext(ctx, sqlQuery)
@@ -219,7 +253,7 @@ func GetManageReport(keyword, year, infCategory, status string, page int, limit 
 	return category, total, nil
 }
 
-func GetReportPhotos(reportId string) ([]entity.ReportPhoto, error) {
+func GetReportPhotos(reportNumber string) ([]entity.ReportPhoto, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -237,10 +271,10 @@ func GetReportPhotos(reportId string) ([]entity.ReportPhoto, error) {
 		rp.uploaded_at
 	FROM report_photos rp
 	JOIN reports r ON r.report_id = rp.report_id
-	WHERE r.report_id = ?
+	WHERE r.report_number = ?
 	`
 
-	rows, err := db.QueryContext(ctx, query, reportId)
+	rows, err := db.QueryContext(ctx, query, reportNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +303,7 @@ func GetReportPhotos(reportId string) ([]entity.ReportPhoto, error) {
 	return photos, nil
 }
 
-func GetDetailReport(reportId string) (entity.DetailReport, error) {
+func GetDetailReport(reportNumber string) (entity.DetailReport, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -297,9 +331,9 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 	JOIN damage_types d ON d.damage_type_id = r.damage_type_id
 	JOIN districts s ON s.district_id = r.district_id
 	JOIN villages v ON v.village_id = r.village_id
-	WHERE r.report_id = ?
+	WHERE r.report_number = ?
 	`
-	err := db.QueryRowContext(ctx, query, reportId).Scan(
+	err := db.QueryRowContext(ctx, query, reportNumber).Scan(
 		&detailReport.ReportID,
 		&detailReport.ReportNumber,
 		&detailReport.CreatedAt,
@@ -319,7 +353,7 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 		return detailReport, err
 	}
 
-	photos, err := GetReportPhotos(reportId)
+	photos, err := GetReportPhotos(reportNumber)
 	if err != nil && err != sql.ErrNoRows {
 		return detailReport, err
 	}
@@ -329,7 +363,7 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 	return detailReport, nil
 }
 
-func UpdateReport(reportId string, data entity.UpdateReport) (entity.UpdateReport, error) {
+func UpdateReport(reportNumber string, data entity.UpdateReport) (entity.UpdateReport, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -345,7 +379,7 @@ func UpdateReport(reportId string, data entity.UpdateReport) (entity.UpdateRepor
             estimated_completion = ?,
             completed_at = ?,
             updated_at = ?
-        WHERE report_id = ?
+        WHERE report_number = ?
     `
 
 	_, err := db.ExecContext(ctx, query,
@@ -357,7 +391,7 @@ func UpdateReport(reportId string, data entity.UpdateReport) (entity.UpdateRepor
 		data.EstimatedCompletionDate,
 		data.ComletedAt,
 		data.UpdatedAt,
-		reportId)
+		reportNumber)
 
 	if err != nil {
 		return data, err
