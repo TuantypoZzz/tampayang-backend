@@ -138,7 +138,24 @@ func CheckStatus(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err003", nil))
 	}
 
-	return response.SuccessResponse(ctx, details)
+	statusHistory, err := models.GetStatusHistory(reportNumber)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	result := fiber.Map{
+		"report_number":                details.ReportNumber,
+		"reporter_name":                details.ReporterName,
+		"infrastructure_category_name": details.InfrastructureCategoryName,
+		"district_name":                details.DistrictName,
+		"village_name":                 details.VillageName,
+		"status":                       details.Status,
+		"admin_notes":                  details.AdminNotes,
+		"created_at":                   details.CreatedAt,
+		"status_history":               statusHistory,
+	}
+
+	return response.SuccessResponse(ctx, result)
 }
 
 func UrgencyReport(ctx *fiber.Ctx) error {

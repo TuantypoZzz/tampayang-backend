@@ -38,15 +38,23 @@ type Report struct {
 	ReportImages             []*multipart.FileHeader `json:"-"`
 }
 
+type StatusHistory struct {
+	PreviousStatus string `json:"previous_status"`
+	NewStatus      string `json:"new_status"`
+	Notes          string `json:"notes"`
+	CreatedAt      string `json:"created_at"`
+}
+
 type CheckStatus struct {
-	ReportNumber               string `json:"report_number"`
-	ReporterName               string `json:"reporter_name"`
-	InfrastructureCategoryName string `json:"infrastructure_category_name"`
-	DistrictName               string `json:"district_name"`
-	VillageName                string `json:"village_name"`
-	Status                     string `json:"status"`
-	AdminNotes                 string `json:"admin_notes"`
-	CreatedAt                  string `json:"created_at"`
+	ReportNumber               string          `json:"report_number"`
+	ReporterName               string          `json:"reporter_name"`
+	InfrastructureCategoryName string          `json:"infrastructure_category_name"`
+	DistrictName               string          `json:"district_name"`
+	VillageName                string          `json:"village_name"`
+	Status                     string          `json:"status"`
+	AdminNotes                 string          `json:"admin_notes"`
+	CreatedAt                  string          `json:"created_at"`
+	History                    []StatusHistory `json:"history"`
 }
 
 type ValidationRule struct {

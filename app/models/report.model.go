@@ -165,6 +165,42 @@ func GetCheckStatus(reportNumber string) (entity.CheckStatus, error) {
 	return checkStatus, nil
 }
 
+func GetStatusHistory(reportNumber string) ([]entity.StatusHistory, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var histories []entity.StatusHistory
+
+	query := `
+	SELECT 
+		h.previous_status,
+		h.new_status,
+		h.notes,
+		h.created_at
+	FROM report_status_history h
+	JOIN reports r ON r.report_id = h.report_id
+	WHERE r.report_number = ?
+	ORDER BY h.created_at ASC
+	`
+
+	rows, err := db.QueryContext(ctx, query, reportNumber)
+	if err != nil {
+		return histories, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var h entity.StatusHistory
+		if err := rows.Scan(&h.PreviousStatus, &h.NewStatus, &h.Notes, &h.CreatedAt); err != nil {
+			return histories, err
+		}
+		histories = append(histories, h)
+	}
+
+	return histories, nil
+}
+
 func GetVillageNameByID(villageID string) (string, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
