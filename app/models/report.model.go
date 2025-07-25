@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"tampayang-backend/app/models/entity"
 	"tampayang-backend/core/database"
@@ -343,7 +345,7 @@ func GetReportPhotos(reportNumber string) ([]entity.ReportPhoto, error) {
 	return photos, nil
 }
 
-func GetDetailReport(reportNumber string) (entity.DetailReport, error) {
+func GetDetailReport(reportId string) (entity.DetailReport, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -371,9 +373,9 @@ func GetDetailReport(reportNumber string) (entity.DetailReport, error) {
 	JOIN damage_types d ON d.damage_type_id = r.damage_type_id
 	JOIN districts s ON s.district_id = r.district_id
 	JOIN villages v ON v.village_id = r.village_id
-	WHERE r.report_number = ?
+	WHERE r.report_id = ?
 	`
-	err := db.QueryRowContext(ctx, query, reportNumber).Scan(
+	err := db.QueryRowContext(ctx, query, reportId).Scan(
 		&detailReport.ReportID,
 		&detailReport.ReportNumber,
 		&detailReport.CreatedAt,
@@ -393,7 +395,7 @@ func GetDetailReport(reportNumber string) (entity.DetailReport, error) {
 		return detailReport, err
 	}
 
-	photos, err := GetReportPhotos(reportNumber)
+	photos, err := GetReportPhotos(reportId)
 	if err != nil && err != sql.ErrNoRows {
 		return detailReport, err
 	}
@@ -403,38 +405,102 @@ func GetDetailReport(reportNumber string) (entity.DetailReport, error) {
 	return detailReport, nil
 }
 
-func UpdateReport(reportNumber string, data entity.UpdateReport) (entity.UpdateReport, error) {
+func UpdateReportAndLogHistory(ctx context.Context, reportID string, data entity.UpdateReport, adminID string) error {
 	db := database.GetConnectionDB()
-	defer db.Close()
-	ctx := context.Background()
 
-	query := `
-        UPDATE reports 
-        SET 
-			status = ?,
-            pic_name = ?,
-            pic_contact = ?,
-            admin_notes = ?,
-            completion_notes = ?,
-            estimated_completion = ?,
-            completed_at = ?,
-            updated_at = ?
-        WHERE report_number = ?
-    `
-
-	_, err := db.ExecContext(ctx, query,
-		data.Status,
-		data.PicName,
-		data.PicPhone,
-		data.AdminNotes,
-		data.CompletionNotes,
-		data.EstimatedCompletionDate,
-		data.ComletedAt,
-		data.UpdatedAt,
-		reportNumber)
-
+	tx, err := db.Begin()
 	if err != nil {
-		return data, err
+		return fmt.Errorf("gagal memulai transaksi: %w", err)
 	}
-	return data, nil
+	defer tx.Rollback()
+
+	// 1. Ambil status laporan saat ini sebelum diubah
+	var currentStatus sql.NullString
+	err = tx.QueryRowContext(ctx, "SELECT status FROM reports WHERE report_id = ?", reportID).Scan(&currentStatus)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("laporan dengan ID %s tidak ditemukan", reportID)
+		}
+		return fmt.Errorf("gagal mendapatkan status laporan saat ini: %w", err)
+	}
+
+	// 2. Bangun query UPDATE secara dinamis berdasarkan data yang tidak nil
+	updateClauses := []string{}
+	args := []interface{}{}
+	statusChanged := false
+
+	// Cek apakah status berubah
+	if data.Status != "" && data.Status != currentStatus.String {
+		updateClauses = append(updateClauses, "status = ?")
+		args = append(args, data.Status)
+		statusChanged = true
+	}
+
+	// Tambahkan field lain jika nilainya tidak nil
+	if data.PicName != nil {
+		updateClauses = append(updateClauses, "pic_name = ?")
+		args = append(args, *data.PicName)
+	}
+	if data.PicPhone != nil {
+		updateClauses = append(updateClauses, "pic_contact = ?")
+		args = append(args, *data.PicPhone)
+	}
+	if data.AdminNotes != nil {
+		updateClauses = append(updateClauses, "admin_notes = ?")
+		args = append(args, *data.AdminNotes)
+	}
+	if data.CompletionNotes != nil {
+		updateClauses = append(updateClauses, "completion_notes = ?")
+		args = append(args, *data.CompletionNotes)
+	}
+	if data.EstimatedCompletionDate != nil {
+		updateClauses = append(updateClauses, "estimated_completion = ?")
+		// PERBAIKAN: Kirim nilai .Time dari struct CustomDate
+		args = append(args, data.EstimatedCompletionDate.Time)
+	}
+	if data.CompletedAt != nil {
+		updateClauses = append(updateClauses, "completed_at = ?")
+		// PERBAIKAN: Kirim nilai .Time dari struct CustomDate
+		args = append(args, data.CompletedAt.Time)
+	}
+
+	// Jika tidak ada field yang diupdate, hentikan proses.
+	if len(updateClauses) == 0 {
+		return nil // Tidak ada yang perlu diupdate
+	}
+
+	// Selalu update kolom `updated_at`
+	updateClauses = append(updateClauses, "updated_at = ?")
+	args = append(args, time.Now())
+
+	// 3. Gabungkan dan jalankan query UPDATE
+	query := fmt.Sprintf("UPDATE reports SET %s WHERE report_id = ?", strings.Join(updateClauses, ", "))
+	args = append(args, reportID)
+
+	_, err = tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("gagal update laporan: %w", err)
+	}
+
+	// 4. Jika status berubah, insert log ke tabel riwayat
+	if statusChanged {
+		logQuery := `
+            INSERT INTO report_status_history 
+            (report_id, previous_status, new_status, notes, updated_by, created_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())`
+
+		var historyNotes sql.NullString
+		if data.AdminNotes != nil {
+			historyNotes.String = *data.AdminNotes
+			historyNotes.Valid = true
+		}
+
+		_, err = tx.ExecContext(ctx, logQuery, reportID, currentStatus.String, data.Status, historyNotes, adminID)
+		if err != nil {
+			return fmt.Errorf("gagal insert riwayat status: %w", err)
+		}
+	}
+
+	// 5. Jika semua berhasil, commit transaksi
+	return tx.Commit()
 }

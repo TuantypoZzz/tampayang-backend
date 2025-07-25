@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func SendFonnteNotification(recipientName, recipientPhone, reportNumber string) {
+func SendFonnteNotification(recipientName, recipientPhone, reportNumber, villageName string) {
 	apiUrl := os.Getenv("WHATSAPP_API_URL")
 	token := os.Getenv("WHATSAPP_API_KEY")
 
@@ -24,9 +24,10 @@ func SendFonnteNotification(recipientName, recipientPhone, reportNumber string) 
 	}
 
 	message := fmt.Sprintf(
-		"Halo, *%s*.\n\nTerima kasih atas partisipasi Anda. Laporan kerusakan infrastruktur dengan nomor *%s* telah kami terima pada tanggal %s WIT.\n\nAnda dapat melacak progres laporan melalui menu \"Cek Status\" di aplikasi TAMPAYANG.",
+		"Halo, *%s*.\n\nTerima kasih atas partisipasi Anda. Laporan kerusakan infrastruktur dengan nomor *%s* pada desa *%s* telah kami terima pada tanggal %s WIT.\n\nAnda dapat melacak progres laporan melalui menu \"Cek Status\" di aplikasi TAMPAYANG.",
 		recipientName,
 		reportNumber,
+		villageName,
 		time.Now().Format("02 January 2006, 15:04"),
 	)
 

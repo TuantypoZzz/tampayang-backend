@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"regexp"
+	"strings"
 	"time"
 
 	"tampayang-backend/core/database"
@@ -104,15 +105,43 @@ type DetailReport struct {
 	Photos                     []ReportPhoto `json:"photos"`
 }
 
+type CustomDate struct {
+	time.Time
+}
+
+// UnmarshalJSON adalah metode kustom yang akan dipanggil oleh BodyParser
+// untuk mengonversi string JSON menjadi tipe CustomDate.
+func (cd *CustomDate) UnmarshalJSON(b []byte) (err error) {
+	// Membersihkan tanda kutip dari string JSON (misal: "2025-12-12" -> 2025-12-12)
+	s := strings.Trim(string(b), "\"")
+	if s == "null" || s == "" {
+		// Jika nilainya null atau string kosong, jangan lakukan apa-apa.
+		return
+	}
+
+	// Coba parse dengan format "YYYY-MM-DD".
+	// "2006-01-02" adalah layout standar Go untuk format ini.
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		// Jika gagal, coba parse dengan format RFC3339 sebagai fallback.
+		t, err = time.Parse(time.RFC3339, s)
+		if err != nil {
+			return err
+		}
+	}
+	cd.Time = t
+	return
+}
+
+// UpdateReport adalah struct untuk menerima data update dari admin.
 type UpdateReport struct {
-	Status                  string `json:"status"`
-	PicName                 string `json:"pic_name"`
-	PicPhone                string `json:"pic_phone"`
-	AdminNotes              string `json:"admin_notes"`
-	CompletionNotes         string `json:"completion_notes"`
-	EstimatedCompletionDate string `json:"estimated_completion_date"`
-	ComletedAt              string `json:"completed_at"`
-	UpdatedAt               string `json:"updated_at"`
+	Status                  string      `json:"status"`
+	PicName                 *string     `json:"pic_name"`
+	PicPhone                *string     `json:"pic_phone"`
+	AdminNotes              *string     `json:"admin_notes"`
+	CompletionNotes         *string     `json:"completion_notes"`
+	EstimatedCompletionDate *CustomDate `json:"estimated_completion_date"`
+	CompletedAt             *CustomDate `json:"completed_at"`
 }
 
 func ValidateNewReport(newReport *Report) error {

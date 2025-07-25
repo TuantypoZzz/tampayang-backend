@@ -13,5 +13,5 @@ func ReportRoute(app *fiber.App) {
 	app.Get("/reports/urgently-report/", middlewares.AuthCookie, controllers.UrgencyReport)
 	app.Get("/reports/manage-report/", middlewares.AuthCookie, controllers.ManageReport)
 	app.Get("/reports/detail-report/", middlewares.AuthCookie, controllers.DetailReport)
-	app.Put("/reports/update-report/:report_number", middlewares.AuthCookie, controllers.UpdateReport)
+	app.Put("/reports/update-report/:report_id", middlewares.AuthCookie, controllers.UpdateReport)
 }
