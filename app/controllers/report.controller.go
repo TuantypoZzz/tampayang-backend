@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -98,16 +97,9 @@ func CreateReport(ctx *fiber.Ctx) error {
 	// >> PEMANGGILAN NOTIFIKASI <<
 	// =============================================================
 	var villageName string = "[Lokasi tidak teridentifikasi]"
-	if newReport.DistrictID != "" {
-		villageList := models.GetLovVillage(newReport.DistrictID)
-		for _, village := range villageList {
-			if village.Id == newReport.VillageID {
-				villageName = village.Name
-				break // Hentikan loop jika sudah ditemukan
-			}
-		}
-	} else {
-		log.Printf("WARNING: DistrictID tidak ada di laporan, tidak dapat mengambil nama desa.")
+	villageName, err = models.GetVillageNameByID(newReport.VillageID)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
 	}
 
 	go services.SendFonnteNotification(

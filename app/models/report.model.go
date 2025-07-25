@@ -165,6 +165,22 @@ func GetCheckStatus(reportNumber string) (entity.CheckStatus, error) {
 	return checkStatus, nil
 }
 
+func GetVillageNameByID(villageID string) (string, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+	var villageName string
+
+	query := "SELECT village_name FROM villages WHERE village_id = ?"
+
+	err := db.QueryRowContext(ctx, query, villageID).Scan(&villageName)
+	if err != nil {
+		return "", err
+	}
+
+	return villageName, nil
+}
+
 func GetUrgentlyReport() []entity.UrgencyReportRequest {
 	db := database.GetConnectionDB()
 	defer db.Close()
