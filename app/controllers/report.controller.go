@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -9,10 +10,11 @@ import (
 
 	"tampayang-backend/app/models"
 	"tampayang-backend/app/models/entity"
-	"tampayang-backend/config/constant"
+	"tampayang-backend/app/services"
 	globalFunction "tampayang-backend/core/functions"
 	"tampayang-backend/core/response"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -37,9 +39,10 @@ func CreateReport(ctx *fiber.Ctx) error {
 
 	newReport := &entity.Report{
 		ReportId:                 uuid.New(),
-		ReportNumber:             globalFunction.GenerateReportNumber(),
+		ReportNumber:             GenerateReportNumber(),
 		ReporterName:             ctx.FormValue("reporter_name"),
 		ReporterPhone:            ctx.FormValue("reporter_phone"),
+		ReporterEmail:            ctx.FormValue("reporter_email"),
 		InfrastructureCategoryId: ctx.FormValue("infrastructure_category_id"),
 		DamageTypeID:             ctx.FormValue("damage_type_id"),
 		ProviceID:                ctx.FormValue("province_id"),
@@ -66,11 +69,11 @@ func CreateReport(ctx *fiber.Ctx) error {
 	}
 
 	for i, file := range newReport.ReportImages {
-		fileName := fmt.Sprintf("%s%s", uuid.New().String(), filepath.Ext(file.Filename))
+		fileName := fmt.Sprintf("%s.jpg", uuid.New().String())
 		savePath := filepath.Join(UploadReportPhoto, fileName)
 
-		if err := ctx.SaveFile(file, savePath); err != nil {
-			return response.ErrorResponse(ctx, globalFunction.GetMessage("err007", nil))
+		if err := globalFunction.CompressAndSaveImage(file, savePath); err != nil {
+			return response.ErrorResponse(ctx, "Gagal memproses dan mengompres gambar")
 		}
 
 		photoData := &entity.ReportPhoto{
@@ -91,7 +94,59 @@ func CreateReport(ctx *fiber.Ctx) error {
 	}
 	newReport.ReportImages = nil
 
+	// =============================================================
+	// >> PEMANGGILAN NOTIFIKASI <<
+	// =============================================================
+	var villageName string = "[Lokasi tidak teridentifikasi]"
+	if newReport.DistrictID != "" {
+		villageList := models.GetLovVillage(newReport.DistrictID)
+		for _, village := range villageList {
+			if village.Id == newReport.VillageID {
+				villageName = village.Name
+				break // Hentikan loop jika sudah ditemukan
+			}
+		}
+	} else {
+		log.Printf("WARNING: DistrictID tidak ada di laporan, tidak dapat mengambil nama desa.")
+	}
+
+	go services.SendFonnteNotification(
+		newReport.ReporterName,
+		newReport.ReporterPhone,
+		newReport.ReportNumber,
+		villageName,
+	)
+
+	if newReport.ReporterEmail != "" {
+		go services.SendEmailNotification(
+			newReport.ReporterName,
+			newReport.ReporterEmail,
+			newReport.ReportNumber,
+		)
+	}
+
+	// =============================================================
+
 	return response.SuccessResponse(ctx, newReport)
+}
+
+func CheckStatus(ctx *fiber.Ctx) error {
+	reportNumber := ctx.Query("report_number")
+	if globalFunction.IsEmpty(reportNumber) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
+	}
+
+	details, err := models.GetCheckStatus(reportNumber)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	// Cek apakah data ditemukan
+	if globalFunction.IsEmpty(details.ReportNumber) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("err003", nil))
+	}
+
+	return response.SuccessResponse(ctx, details)
 }
 
 func UrgencyReport(ctx *fiber.Ctx) error {
@@ -130,12 +185,12 @@ func ManageReport(ctx *fiber.Ctx) error {
 }
 
 func DetailReport(ctx *fiber.Ctx) error {
-	reportId := ctx.Query("report_id")
-	if globalFunction.IsEmpty(reportId) {
+	reportNumber := ctx.Query("report_number")
+	if globalFunction.IsEmpty(reportNumber) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
 	}
 
-	details, err := models.GetDetailReport(reportId)
+	details, err := models.GetDetailReport(reportNumber)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
@@ -150,11 +205,7 @@ func DetailReport(ctx *fiber.Ctx) error {
 
 func UpdateReport(ctx *fiber.Ctx) error {
 	reportId := ctx.Params("report_id")
-	reports := new(entity.UpdateReport)
-	if err := ctx.BodyParser(reports); err != nil {
-		return response.ErrorResponse(ctx, err)
-	}
-
+	fmt.Println(reportId)
 	if globalFunction.IsEmpty(reportId) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err002", nil))
 	}
@@ -167,35 +218,48 @@ func UpdateReport(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err006", nil))
 	}
 
-	if globalFunction.IsEmpty(reports.Status) {
+	claims, ok := ctx.Locals("userInfo").(jwt.MapClaims)
+	if !ok {
+		return response.ErrorResponse(ctx, "Akses ditolak: Gagal memproses informasi user")
+	}
+
+	adminID, ok := claims["user_id"].(string)
+	if !ok {
+		return response.ErrorResponse(ctx, "Akses ditolak: User ID tidak ditemukan")
+	}
+
+	updateData := new(entity.UpdateReport)
+	if err := ctx.BodyParser(updateData); err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	if globalFunction.IsEmpty(updateData.Status) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("rpt020", nil))
 	}
 
-	if globalFunction.IsEmpty(reports.PicName) {
+	if globalFunction.IsEmpty(updateData.PicName) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("rpt021", nil))
 	}
-	if globalFunction.IsEmpty(reports.PicPhone) {
+	if globalFunction.IsEmpty(updateData.PicPhone) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("rpt022", nil))
 	}
 
-	now := time.Now()
-	updated_date := now.Format(constant.NOW_DATE_TIME_FORMAT)
-
-	updateData := entity.UpdateReport{
-		Status:                  reports.Status,
-		PicName:                 reports.PicName,
-		PicPhone:                reports.PicPhone,
-		AdminNotes:              reports.AdminNotes,
-		CompletionNotes:         reports.CompletionNotes,
-		EstimatedCompletionDate: reports.EstimatedCompletionDate,
-		ComletedAt:              reports.ComletedAt,
-		UpdatedAt:               updated_date,
-	}
-
-	updateResult, err := models.UpdateReport(reportId, updateData)
+	err = models.UpdateReportAndLogHistory(ctx.Context(), reportId, *updateData, adminID)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
 
-	return response.SuccessResponse(ctx, updateResult)
+	return response.SuccessResponse(ctx, fiber.Map{
+		"message": "Laporan berhasil diperbarui",
+	})
+}
+
+func GenerateReportNumber() string {
+	currentYear := time.Now().Year()
+	lastSequence, err := models.GetLastSequenceForYear(currentYear)
+	if err != nil {
+		return fmt.Sprintf("TMP-%d-ERR%d", currentYear, time.Now().Unix())
+	}
+	newSequence := lastSequence + 1
+	return fmt.Sprintf("TMP-%d-%06d", currentYear, newSequence)
 }

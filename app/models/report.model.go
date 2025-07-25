@@ -6,21 +6,53 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"tampayang-backend/app/models/entity"
 	"tampayang-backend/core/database"
 )
 
+func GetLastSequenceForYear(year int) (int, error) {
+	db := database.GetConnectionDB()
+
+	// Query untuk mencari nomor urut (sequence) tertinggi di tahun berjalan.
+	// Contoh: 'TMP-2025-000001' -> kita ambil bagian '000001' dan ubah jadi angka.
+	query := `
+        SELECT MAX(CAST(SUBSTRING_INDEX(report_number, '-', -1) AS UNSIGNED)) 
+        FROM reports 
+        WHERE report_number LIKE ?`
+
+	// Parameter LIKE, contoh: 'TMP-2025-%'
+	likeParam := fmt.Sprintf("TMP-%d-%%", year)
+
+	var lastSequence sql.NullInt64 // Gunakan NullInt64 untuk menangani kasus jika belum ada laporan di tahun ini (hasilnya NULL).
+
+	err := db.QueryRow(query, likeParam).Scan(&lastSequence)
+	if err != nil && err != sql.ErrNoRows {
+		// Jika ada error selain karena tidak ada baris, kembalikan error.
+		return 0, fmt.Errorf("gagal query sequence terakhir: %w", err)
+	}
+
+	// Jika lastSequence valid (ada isinya), kembalikan nilainya.
+	if lastSequence.Valid {
+		return int(lastSequence.Int64), nil
+	}
+
+	// Jika tidak ada laporan di tahun ini (hasilnya NULL), kembalikan 0.
+	return 0, nil
+}
+
 func InsertNewReport(ctx context.Context, data *entity.Report) error {
 	db := database.GetConnectionDB()
 	sqlQuery := `
 		INSERT INTO reports (
-			report_id, report_number, reporter_name, reporter_phone, 
+			report_id, report_number, reporter_name, reporter_phone, reporter_email,
 			infrastructure_category_id, damage_type_id, province_id, regency_id, 
 			district_id, village_id, location_detail, description, 
 			urgency_level, status, latitude, longitude, created_at
 		) VALUES (
-			?, ?, ?, ?,
+			?, ?, ?, ?, ?,
 			?, ?, ?, ?,
 			?, ?, ?, ?,
 			?, ?, ?, ?, ?
@@ -31,6 +63,7 @@ func InsertNewReport(ctx context.Context, data *entity.Report) error {
 		data.ReportNumber,
 		data.ReporterName,
 		data.ReporterPhone,
+		data.ReporterEmail,
 		data.InfrastructureCategoryId,
 		data.DamageTypeID,
 		data.ProviceID,
@@ -92,6 +125,46 @@ func InsertReportPhoto(ctx context.Context, photo *entity.ReportPhoto) error {
 	return nil
 }
 
+func GetCheckStatus(reportNumber string) (entity.CheckStatus, error) {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var checkStatus entity.CheckStatus
+
+	query := `
+	SELECT 
+		r.report_number,
+		r.created_at,
+		r.reporter_name,
+		i.name AS category,
+		v.village_name,
+		s.district_name,
+		r.status,
+		r.admin_notes
+	FROM reports r
+	JOIN infrastructure_categories i ON i.infrastructure_category_id = r.infrastructure_category_id
+	JOIN damage_types d ON d.damage_type_id = r.damage_type_id
+	JOIN districts s ON s.district_id = r.district_id
+	JOIN villages v ON v.village_id = r.village_id
+	WHERE r.report_number = ?
+	`
+	err := db.QueryRowContext(ctx, query, reportNumber).Scan(
+		&checkStatus.ReportNumber,
+		&checkStatus.CreatedAt,
+		&checkStatus.ReporterName,
+		&checkStatus.InfrastructureCategoryName,
+		&checkStatus.VillageName,
+		&checkStatus.DistrictName,
+		&checkStatus.Status,
+		&checkStatus.AdminNotes,
+	)
+	if err != nil {
+		return checkStatus, err
+	}
+	return checkStatus, nil
+}
+
 func GetUrgentlyReport() []entity.UrgencyReportRequest {
 	db := database.GetConnectionDB()
 	defer db.Close()
@@ -108,7 +181,10 @@ func GetUrgentlyReport() []entity.UrgencyReportRequest {
 		FROM reports r
 		INNER JOIN damage_types d ON d.damage_type_id = r.damage_type_id
 		INNER JOIN villages v ON v.village_id = r.village_id
-		ORDER BY r.urgency_level DESC,r.report_number DESC;
+		WHERE r.status NOT IN ('selesai', 'batal')
+		ORDER BY r.urgency_level DESC,r.report_number DESC
+		LIMIT 10
+		;
 	`
 
 	result, err := db.QueryContext(ctx, sqlQuery)
@@ -219,7 +295,7 @@ func GetManageReport(keyword, year, infCategory, status string, page int, limit 
 	return category, total, nil
 }
 
-func GetReportPhotos(reportId string) ([]entity.ReportPhoto, error) {
+func GetReportPhotos(reportNumber string) ([]entity.ReportPhoto, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -237,10 +313,10 @@ func GetReportPhotos(reportId string) ([]entity.ReportPhoto, error) {
 		rp.uploaded_at
 	FROM report_photos rp
 	JOIN reports r ON r.report_id = rp.report_id
-	WHERE r.report_id = ?
+	WHERE r.report_number = ?
 	`
 
-	rows, err := db.QueryContext(ctx, query, reportId)
+	rows, err := db.QueryContext(ctx, query, reportNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -329,38 +405,102 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 	return detailReport, nil
 }
 
-func UpdateReport(reportId string, data entity.UpdateReport) (entity.UpdateReport, error) {
+func UpdateReportAndLogHistory(ctx context.Context, reportID string, data entity.UpdateReport, adminID string) error {
 	db := database.GetConnectionDB()
-	defer db.Close()
-	ctx := context.Background()
 
-	query := `
-        UPDATE reports 
-        SET 
-			status = ?,
-            pic_name = ?,
-            pic_contact = ?,
-            admin_notes = ?,
-            completion_notes = ?,
-            estimated_completion = ?,
-            completed_at = ?,
-            updated_at = ?
-        WHERE report_id = ?
-    `
-
-	_, err := db.ExecContext(ctx, query,
-		data.Status,
-		data.PicName,
-		data.PicPhone,
-		data.AdminNotes,
-		data.CompletionNotes,
-		data.EstimatedCompletionDate,
-		data.ComletedAt,
-		data.UpdatedAt,
-		reportId)
-
+	tx, err := db.Begin()
 	if err != nil {
-		return data, err
+		return fmt.Errorf("gagal memulai transaksi: %w", err)
 	}
-	return data, nil
+	defer tx.Rollback()
+
+	// 1. Ambil status laporan saat ini sebelum diubah
+	var currentStatus sql.NullString
+	err = tx.QueryRowContext(ctx, "SELECT status FROM reports WHERE report_id = ?", reportID).Scan(&currentStatus)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("laporan dengan ID %s tidak ditemukan", reportID)
+		}
+		return fmt.Errorf("gagal mendapatkan status laporan saat ini: %w", err)
+	}
+
+	// 2. Bangun query UPDATE secara dinamis berdasarkan data yang tidak nil
+	updateClauses := []string{}
+	args := []interface{}{}
+	statusChanged := false
+
+	// Cek apakah status berubah
+	if data.Status != "" && data.Status != currentStatus.String {
+		updateClauses = append(updateClauses, "status = ?")
+		args = append(args, data.Status)
+		statusChanged = true
+	}
+
+	// Tambahkan field lain jika nilainya tidak nil
+	if data.PicName != nil {
+		updateClauses = append(updateClauses, "pic_name = ?")
+		args = append(args, *data.PicName)
+	}
+	if data.PicPhone != nil {
+		updateClauses = append(updateClauses, "pic_contact = ?")
+		args = append(args, *data.PicPhone)
+	}
+	if data.AdminNotes != nil {
+		updateClauses = append(updateClauses, "admin_notes = ?")
+		args = append(args, *data.AdminNotes)
+	}
+	if data.CompletionNotes != nil {
+		updateClauses = append(updateClauses, "completion_notes = ?")
+		args = append(args, *data.CompletionNotes)
+	}
+	if data.EstimatedCompletionDate != nil {
+		updateClauses = append(updateClauses, "estimated_completion = ?")
+		// PERBAIKAN: Kirim nilai .Time dari struct CustomDate
+		args = append(args, data.EstimatedCompletionDate.Time)
+	}
+	if data.CompletedAt != nil {
+		updateClauses = append(updateClauses, "completed_at = ?")
+		// PERBAIKAN: Kirim nilai .Time dari struct CustomDate
+		args = append(args, data.CompletedAt.Time)
+	}
+
+	// Jika tidak ada field yang diupdate, hentikan proses.
+	if len(updateClauses) == 0 {
+		return nil // Tidak ada yang perlu diupdate
+	}
+
+	// Selalu update kolom `updated_at`
+	updateClauses = append(updateClauses, "updated_at = ?")
+	args = append(args, time.Now())
+
+	// 3. Gabungkan dan jalankan query UPDATE
+	query := fmt.Sprintf("UPDATE reports SET %s WHERE report_id = ?", strings.Join(updateClauses, ", "))
+	args = append(args, reportID)
+
+	_, err = tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("gagal update laporan: %w", err)
+	}
+
+	// 4. Jika status berubah, insert log ke tabel riwayat
+	if statusChanged {
+		logQuery := `
+            INSERT INTO report_status_history 
+            (report_id, previous_status, new_status, notes, updated_by, created_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())`
+
+		var historyNotes sql.NullString
+		if data.AdminNotes != nil {
+			historyNotes.String = *data.AdminNotes
+			historyNotes.Valid = true
+		}
+
+		_, err = tx.ExecContext(ctx, logQuery, reportID, currentStatus.String, data.Status, historyNotes, adminID)
+		if err != nil {
+			return fmt.Errorf("gagal insert riwayat status: %w", err)
+		}
+	}
+
+	// 5. Jika semua berhasil, commit transaksi
+	return tx.Commit()
 }

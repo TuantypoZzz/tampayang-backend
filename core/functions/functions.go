@@ -5,9 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
+	_ "image/png"
 	"io"
 	"math/rand"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -280,4 +285,23 @@ func GenerateReportNumber() string {
 
 	// 3. Gabungkan semua bagian menjadi satu string.
 	return fmt.Sprintf("RPT-%s-%s", datePart, string(randomPart))
+}
+
+func CompressAndSaveImage(fileHeader *multipart.FileHeader, savePath string) error {
+	src, err := fileHeader.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	img, _, err := image.Decode(src)
+	if err != nil {
+		return err
+	}
+	out, err := os.Create(savePath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	opts := &jpeg.Options{Quality: 75}
+	return jpeg.Encode(out, img, opts)
 }
