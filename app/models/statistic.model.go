@@ -18,11 +18,11 @@ func GetReportSummary(request entity.ReportSummaryRequest) entity.ReportSummary 
 	sqlQuery := `
 		SELECT 
 			count(1) AS total_report, 
-			SUM(IF(status = 'done', 1, 0)) AS total_report_done, 
-			SUM(IF(status = 'in_progress', 1, 0)) AS total_report_in_progress, 
-			SUM(IF(status IN ('baru', 'verification', 'rejected'), 1, 0)) AS total_report_waiting, 
+			SUM(IF(status = 'selesai', 1, 0)) AS total_report_done, 
+			SUM(IF(status = 'proses', 1, 0)) AS total_report_in_progress, 
+			SUM(IF(status IN ('baru', 'verifikasi', 'ditolak'), 1, 0)) AS total_report_waiting, 
 			SUM(IF(status = 'baru', 1, 0)) AS total_report_new, 
-			SUM(IF(status = 'verification', 1, 0)) AS total_report_verification
+			SUM(IF(status = 'verifikasi', 1, 0)) AS total_report_verification
 		FROM reports
 		WHERE created_at BETWEEN ? AND ? 
 	`

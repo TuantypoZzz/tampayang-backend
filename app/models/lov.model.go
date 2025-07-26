@@ -78,7 +78,7 @@ func GetDefaultProvince() entity.Lov {
 
 	var value entity.Lov
 
-	sqlQuery := "SELECT regency_id, regency_name, regency_code FROM provinces WHERE province_code = ?"
+	sqlQuery := "SELECT province_id, province_name, province_code FROM provinces WHERE province_code = ?"
 	result, err := db.QueryContext(ctx, sqlQuery, defaultProvinceCode)
 	if err != nil {
 		panic("models - GetDefaultProvince, db.QueryContext " + err.Error())
@@ -167,7 +167,7 @@ func GetLovVillage(districtId string) []entity.Lov {
 
 	var lov []entity.Lov
 
-	sqlQuery := "SELECT village_id, village_name, village_code FROM regencies WHERE district_id = ?"
+	sqlQuery := "SELECT village_id, village_name, village_code FROM villages WHERE district_id = ?"
 	result, err := db.QueryContext(ctx, sqlQuery, districtId)
 	if err != nil {
 		panic("models - GetLovVillage, db.QueryContext " + err.Error())
