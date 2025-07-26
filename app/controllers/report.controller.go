@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -98,16 +97,9 @@ func CreateReport(ctx *fiber.Ctx) error {
 	// >> PEMANGGILAN NOTIFIKASI <<
 	// =============================================================
 	var villageName string = "[Lokasi tidak teridentifikasi]"
-	if newReport.DistrictID != "" {
-		villageList := models.GetLovVillage(newReport.DistrictID)
-		for _, village := range villageList {
-			if village.Id == newReport.VillageID {
-				villageName = village.Name
-				break // Hentikan loop jika sudah ditemukan
-			}
-		}
-	} else {
-		log.Printf("WARNING: DistrictID tidak ada di laporan, tidak dapat mengambil nama desa.")
+	villageName, err = models.GetVillageNameByID(newReport.VillageID)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
 	}
 
 	go services.SendFonnteNotification(
@@ -146,7 +138,24 @@ func CheckStatus(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err003", nil))
 	}
 
-	return response.SuccessResponse(ctx, details)
+	statusHistory, err := models.GetStatusHistory(reportNumber)
+	if err != nil {
+		return response.ErrorResponse(ctx, err)
+	}
+
+	result := fiber.Map{
+		"report_number":                details.ReportNumber,
+		"reporter_name":                details.ReporterName,
+		"infrastructure_category_name": details.InfrastructureCategoryName,
+		"district_name":                details.DistrictName,
+		"village_name":                 details.VillageName,
+		"status":                       details.Status,
+		"admin_notes":                  details.AdminNotes,
+		"created_at":                   details.CreatedAt,
+		"status_history":               statusHistory,
+	}
+
+	return response.SuccessResponse(ctx, result)
 }
 
 func UrgencyReport(ctx *fiber.Ctx) error {

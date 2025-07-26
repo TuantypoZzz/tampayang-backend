@@ -38,15 +38,23 @@ type Report struct {
 	ReportImages             []*multipart.FileHeader `json:"-"`
 }
 
+type StatusHistory struct {
+	PreviousStatus string `json:"previous_status"`
+	NewStatus      string `json:"new_status"`
+	Notes          string `json:"notes"`
+	CreatedAt      string `json:"created_at"`
+}
+
 type CheckStatus struct {
-	ReportNumber               string `json:"report_number"`
-	ReporterName               string `json:"reporter_name"`
-	InfrastructureCategoryName string `json:"infrastructure_category_name"`
-	DistrictName               string `json:"district_name"`
-	VillageName                string `json:"village_name"`
-	Status                     string `json:"status"`
-	AdminNotes                 string `json:"admin_notes"`
-	CreatedAt                  string `json:"created_at"`
+	ReportNumber               string          `json:"report_number"`
+	ReporterName               string          `json:"reporter_name"`
+	InfrastructureCategoryName string          `json:"infrastructure_category_name"`
+	DistrictName               string          `json:"district_name"`
+	VillageName                string          `json:"village_name"`
+	Status                     string          `json:"status"`
+	AdminNotes                 string          `json:"admin_notes"`
+	CreatedAt                  string          `json:"created_at"`
+	History                    []StatusHistory `json:"history"`
 }
 
 type ValidationRule struct {
@@ -109,21 +117,14 @@ type CustomDate struct {
 	time.Time
 }
 
-// UnmarshalJSON adalah metode kustom yang akan dipanggil oleh BodyParser
-// untuk mengonversi string JSON menjadi tipe CustomDate.
 func (cd *CustomDate) UnmarshalJSON(b []byte) (err error) {
-	// Membersihkan tanda kutip dari string JSON (misal: "2025-12-12" -> 2025-12-12)
 	s := strings.Trim(string(b), "\"")
 	if s == "null" || s == "" {
-		// Jika nilainya null atau string kosong, jangan lakukan apa-apa.
 		return
 	}
 
-	// Coba parse dengan format "YYYY-MM-DD".
-	// "2006-01-02" adalah layout standar Go untuk format ini.
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
-		// Jika gagal, coba parse dengan format RFC3339 sebagai fallback.
 		t, err = time.Parse(time.RFC3339, s)
 		if err != nil {
 			return err
@@ -133,7 +134,6 @@ func (cd *CustomDate) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
-// UpdateReport adalah struct untuk menerima data update dari admin.
 type UpdateReport struct {
 	Status                  string      `json:"status"`
 	PicName                 *string     `json:"pic_name"`
