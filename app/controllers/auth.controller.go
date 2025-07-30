@@ -72,7 +72,8 @@ func Login(ctx *fiber.Ctx) error {
 		Name:     constant.JWT_COOKIE_NAME,
 		Value:    token,
 		HTTPOnly: true,
-		SameSite: "Strict",
+		Secure:   true,
+		SameSite: "None",
 		Expires:  time.Now().Add(time.Minute * constant.TOKEN_EXPIRE_MINUTE),
 	})
 
@@ -81,6 +82,23 @@ func Login(ctx *fiber.Ctx) error {
 	}
 
 	return response.SuccessResponse(ctx, result)
+}
+
+func GetUserLogin(ctx *fiber.Ctx) error {
+	// access userInfo object from jwt.MapClaims------------------
+	userInfo := ctx.Locals("userInfo").(jwt.MapClaims)
+
+	if globalFunction.IsEmpty(userInfo) {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
+	}
+	userLogin := entity.LoggedInUser{
+		User_id:    userInfo["user_id"].(string),
+		User_name:  userInfo["user_name"].(string),
+		User_email: userInfo["user_email"].(string),
+		User_role:  userInfo["user_role"].(string),
+	}
+
+	return response.SuccessResponse(ctx, userLogin)
 }
 
 func Logout(ctx *fiber.Ctx) error {
@@ -94,7 +112,8 @@ func Logout(ctx *fiber.Ctx) error {
 		Value:    "",
 		Expires:  time.Now().Add(-time.Hour), // Expire the cookie immediately
 		HTTPOnly: true,
-		SameSite: "Strict",
+		Secure:   true,
+		SameSite: "None",
 	})
 
 	return response.SuccessResponse(ctx, globalFunction.GetMessage("success", nil))

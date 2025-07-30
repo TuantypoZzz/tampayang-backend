@@ -21,6 +21,7 @@ func main() {
 	}
 
 	app := fiber.New()
+	app.Static("/public", "./public")
 
 	// INITIALIZE CORE
 	core.CoreInit(app)

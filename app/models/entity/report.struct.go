@@ -80,6 +80,7 @@ type ReportPhoto struct {
 }
 
 type UrgencyReportRequest struct {
+	ReportID       string `json:"report_id"`
 	ReportNumber   string `json:"report_number"`
 	DamageTypeName string `json:"damage_type_name"`
 	VillageName    string `json:"village_name"`

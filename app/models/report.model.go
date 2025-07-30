@@ -226,6 +226,7 @@ func GetUrgentlyReport() []entity.UrgencyReportRequest {
 
 	sqlQuery := `
 		SELECT 
+			r.report_id,
 			r.report_number,
 			d.name,
 			v.village_name,
@@ -235,7 +236,7 @@ func GetUrgentlyReport() []entity.UrgencyReportRequest {
 		INNER JOIN villages v ON v.village_id = r.village_id
 		WHERE r.status NOT IN ('selesai', 'batal')
 		ORDER BY r.urgency_level DESC,r.report_number DESC
-		LIMIT 10
+		LIMIT 5
 		;
 	`
 
@@ -248,6 +249,7 @@ func GetUrgentlyReport() []entity.UrgencyReportRequest {
 	for result.Next() {
 		var urgentlyReport entity.UrgencyReportRequest
 		err := result.Scan(
+			&urgentlyReport.ReportID,
 			&urgentlyReport.ReportNumber,
 			&urgentlyReport.DamageTypeName,
 			&urgentlyReport.VillageName,
@@ -347,7 +349,7 @@ func GetManageReport(keyword, year, infCategory, status string, page int, limit 
 	return category, total, nil
 }
 
-func GetReportPhotos(reportNumber string) ([]entity.ReportPhoto, error) {
+func GetReportPhotos(reportID string) ([]entity.ReportPhoto, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -365,10 +367,10 @@ func GetReportPhotos(reportNumber string) ([]entity.ReportPhoto, error) {
 		rp.uploaded_at
 	FROM report_photos rp
 	JOIN reports r ON r.report_id = rp.report_id
-	WHERE r.report_number = ?
+	WHERE rp.report_id = ?
 	`
 
-	rows, err := db.QueryContext(ctx, query, reportNumber)
+	rows, err := db.QueryContext(ctx, query, reportID)
 	if err != nil {
 		return nil, err
 	}

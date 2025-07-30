@@ -18,13 +18,13 @@ func GetReportSummary(request entity.ReportSummaryRequest) entity.ReportSummary 
 	sqlQuery := `
 		SELECT 
 			count(1) AS total_report, 
-			SUM(IF(status = 'selesai', 1, 0)) AS total_report_done, 
-			SUM(IF(status = 'proses', 1, 0)) AS total_report_in_progress, 
-			SUM(IF(status IN ('baru', 'verifikasi', 'ditolak'), 1, 0)) AS total_report_waiting, 
-			SUM(IF(status = 'baru', 1, 0)) AS total_report_new, 
-			SUM(IF(status = 'verifikasi', 1, 0)) AS total_report_verification
+			IFNULL(SUM(IF(status = 'selesai', 1, 0)), 0) AS total_report_done, 
+			IFNULL(SUM(IF(status = 'proses', 1, 0)), 0) AS total_report_in_progress, 
+			IFNULL(SUM(IF(status IN ('baru', 'verifikasi', 'ditolak'), 1, 0)), 0) AS total_report_waiting, 
+			IFNULL(SUM(IF(status = 'baru', 1, 0)), 0) AS total_report_new, 
+			IFNULL(SUM(IF(status = 'verifikasi', 1, 0)), 0) AS total_report_verification
 		FROM reports
-		WHERE created_at BETWEEN ? AND ? 
+		WHERE created_at BETWEEN ? AND ?
 	`
 	result, err := db.QueryContext(ctx, sqlQuery, fmt.Sprintf("%s 00:00:00", request.StartDate), fmt.Sprintf("%s 23:59:59", request.EndDate))
 	if err != nil {
