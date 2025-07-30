@@ -194,18 +194,17 @@ func ManageReport(ctx *fiber.Ctx) error {
 }
 
 func DetailReport(ctx *fiber.Ctx) error {
-	reportNumber := ctx.Query("report_number")
-	if globalFunction.IsEmpty(reportNumber) {
+	report_id := ctx.Params("report_id")
+	if globalFunction.IsEmpty(report_id) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err008", nil))
 	}
 
-	details, err := models.GetDetailReport(reportNumber)
+	details, err := models.GetDetailReport(report_id)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
 
-	// Cek apakah data ditemukan
-	if globalFunction.IsEmpty(details.ReportNumber) {
+	if globalFunction.IsEmpty(details.ReportID) {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("err003", nil))
 	}
 

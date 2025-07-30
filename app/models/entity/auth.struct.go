@@ -13,6 +13,13 @@ type UserLogin struct {
 	User_role     string `json:"user_role"`
 }
 
+type LoggedInUser struct {
+	User_id    string `json:"user_id"`
+	User_name  string `json:"user_name"`
+	User_email string `json:"user_email"`
+	User_role  string `json:"user_role"`
+}
+
 type ResultToken struct {
 	Access_token string `json:"access_token"`
 }
