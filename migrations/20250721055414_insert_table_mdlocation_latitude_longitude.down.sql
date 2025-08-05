@@ -1,4 +1,5 @@
 -- Migration Down: Mengembalikan nilai latitude dan longitude menjadi NULL
+-- Rollback for corrected coordinates migration
 
 START TRANSACTION;
 
@@ -21,6 +22,7 @@ WHERE regency_id IN (SELECT regency_id FROM regencies WHERE province_id = (SELEC
 
 -- Mengatur NULL untuk tabel villages
 -- Ini akan mengatur ulang semua desa/kelurahan yang datanya telah diisi
+-- Including the additional villages added in the up migration
 UPDATE villages
 SET latitude = NULL, longitude = NULL
 WHERE district_id IN (

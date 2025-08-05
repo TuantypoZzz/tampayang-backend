@@ -24,6 +24,11 @@ func DamageType(ctx *fiber.Ctx) error {
 	return response.SuccessResponse(ctx, lov)
 }
 
+func Province(ctx *fiber.Ctx) error {
+	lov := models.GetDefaultProvince()
+	return response.SuccessResponse(ctx, lov)
+}
+
 func Regency(ctx *fiber.Ctx) error {
 	provinceId := ctx.Query("province_id", "")
 

@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"tampayang-backend/core/middleware"
 	_ "tampayang-backend/core/validation"
 
 	"tampayang-backend/app/routes"
@@ -21,6 +22,14 @@ func main() {
 	}
 
 	app := fiber.New()
+	// Security middleware
+	app.Use(middleware.RequestID())
+	app.Use(middleware.SecurityHeaders())
+	app.Use(middleware.CORS())
+	app.Use(middleware.RateLimiter())
+	app.Use(middleware.RequestLogger())
+	app.Use(middleware.InputSanitizer())
+	app.Use(middleware.BodySizeLimit())
 	app.Static("/public", "./public")
 
 	// INITIALIZE CORE

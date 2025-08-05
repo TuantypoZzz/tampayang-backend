@@ -2,6 +2,7 @@ package entity
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -52,7 +53,7 @@ type CheckStatus struct {
 	DistrictName               string          `json:"district_name"`
 	VillageName                string          `json:"village_name"`
 	Status                     string          `json:"status"`
-	AdminNotes                 string          `json:"admin_notes"`
+	AdminNotes                 sql.NullString  `json:"admin_notes"`
 	CreatedAt                  string          `json:"created_at"`
 	History                    []StatusHistory `json:"history"`
 }
@@ -101,6 +102,7 @@ type DetailReport struct {
 	ReportNumber               string        `json:"report_number"`
 	ReporterName               string        `json:"reporter_name"`
 	ReporterPhone              string        `json:"reporter_phone"`
+	ReporterEmail              string        `json:"reporter_email"`
 	InfrastructureCategoryName string        `json:"infrastructure_category_name"`
 	DamageTypeName             string        `json:"damage_type_name"`
 	DistrictName               string        `json:"district_name"`

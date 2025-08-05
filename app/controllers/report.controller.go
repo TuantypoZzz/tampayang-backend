@@ -150,7 +150,7 @@ func CheckStatus(ctx *fiber.Ctx) error {
 		"district_name":                details.DistrictName,
 		"village_name":                 details.VillageName,
 		"status":                       details.Status,
-		"admin_notes":                  details.AdminNotes,
+		"admin_notes":                  details.AdminNotes.String,
 		"created_at":                   details.CreatedAt,
 		"status_history":               statusHistory,
 	}
@@ -256,6 +256,66 @@ func UpdateReport(ctx *fiber.Ctx) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
+
+	// =============================================================
+	// >> PEMANGGILAN NOTIFIKASI STATUS UPDATE <<
+	// =============================================================
+
+	// Send notifications to the reporter about the status update
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("ERROR: Panic in notification goroutine for report %s: %v\n", dbResult.ReportNumber, r)
+			}
+		}()
+
+		// Get admin notes for notification
+		adminNotes := ""
+		if updateData.AdminNotes != nil {
+			adminNotes = *updateData.AdminNotes
+		}
+
+		// Validate required data before sending notifications
+		if dbResult.ReporterName == "" || dbResult.ReporterPhone == "" {
+			fmt.Printf("WARNING: Missing reporter contact info for report %s - skipping notifications\n", dbResult.ReportNumber)
+			return
+		}
+
+		// Send WhatsApp notification
+		fmt.Printf("INFO: Sending WhatsApp status update notification for report %s\n", dbResult.ReportNumber)
+		services.SendFonnteStatusUpdateNotification(
+			dbResult.ReporterName,
+			dbResult.ReporterPhone,
+			dbResult.ReportNumber,
+			updateData.Status,
+			adminNotes,
+			dbResult.VillageName,
+		)
+
+		// Send email notification if reporter has email
+		if dbResult.ReporterEmail != "" {
+			fmt.Printf("INFO: Sending email status update notification for report %s\n", dbResult.ReportNumber)
+			services.SendEmailStatusUpdateNotification(
+				dbResult.ReporterName,
+				dbResult.ReporterEmail,
+				dbResult.ReportNumber,
+				updateData.Status,
+				adminNotes,
+			)
+		} else {
+			fmt.Printf("INFO: No email provided for report %s - skipping email notification\n", dbResult.ReportNumber)
+		}
+
+		// Log successful notification attempt
+		fmt.Printf("INFO: Status update notifications completed for report %s to %s (Phone: %s, Email: %s, Status: %s)\n",
+			dbResult.ReportNumber,
+			dbResult.ReporterName,
+			dbResult.ReporterPhone,
+			dbResult.ReporterEmail,
+			updateData.Status)
+	}()
+
+	// =============================================================
 
 	return response.SuccessResponse(ctx, fiber.Map{
 		"message": "Laporan berhasil diperbarui",
