@@ -109,11 +109,15 @@ func GetReportMapProvince() []entity.ReportMap {
     		count(1) AS total,
 			'province_id' AS filter_key,
     		l.latitude AS latitude,
-    		l.longitude AS longitude
-		FROM reports r 
+    		l.longitude AS longitude,
+			SUM(CASE WHEN r.status IN ('baru', 'verifikasi') THEN 1 ELSE 0 END) AS menunggu,
+			SUM(CASE WHEN r.status = 'proses' THEN 1 ELSE 0 END) AS proses,
+			SUM(CASE WHEN r.status = 'selesai' THEN 1 ELSE 0 END) AS selesai,
+			SUM(CASE WHEN r.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+		FROM reports r
 		INNER JOIN provinces l ON l.province_id = r.province_id
 		GROUP BY r.province_id
-		ORDER BY name; 
+		ORDER BY name;
 	`
 	result, err := db.QueryContext(ctx, sqlQuery)
 	if err != nil {
@@ -129,7 +133,11 @@ func GetReportMapProvince() []entity.ReportMap {
 			&location.Total,
 			&location.FilterKey,
 			&location.Latitude,
-			&location.Longitude)
+			&location.Longitude,
+			&location.StatusBreakdown.Menunggu,
+			&location.StatusBreakdown.Proses,
+			&location.StatusBreakdown.Selesai,
+			&location.StatusBreakdown.Ditolak)
 		locations = append(locations, location)
 		if err != nil {
 			panic("models - GetReportMapProvince, result.Scan " + err.Error())
@@ -137,6 +145,60 @@ func GetReportMapProvince() []entity.ReportMap {
 	}
 	if err := result.Err(); err != nil {
 		panic("models - GetReportMapProvince, result.Err " + err.Error())
+	}
+	return locations
+}
+
+func GetReportMapAllRegencies() []entity.ReportMap {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var locations []entity.ReportMap
+
+	sqlQuery := `
+		SELECT
+    		r.regency_id AS id,
+    		l.regency_name AS name,
+    		count(1) AS total,
+			'regency_id' AS filter_key,
+    		l.latitude AS latitude,
+    		l.longitude AS longitude,
+			SUM(CASE WHEN r.status IN ('baru', 'verifikasi') THEN 1 ELSE 0 END) AS menunggu,
+			SUM(CASE WHEN r.status = 'proses' THEN 1 ELSE 0 END) AS proses,
+			SUM(CASE WHEN r.status = 'selesai' THEN 1 ELSE 0 END) AS selesai,
+			SUM(CASE WHEN r.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+		FROM reports r
+		INNER JOIN regencies l ON l.regency_id = r.regency_id
+		GROUP BY r.regency_id
+		ORDER BY name;
+	`
+	result, err := db.QueryContext(ctx, sqlQuery)
+	if err != nil {
+		panic("models - GetReportMapAllRegencies, db.QueryContext " + err.Error())
+	}
+	defer result.Close()
+
+	for result.Next() {
+		var location entity.ReportMap
+		err := result.Scan(
+			&location.Id,
+			&location.Name,
+			&location.Total,
+			&location.FilterKey,
+			&location.Latitude,
+			&location.Longitude,
+			&location.StatusBreakdown.Menunggu,
+			&location.StatusBreakdown.Proses,
+			&location.StatusBreakdown.Selesai,
+			&location.StatusBreakdown.Ditolak)
+		locations = append(locations, location)
+		if err != nil {
+			panic("models - GetReportMapAllRegencies, result.Scan " + err.Error())
+		}
+	}
+	if err := result.Err(); err != nil {
+		panic("models - GetReportMapAllRegencies, result.Err " + err.Error())
 	}
 	return locations
 }
@@ -155,12 +217,16 @@ func GetReportMapRegency(provinceId string) []entity.ReportMap {
     		count(1) AS total,
 			'regency_id' AS filter_key,
     		l.latitude AS latitude,
-    		l.longitude AS longitude
-		FROM reports r 
+    		l.longitude AS longitude,
+			SUM(CASE WHEN r.status IN ('baru', 'verifikasi') THEN 1 ELSE 0 END) AS menunggu,
+			SUM(CASE WHEN r.status = 'proses' THEN 1 ELSE 0 END) AS proses,
+			SUM(CASE WHEN r.status = 'selesai' THEN 1 ELSE 0 END) AS selesai,
+			SUM(CASE WHEN r.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+		FROM reports r
 		INNER JOIN regencies l ON l.regency_id = r.regency_id
 		WHERE l.province_id = ?
 		GROUP BY r.regency_id
-		ORDER BY name; 
+		ORDER BY name;
 	`
 	result, err := db.QueryContext(ctx, sqlQuery, provinceId)
 	if err != nil {
@@ -176,7 +242,11 @@ func GetReportMapRegency(provinceId string) []entity.ReportMap {
 			&location.Total,
 			&location.FilterKey,
 			&location.Latitude,
-			&location.Longitude)
+			&location.Longitude,
+			&location.StatusBreakdown.Menunggu,
+			&location.StatusBreakdown.Proses,
+			&location.StatusBreakdown.Selesai,
+			&location.StatusBreakdown.Ditolak)
 		locations = append(locations, location)
 		if err != nil {
 			panic("models - GetReportMapRegency, result.Scan " + err.Error())
@@ -202,12 +272,16 @@ func GetReportMapDistrict(regencyId string) []entity.ReportMap {
     		count(1) AS total,
 			'district_id' AS filter_key,
     		l.latitude AS latitude,
-    		l.longitude AS longitude
-		FROM reports r 
+    		l.longitude AS longitude,
+			SUM(CASE WHEN r.status IN ('baru', 'verifikasi') THEN 1 ELSE 0 END) AS menunggu,
+			SUM(CASE WHEN r.status = 'proses' THEN 1 ELSE 0 END) AS proses,
+			SUM(CASE WHEN r.status = 'selesai' THEN 1 ELSE 0 END) AS selesai,
+			SUM(CASE WHEN r.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+		FROM reports r
 		INNER JOIN districts l ON l.district_id = r.district_id
 		WHERE l.regency_id = ?
 		GROUP BY r.district_id
-		ORDER BY name; 
+		ORDER BY name;
 	`
 	result, err := db.QueryContext(ctx, sqlQuery, regencyId)
 	if err != nil {
@@ -223,7 +297,11 @@ func GetReportMapDistrict(regencyId string) []entity.ReportMap {
 			&location.Total,
 			&location.FilterKey,
 			&location.Latitude,
-			&location.Longitude)
+			&location.Longitude,
+			&location.StatusBreakdown.Menunggu,
+			&location.StatusBreakdown.Proses,
+			&location.StatusBreakdown.Selesai,
+			&location.StatusBreakdown.Ditolak)
 		locations = append(locations, location)
 		if err != nil {
 			panic("models - GetReportMapDistrict, result.Scan " + err.Error())
@@ -233,6 +311,42 @@ func GetReportMapDistrict(regencyId string) []entity.ReportMap {
 		panic("models - GetReportMapDistrict, result.Err " + err.Error())
 	}
 	return locations
+}
+
+// GetDashboardSummary returns total reports and completion rate
+func GetDashboardSummary() entity.DashboardSummary {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	var summary entity.DashboardSummary
+
+	sqlQuery := `
+		SELECT
+			COUNT(1) AS total_laporan,
+			ROUND(
+				(SUM(CASE WHEN status = 'selesai' THEN 1 ELSE 0 END) * 100.0) / COUNT(1),
+				2
+			) AS tingkat_penyelesaian
+		FROM reports
+	`
+
+	result, err := db.QueryContext(ctx, sqlQuery)
+	if err != nil {
+		panic("models - GetDashboardSummary, db.QueryContext " + err.Error())
+	}
+	defer result.Close()
+
+	if result.Next() {
+		err := result.Scan(
+			&summary.TotalLaporan,
+			&summary.TingkatPenyelesaian)
+		if err != nil {
+			panic("models - GetDashboardSummary, result.Scan " + err.Error())
+		}
+	}
+
+	return summary
 }
 
 func GetReportMapVillage(districtId string) []entity.ReportMap {
@@ -249,12 +363,16 @@ func GetReportMapVillage(districtId string) []entity.ReportMap {
     		count(1) AS total,
 			'' AS filter_key,
     		l.latitude AS latitude,
-    		l.longitude AS longitude
-		FROM reports r 
+    		l.longitude AS longitude,
+			SUM(CASE WHEN r.status IN ('baru', 'verifikasi') THEN 1 ELSE 0 END) AS menunggu,
+			SUM(CASE WHEN r.status = 'proses' THEN 1 ELSE 0 END) AS proses,
+			SUM(CASE WHEN r.status = 'selesai' THEN 1 ELSE 0 END) AS selesai,
+			SUM(CASE WHEN r.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+		FROM reports r
 		INNER JOIN villages l ON l.village_id = r.village_id
 		WHERE l.district_id = ?
 		GROUP BY r.village_id
-		ORDER BY name; 
+		ORDER BY name;
 	`
 	result, err := db.QueryContext(ctx, sqlQuery, districtId)
 	if err != nil {
@@ -270,7 +388,11 @@ func GetReportMapVillage(districtId string) []entity.ReportMap {
 			&location.Total,
 			&location.FilterKey,
 			&location.Latitude,
-			&location.Longitude)
+			&location.Longitude,
+			&location.StatusBreakdown.Menunggu,
+			&location.StatusBreakdown.Proses,
+			&location.StatusBreakdown.Selesai,
+			&location.StatusBreakdown.Ditolak)
 		locations = append(locations, location)
 		if err != nil {
 			panic("models - GetReportMapVillage, result.Scan " + err.Error())

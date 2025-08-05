@@ -77,13 +77,26 @@ func ReportMap(ctx *fiber.Ctx) error {
 		reportMap = models.GetReportMapDistrict(request.RegencyId)
 	}
 
-	if request.ProvinceId != "" {
-		reportMap = models.GetReportMapRegency(request.ProvinceId)
-	}
+	// if request.ProvinceId != "" {
+	// 	reportMap = models.GetReportMapRegency(request.ProvinceId)
+	// }
 
-	if request.ProvinceId == "" && request.RegencyId == "" && request.DistrictId == "" {
-		reportMap = models.GetReportMapProvince()
+	if request.RegencyId == "" && request.DistrictId == "" {
+		reportMap = models.GetReportMapAllRegencies()
 	}
 
 	return response.SuccessResponse(ctx, reportMap)
+}
+
+func DashboardSummary(ctx *fiber.Ctx) error {
+	// Log the dashboard summary request
+	fmt.Printf("Dashboard summary requested from IP: %s\n", ctx.IP())
+
+	summary := models.GetDashboardSummary()
+
+	// Log the results for debugging
+	fmt.Printf("Dashboard Summary - Total Laporan: %d, Tingkat Penyelesaian: %.2f%%\n",
+		summary.TotalLaporan, summary.TingkatPenyelesaian)
+
+	return response.SuccessResponse(ctx, summary)
 }

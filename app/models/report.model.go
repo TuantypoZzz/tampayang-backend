@@ -407,12 +407,13 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 	var detailReport entity.DetailReport
 
 	query := `
-	SELECT 
+	SELECT
 		r.report_id,
 		r.report_number,
 		r.created_at,
 		r.reporter_name,
 		r.reporter_phone,
+		r.reporter_email,
 		i.name AS category,
 		d.name AS type,
 		v.village_name,
@@ -435,6 +436,7 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 		&detailReport.CreatedAt,
 		&detailReport.ReporterName,
 		&detailReport.ReporterPhone,
+		&detailReport.ReporterEmail,
 		&detailReport.InfrastructureCategoryName,
 		&detailReport.DamageTypeName,
 		&detailReport.VillageName,

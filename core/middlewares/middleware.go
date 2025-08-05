@@ -99,28 +99,21 @@ func Auth(ctx *fiber.Ctx) error {
 	if token == "" {
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
-	// _, err := helper.VerfyToken(token)
+
 	claims, err := helper.DecodeToken(token)
 	if err != nil {
+		mylogger.Error("auth_token_decode_error", map[string]interface{}{
+			"error": err.Error(),
+			"ip":    ctx.IP(),
+		})
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
 
-	role := claims["user_role"].(string)
-	if role != constant.ADMIN_ROLE {
-		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth007", nil))
-	}
-
-	// Unix timestamp in scientific notation
-	scientificNotation := claims["expire"].(float64)
-
-	// Convert scientific notation to a regular Unix timestamp
-	unixTimestamp := int64(scientificNotation)
-
-	// Get the current Unix timestamp
-	currentTime := time.Now().Unix()
-
-	// Check if the timestamp has passed the current time
-	if unixTimestamp < currentTime {
+	// Validate claims using helper function
+	if err := validateTokenClaims(claims, ctx, "auth"); err != nil {
+		if err.Error() == "insufficient privileges" {
+			return response.ErrorResponse(ctx, globalFunction.GetMessage("auth007", nil))
+		}
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
 
@@ -140,25 +133,18 @@ func AuthCookie(ctx *fiber.Ctx) error {
 
 	claims, err := helper.DecodeToken(token)
 	if err != nil {
+		mylogger.Error("auth_cookie_decode_error", map[string]interface{}{
+			"error": err.Error(),
+			"ip":    ctx.IP(),
+		})
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
 
-	role := claims["user_role"].(string)
-	if role != constant.ADMIN_ROLE {
-		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth007", nil))
-	}
-
-	// Unix timestamp in scientific notation
-	scientificNotation := claims["expire"].(float64)
-
-	// Convert scientific notation to a regular Unix timestamp
-	unixTimestamp := int64(scientificNotation)
-
-	// Get the current Unix timestamp
-	currentTime := time.Now().Unix()
-
-	// Check if the timestamp has passed the current time
-	if unixTimestamp < currentTime {
+	// Validate claims using helper function
+	if err := validateTokenClaims(claims, ctx, "auth_cookie"); err != nil {
+		if err.Error() == "insufficient privileges" {
+			return response.ErrorResponse(ctx, globalFunction.GetMessage("auth007", nil))
+		}
 		return response.ErrorResponse(ctx, globalFunction.GetMessage("auth001", nil))
 	}
 
@@ -196,4 +182,76 @@ type CustomErrorResponse struct {
 	Status     string      `json:"status"`
 	StatusCode int         `json:"statusCode"`
 	Payload    interface{} `json:"payload"`
+}
+
+// validateTokenClaims validates JWT claims with proper nil checks and logging
+func validateTokenClaims(claims map[string]interface{}, ctx *fiber.Ctx, logPrefix string) error {
+	// Validate user role with nil check
+	roleInterface, exists := claims["user_role"]
+	if !exists || roleInterface == nil {
+		mylogger.Error(logPrefix+"_missing_role", map[string]interface{}{
+			"ip": ctx.IP(),
+		})
+		return fmt.Errorf("missing user role")
+	}
+
+	role, ok := roleInterface.(string)
+	if !ok {
+		mylogger.Error(logPrefix+"_invalid_role_type", map[string]interface{}{
+			"role_type": fmt.Sprintf("%T", roleInterface),
+			"ip":        ctx.IP(),
+		})
+		return fmt.Errorf("invalid role type")
+	}
+
+	if role != constant.ADMIN_ROLE {
+		return fmt.Errorf("insufficient privileges")
+	}
+
+	// Validate expiration time with proper nil checks
+	// Try both "exp" (standard) and "expire" (legacy) fields
+	var expirationTime int64
+
+	if expInterface, exists := claims["exp"]; exists && expInterface != nil {
+		// Standard JWT "exp" field
+		if expFloat, ok := expInterface.(float64); ok {
+			expirationTime = int64(expFloat)
+		} else {
+			mylogger.Error(logPrefix+"_invalid_exp_type", map[string]interface{}{
+				"exp_type": fmt.Sprintf("%T", expInterface),
+				"ip":       ctx.IP(),
+			})
+			return fmt.Errorf("invalid exp type")
+		}
+	} else if expireInterface, exists := claims["expire"]; exists && expireInterface != nil {
+		// Legacy "expire" field
+		if expireFloat, ok := expireInterface.(float64); ok {
+			expirationTime = int64(expireFloat)
+		} else {
+			mylogger.Error(logPrefix+"_invalid_expire_type", map[string]interface{}{
+				"expire_type": fmt.Sprintf("%T", expireInterface),
+				"ip":          ctx.IP(),
+			})
+			return fmt.Errorf("invalid expire type")
+		}
+	} else {
+		mylogger.Error(logPrefix+"_missing_expiration", map[string]interface{}{
+			"claims": claims,
+			"ip":     ctx.IP(),
+		})
+		return fmt.Errorf("missing expiration")
+	}
+
+	// Check if the token has expired
+	currentTime := time.Now().Unix()
+	if expirationTime < currentTime {
+		mylogger.Info(logPrefix+"_token_expired", map[string]interface{}{
+			"expiration": expirationTime,
+			"current":    currentTime,
+			"ip":         ctx.IP(),
+		})
+		return fmt.Errorf("token expired")
+	}
+
+	return nil
 }

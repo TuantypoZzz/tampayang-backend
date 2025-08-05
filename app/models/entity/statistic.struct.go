@@ -21,12 +21,25 @@ type ReportWeekly struct {
 }
 
 type ReportMap struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Total     int    `json:"total"`
-	FilterKey string `json:"filter_key"`
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
+	Id              string          `json:"id"`
+	Name            string          `json:"name"`
+	Total           int             `json:"total"`
+	FilterKey       string          `json:"filter_key"`
+	Latitude        string          `json:"latitude"`
+	Longitude       string          `json:"longitude"`
+	StatusBreakdown StatusBreakdown `json:"status_breakdown"`
+}
+
+type StatusBreakdown struct {
+	Menunggu int `json:"menunggu"`
+	Proses   int `json:"proses"`
+	Selesai  int `json:"selesai"`
+	Ditolak  int `json:"ditolak"`
+}
+
+type DashboardSummary struct {
+	TotalLaporan        int     `json:"total_laporan"`
+	TingkatPenyelesaian float64 `json:"tingkat_penyelesaian"`
 }
 
 type ReportMapRequest struct {
