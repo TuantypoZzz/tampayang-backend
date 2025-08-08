@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"database/sql"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -167,9 +169,10 @@ func ManageReport(ctx *fiber.Ctx) error {
 	keyword := ctx.Query("keyword", "")
 	page, _ := strconv.Atoi(ctx.Query("page", "1"))
 	limit, _ := strconv.Atoi(ctx.Query("limit", "10"))
-	year := ctx.Query("year", "")
 	infCategory := ctx.Query("category", "")
 	status := ctx.Query("status", "")
+	startDate := ctx.Query("start_date", "")
+	endDate := ctx.Query("end_date", "")
 
 	if page < 1 {
 		page = 1
@@ -178,7 +181,7 @@ func ManageReport(ctx *fiber.Ctx) error {
 		limit = 10
 	}
 
-	ManageReport, total, err := models.GetManageReport(keyword, year, infCategory, status, page, limit)
+	ManageReport, total, err := models.GetManageReport(keyword, infCategory, status, startDate, endDate, page, limit)
 	if err != nil {
 		return response.ErrorResponse(ctx, err)
 	}
@@ -319,6 +322,27 @@ func UpdateReport(ctx *fiber.Ctx) error {
 
 	return response.SuccessResponse(ctx, fiber.Map{
 		"message": "Laporan berhasil diperbarui",
+	})
+}
+
+func DeleteReport(ctx *fiber.Ctx) error {
+	reportID := ctx.Params("report_id")
+	if reportID == "" {
+		return response.ErrorResponse(ctx, fiber.NewError(http.StatusBadRequest, "Report ID harus diisi"))
+	}
+
+	err := models.DeleteReportByID(reportID)
+	if err != nil {
+		// Jika error karena data tidak ditemukan (dari sql.ErrNoRows)
+		if err == sql.ErrNoRows {
+			return response.ErrorResponse(ctx, fiber.NewError(http.StatusNotFound, "Laporan tidak ditemukan"))
+		}
+		// Untuk error lainnya, kembalikan internal server error
+		return response.ErrorResponse(ctx, err)
+	}
+
+	return response.SuccessResponse(ctx, fiber.Map{
+		"message": "Laporan berhasil dihapus",
 	})
 }
 

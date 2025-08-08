@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -265,7 +266,7 @@ func GetUrgentlyReport() []entity.UrgencyReportRequest {
 	return reports
 }
 
-func GetManageReport(keyword, year, infCategory, status string, page int, limit int) ([]entity.ManageReport, int64, error) {
+func GetManageReport(keyword, infCategory, status, startDate, endDate string, page int, limit int) ([]entity.ManageReport, int64, error) {
 	db := database.GetConnectionDB()
 	defer db.Close()
 	ctx := context.Background()
@@ -276,16 +277,19 @@ func GetManageReport(keyword, year, infCategory, status string, page int, limit 
 
 	query := `
 	SELECT 
+		r.report_id,
 		r.report_number,
-		DATE_FORMAT(r.created_at, '%m-%d') AS created_at,
+		DATE_FORMAT(r.created_at, '%Y-%m-%d') AS created_at,
 		r.reporter_name,
 		i.name,
 		v.village_name,
+		d.district_name,
 		r.status,
 		COUNT(*) OVER() as total_rows
 	FROM reports r
 	INNER JOIN infrastructure_categories i ON i.infrastructure_category_id = r.infrastructure_category_id
 	INNER JOIN villages v ON v.village_id = r.village_id
+	INNER JOIN districts d ON d.district_id = r.district_id
 	WHERE 1=1
 	`
 	if keyword != "" {
@@ -299,9 +303,9 @@ func GetManageReport(keyword, year, infCategory, status string, page int, limit 
 		args = append(args, searchPattern, searchPattern, searchPattern, searchPattern)
 	}
 
-	if year != "" {
-		query += " AND YEAR(r.created_at) = ?"
-		args = append(args, year)
+	if startDate != "" && endDate != "" {
+		query += " AND DATE(r.created_at) BETWEEN ? AND ?"
+		args = append(args, startDate, endDate)
 	}
 
 	if infCategory != "" {
@@ -327,11 +331,13 @@ func GetManageReport(keyword, year, infCategory, status string, page int, limit 
 		var cat entity.ManageReport
 
 		err := rows.Scan(
+			&cat.ReportID,
 			&cat.ReportNumber,
 			&cat.CreatedAt,
 			&cat.ReporterName,
 			&cat.InfrastructureCategoryName,
 			&cat.VillageName,
+			&cat.DistrictName,
 			&cat.Status,
 			&total,
 		)
@@ -544,5 +550,85 @@ func UpdateReportAndLogHistory(ctx context.Context, reportID string, data entity
 		}
 	}
 
+	return tx.Commit()
+}
+
+func DeleteReportByID(reportID string) error {
+	db := database.GetConnectionDB()
+	defer db.Close()
+	ctx := context.Background()
+
+	// Gunakan transaksi untuk memastikan semua data terkait dihapus secara atomik
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("gagal memulai transaksi: %w", err)
+	}
+	// Defer rollback untuk membatalkan transaksi jika terjadi error di tengah jalan
+	defer tx.Rollback()
+
+	// LANGKAH 1: Ambil semua path file foto yang akan dihapus
+	rows, err := tx.QueryContext(ctx, "SELECT file_path FROM report_photos WHERE report_id = ?", reportID)
+	if err != nil {
+		return fmt.Errorf("gagal mengambil path foto laporan: %w", err)
+	}
+	defer rows.Close()
+
+	var photoPaths []string
+	for rows.Next() {
+		var path string
+		if err := rows.Scan(&path); err != nil {
+			// Jika scan gagal, lebih baik batalkan operasi
+			return fmt.Errorf("gagal membaca path foto: %w", err)
+		}
+		photoPaths = append(photoPaths, path)
+	}
+	if err = rows.Err(); err != nil {
+		return fmt.Errorf("terjadi error saat iterasi path foto: %w", err)
+	}
+
+	// LANGKAH 2: Hapus referensi dari tabel-tabel di database
+	// Hapus dari tabel report_photos
+	_, err = tx.ExecContext(ctx, "DELETE FROM report_photos WHERE report_id = ?", reportID)
+	if err != nil {
+		return fmt.Errorf("gagal menghapus data foto laporan dari db: %w", err)
+	}
+
+	// Hapus dari tabel report_status_history
+	_, err = tx.ExecContext(ctx, "DELETE FROM report_status_history WHERE report_id = ?", reportID)
+	if err != nil {
+		return fmt.Errorf("gagal menghapus riwayat status laporan: %w", err)
+	}
+
+	// Hapus dari tabel utama reports
+	result, err := tx.ExecContext(ctx, "DELETE FROM reports WHERE report_id = ?", reportID)
+	if err != nil {
+		return fmt.Errorf("gagal menghapus laporan utama: %w", err)
+	}
+
+	// Periksa apakah ada baris yang benar-benar dihapus dari tabel utama
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("gagal memeriksa baris yang terpengaruh: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		// Gunakan sql.ErrNoRows untuk menandakan bahwa laporan tidak ditemukan
+		return sql.ErrNoRows
+	}
+
+	// LANGKAH 3: Hapus file fisik dari folder setelah operasi DB siap di-commit
+	for _, path := range photoPaths {
+		if path != "" {
+			err := os.Remove(path)
+			if err != nil && !os.IsNotExist(err) {
+				// Log error jika file gagal dihapus (dan errornya bukan karena file sudah tidak ada)
+				// Kita tidak mengembalikan error agar transaksi DB tetap bisa di-commit.
+				// Menghapus data di DB lebih prioritas.
+				log.Printf("Peringatan: Gagal menghapus file fisik '%s': %v", path, err)
+			}
+		}
+	}
+
+	// LANGKAH 4: Jika semua berhasil, commit transaksi
 	return tx.Commit()
 }
