@@ -89,11 +89,13 @@ type UrgencyReportRequest struct {
 }
 
 type ManageReport struct {
+	ReportID                   string `json:"report_id"`
 	ReportNumber               string `json:"report_number"`
 	CreatedAt                  string `json:"created_at"`
 	ReporterName               string `json:"reporter_name"`
 	InfrastructureCategoryName string `json:"infrastructure_category_name"`
 	VillageName                string `json:"village_name"`
+	DistrictName               string `json:"district_name"`
 	Status                     string `json:"status"`
 }
 

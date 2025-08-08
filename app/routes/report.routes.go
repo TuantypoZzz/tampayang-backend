@@ -14,4 +14,5 @@ func ReportRoute(app *fiber.App) {
 	app.Get("/reports/manage/", middlewares.AuthCookie, controllers.ManageReport)
 	app.Get("/reports/:report_id", middlewares.AuthCookie, controllers.DetailReport)
 	app.Put("/reports/:report_id", middlewares.AuthCookie, controllers.UpdateReport)
+	app.Delete("/reports/:report_id", middlewares.AuthCookie, controllers.DeleteReport)
 }
