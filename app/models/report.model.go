@@ -411,6 +411,7 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 	ctx := context.Background()
 
 	var detailReport entity.DetailReport
+	var reporterEmail, description sql.NullString
 
 	query := `
 	SELECT
@@ -442,7 +443,7 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 		&detailReport.CreatedAt,
 		&detailReport.ReporterName,
 		&detailReport.ReporterPhone,
-		&detailReport.ReporterEmail,
+		&reporterEmail,
 		&detailReport.InfrastructureCategoryName,
 		&detailReport.DamageTypeName,
 		&detailReport.VillageName,
@@ -451,7 +452,7 @@ func GetDetailReport(reportId string) (entity.DetailReport, error) {
 		&detailReport.Latitude,
 		&detailReport.Longitude,
 		&detailReport.UrgencyLevel,
-		&detailReport.Description,
+		&description,
 	)
 	if err != nil {
 		return detailReport, err
