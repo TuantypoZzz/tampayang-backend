@@ -100,3 +100,96 @@ func DashboardSummary(ctx *fiber.Ctx) error {
 
 	return response.SuccessResponse(ctx, summary)
 }
+
+// MonthlyReport returns monthly report statistics
+func MonthlyReport(ctx *fiber.Ctx) error {
+	// Get query parameters
+	year := ctx.QueryInt("year", 0)
+	month := ctx.QueryInt("month", 0)
+
+	// Log the request
+	fmt.Printf("Monthly report requested from IP: %s (year: %d, month: %d)\n", ctx.IP(), year, month)
+
+	// Get monthly report data
+	monthlyReport := models.GetMonthlyReport(year, month)
+
+	// Log the results for debugging
+	fmt.Printf("Monthly Report - Total months: %d, Total reports: %d\n",
+		len(monthlyReport.MonthlyData), monthlyReport.Summary.TotalReportsLast12Months)
+
+	return response.SuccessResponse(ctx, monthlyReport)
+}
+
+// CategoryBreakdown returns infrastructure category analytics
+func CategoryBreakdown(ctx *fiber.Ctx) error {
+	// Get query parameters
+	startDate := ctx.Query("start_date", "")
+	endDate := ctx.Query("end_date", "")
+
+	// Validate date format if provided
+	if startDate != "" {
+		if _, err := time.Parse("2006-01-02", startDate); err != nil {
+			return response.ErrorResponse(ctx, globalFunction.GetMessage("validation001", map[string]interface{}{
+				"field": "start_date",
+				"error": "Invalid date format. Use YYYY-MM-DD",
+			}))
+		}
+	}
+
+	if endDate != "" {
+		if _, err := time.Parse("2006-01-02", endDate); err != nil {
+			return response.ErrorResponse(ctx, globalFunction.GetMessage("validation001", map[string]interface{}{
+				"field": "end_date",
+				"error": "Invalid date format. Use YYYY-MM-DD",
+			}))
+		}
+	}
+
+	// Log the request
+	fmt.Printf("Category breakdown requested from IP: %s (start_date: %s, end_date: %s)\n",
+		ctx.IP(), startDate, endDate)
+
+	// Get category breakdown data
+	categoryBreakdown := models.GetCategoryBreakdown(startDate, endDate)
+
+	// Log the results for debugging
+	fmt.Printf("Category Breakdown - Total categories: %d, Geographic data points: %d\n",
+		len(categoryBreakdown.Categories), len(categoryBreakdown.GeographicData))
+
+	return response.SuccessResponse(ctx, categoryBreakdown)
+}
+
+// PerformanceChart returns performance metrics for dashboard charts
+func PerformanceChart(ctx *fiber.Ctx) error {
+	// Get query parameters
+	period := ctx.Query("period", "30d")
+
+	// Validate period parameter
+	validPeriods := []string{"7d", "30d", "90d", "180d", "365d", "1y"}
+	isValidPeriod := false
+	for _, validPeriod := range validPeriods {
+		if period == validPeriod {
+			isValidPeriod = true
+			break
+		}
+	}
+
+	if !isValidPeriod {
+		return response.ErrorResponse(ctx, globalFunction.GetMessage("validation001", map[string]interface{}{
+			"field": "period",
+			"error": "Invalid period. Supported periods: 7d, 30d, 90d, 180d, 365d, 1y",
+		}))
+	}
+
+	// Log the request
+	fmt.Printf("Performance chart requested from IP: %s (period: %s)\n", ctx.IP(), period)
+
+	// Get performance chart data
+	performanceChart := models.GetPerformanceChart(period)
+
+	// Log the results for debugging
+	fmt.Printf("Performance Chart - Period: %s, Resolution rates: %d, Trends: %s\n",
+		performanceChart.Period, len(performanceChart.ResolutionRates), performanceChart.Trends.OverallPerformance)
+
+	return response.SuccessResponse(ctx, performanceChart)
+}

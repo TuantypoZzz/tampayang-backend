@@ -7,7 +7,7 @@ import (
 )
 
 func LovRoute(app *fiber.App) {
-	app.Get("/lov/infrastucture-category", controllers.InfrastructureCategory)
+	app.Get("/lov/infrastructure-category", controllers.InfrastructureCategory)
 	app.Get("/lov/damage-type", controllers.DamageType)
 	app.Get("/lov/province", controllers.Province)
 	app.Get("/lov/regency", controllers.Regency)

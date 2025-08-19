@@ -9,4 +9,6 @@ func RouteInit(app *fiber.App) {
 	LovRoute(app)
 	StatisticRoute(app)
 	ReportRoute(app)
+	ExportRoute(app)
+	MasterRoute(app)
 }

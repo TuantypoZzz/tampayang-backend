@@ -1,0 +1,1007 @@
+{
+	"info": {
+		"_postman_id": "master-data-location-api",
+		"name": "Master Data Location API - Tampayang BE",
+		"description": "Comprehensive CRUD API endpoints for master data management of location entities (provinces, regencies, districts, villages) in the tampayang-BE project.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "noauth"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set base URL",
+					"pm.globals.set('baseUrl', 'http://localhost:3000');"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "your_jwt_token_here",
+			"type": "string",
+			"description": "JWT token for authentication"
+		},
+		{
+			"key": "province_id",
+			"value": "",
+			"type": "string",
+			"description": "Created province ID for testing"
+		},
+		{
+			"key": "regency_id",
+			"value": "",
+			"type": "string",
+			"description": "Created regency ID for testing"
+		},
+		{
+			"key": "district_id",
+			"value": "",
+			"type": "string",
+			"description": "Created district ID for testing"
+		},
+		{
+			"key": "village_id",
+			"value": "",
+			"type": "string",
+			"description": "Created village ID for testing"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login to Get JWT Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.status === 'success' && responseJson.payload.token) {",
+									"        pm.collectionVariables.set('jwt_token', responseJson.payload.token);",
+									"        console.log('JWT token saved:', responseJson.payload.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@tampayang.com\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login to get JWT token for authentication. Update email and password as needed."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints to get JWT token"
+		},
+		{
+			"name": "2. Location Statistics",
+			"item": [
+				{
+					"name": "Get Location Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "stats"]
+						},
+						"description": "Get statistics about all location types (count of provinces, regencies, districts, villages)"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/master/locations/stats",
+									"host": ["{{baseUrl}}"],
+									"path": ["master", "locations", "stats"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"statusCode\": 200,\n    \"payload\": {\n        \"total_provinces\": 34,\n        \"total_regencies\": 514,\n        \"total_districts\": 7230,\n        \"total_villages\": 83436\n    }\n}"
+						}
+					]
+				}
+			],
+			"description": "Statistics and utility endpoints"
+		},
+		{
+			"name": "3. Province Management",
+			"item": [
+				{
+					"name": "Create Province",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.status === 'success' && responseJson.payload.id) {",
+									"        pm.collectionVariables.set('province_id', responseJson.payload.id);",
+									"        console.log('Province ID saved:', responseJson.payload.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Maluku\",\n    \"code\": \"81\",\n    \"type\": \"province\",\n    \"latitude\": -3.2385,\n    \"longitude\": 130.1453\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/master/locations",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"]
+						},
+						"description": "Create a new province"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Provinces",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=province&page=1&limit=10&sort_by=name&sort_order=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "province"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sort_by",
+									"value": "name"
+								},
+								{
+									"key": "sort_order",
+									"value": "asc"
+								}
+							]
+						},
+						"description": "Get list of provinces with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Province by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{province_id}}?type=province",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{province_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "province"
+								}
+							]
+						},
+						"description": "Get specific province by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Province",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Maluku Updated\",\n    \"latitude\": -3.2400,\n    \"longitude\": 130.1500\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{province_id}}?type=province",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{province_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "province"
+								}
+							]
+						},
+						"description": "Update province information"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Provinces",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=province&search=Maluku",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "province"
+								},
+								{
+									"key": "search",
+									"value": "Maluku"
+								}
+							]
+						},
+						"description": "Search provinces by name or code"
+					},
+					"response": []
+				}
+			],
+			"description": "Province CRUD operations"
+		},
+		{
+			"name": "4. Regency Management",
+			"item": [
+				{
+					"name": "Create Regency",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.status === 'success' && responseJson.payload.id) {",
+									"        pm.collectionVariables.set('regency_id', responseJson.payload.id);",
+									"        console.log('Regency ID saved:', responseJson.payload.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Kota Ambon\",\n    \"code\": \"8171\",\n    \"type\": \"regency\",\n    \"parent_id\": \"{{province_id}}\",\n    \"regency_type\": \"kota\",\n    \"latitude\": -3.6954,\n    \"longitude\": 128.1814\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/master/locations",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"]
+						},
+						"description": "Create a new regency (requires province_id as parent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Regencies",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=regency&page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "regency"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get list of regencies with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Regencies by Province",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=regency&parent_id={{province_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "regency"
+								},
+								{
+									"key": "parent_id",
+									"value": "{{province_id}}"
+								}
+							]
+						},
+						"description": "Get regencies filtered by province ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Regency by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{regency_id}}?type=regency",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{regency_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "regency"
+								}
+							]
+						},
+						"description": "Get specific regency by ID with hierarchical parent information"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Regency",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Kota Ambon Updated\",\n    \"latitude\": -3.7000,\n    \"longitude\": 128.2000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{regency_id}}?type=regency",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{regency_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "regency"
+								}
+							]
+						},
+						"description": "Update regency information"
+					},
+					"response": []
+				}
+			],
+			"description": "Regency CRUD operations"
+		},
+		{
+			"name": "5. District Management",
+			"item": [
+				{
+					"name": "Create District",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.status === 'success' && responseJson.payload.id) {",
+									"        pm.collectionVariables.set('district_id', responseJson.payload.id);",
+									"        console.log('District ID saved:', responseJson.payload.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sirimau\",\n    \"code\": \"817101\",\n    \"type\": \"district\",\n    \"parent_id\": \"{{regency_id}}\",\n    \"latitude\": -3.6970,\n    \"longitude\": 128.1833\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/master/locations",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"]
+						},
+						"description": "Create a new district (requires regency_id as parent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Districts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=district&page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "district"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get list of districts with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Districts by Regency",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=district&parent_id={{regency_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "district"
+								},
+								{
+									"key": "parent_id",
+									"value": "{{regency_id}}"
+								}
+							]
+						},
+						"description": "Get districts filtered by regency ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get District by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{district_id}}?type=district",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{district_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "district"
+								}
+							]
+						},
+						"description": "Get specific district by ID with full hierarchical information"
+					},
+					"response": []
+				}
+			],
+			"description": "District CRUD operations"
+		},
+		{
+			"name": "6. Village Management",
+			"item": [
+				{
+					"name": "Create Village",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.status === 'success' && responseJson.payload.id) {",
+									"        pm.collectionVariables.set('village_id', responseJson.payload.id);",
+									"        console.log('Village ID saved:', responseJson.payload.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Mardika\",\n    \"code\": \"81710101\",\n    \"type\": \"village\",\n    \"parent_id\": \"{{district_id}}\",\n    \"village_type\": \"kelurahan\",\n    \"latitude\": -3.6980,\n    \"longitude\": 128.1840\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/master/locations",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"]
+						},
+						"description": "Create a new village (requires district_id as parent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Villages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=village&page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "village"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get list of villages with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Villages by District",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?type=village&parent_id={{district_id}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "type",
+									"value": "village"
+								},
+								{
+									"key": "parent_id",
+									"value": "{{district_id}}"
+								}
+							]
+						},
+						"description": "Get villages filtered by district ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Village by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{village_id}}?type=village",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{village_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "village"
+								}
+							]
+						},
+						"description": "Get specific village by ID with complete hierarchical information"
+					},
+					"response": []
+				}
+			],
+			"description": "Village CRUD operations"
+		},
+		{
+			"name": "7. Mixed Location Operations",
+			"item": [
+				{
+					"name": "Get All Locations (Mixed Types)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?page=1&limit=20&sort_by=name&sort_order=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "sort_by",
+									"value": "name"
+								},
+								{
+									"key": "sort_order",
+									"value": "asc"
+								}
+							]
+						},
+						"description": "Get all locations (mixed types) when no type parameter is specified"
+					},
+					"response": []
+				},
+				{
+					"name": "Search All Locations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations?search=Ambon&page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations"],
+							"query": [
+								{
+									"key": "search",
+									"value": "Ambon"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Search across all location types by name or code"
+					},
+					"response": []
+				}
+			],
+			"description": "Operations that work across all location types"
+		},
+		{
+			"name": "8. Dependency & Deletion",
+			"item": [
+				{
+					"name": "Check Village Dependencies",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{village_id}}/dependencies?type=village",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{village_id}}", "dependencies"],
+							"query": [
+								{
+									"key": "type",
+									"value": "village"
+								}
+							]
+						},
+						"description": "Check if village has dependencies (reports or child locations) before deletion"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Village",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{village_id}}?type=village",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{village_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "village"
+								}
+							]
+						},
+						"description": "Delete village (only if no dependencies exist)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete District",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{district_id}}?type=district",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{district_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "district"
+								}
+							]
+						},
+						"description": "Delete district (only if no child villages or reports exist)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Regency",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{regency_id}}?type=regency",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{regency_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "regency"
+								}
+							]
+						},
+						"description": "Delete regency (only if no child districts or reports exist)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Province",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "jwt_token={{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/master/locations/{{province_id}}?type=province",
+							"host": ["{{baseUrl}}"],
+							"path": ["master", "locations", "{{province_id}}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "province"
+								}
+							]
+						},
+						"description": "Delete province (only if no child regencies or reports exist)"
+					},
+					"response": []
+				}
+			],
+			"description": "Dependency checking and deletion operations"
+		}
+	]
+}
