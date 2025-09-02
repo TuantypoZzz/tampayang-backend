@@ -70,7 +70,7 @@ func GetLovDamageType(infrastructureCategoryId string) []entity.Lov {
 }
 
 func GetDefaultProvince() entity.Lov {
-	defaultProvinceCode := "MAL"
+	defaultProvinceCode := "81"
 
 	db := database.GetConnectionDB()
 	defer db.Close()

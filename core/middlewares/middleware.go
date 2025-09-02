@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"tampayang-backend/config"
 	"tampayang-backend/config/constant"
 	globalFunction "tampayang-backend/core/functions"
 	"tampayang-backend/core/helper"
@@ -19,7 +20,7 @@ import (
 func LoadMidleWares(app *fiber.App) {
 	// Cors Middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://127.0.0.1:5173",
+		AllowOrigins:     config.ALLOWED_ORIGINS,
 		AllowCredentials: true,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",

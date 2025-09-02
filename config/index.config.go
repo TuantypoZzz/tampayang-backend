@@ -21,6 +21,9 @@ var (
 	GO_ENV string
 	PORT   string
 
+	// CORS configuration
+	ALLOWED_ORIGINS string
+
 	// Deklarasikan variabel baru untuk WhatsApp
 	WHATSAPP_API_URL       string
 	WHATSAPP_API_KEY       string
@@ -42,6 +45,16 @@ func LoadEnvVariables() error {
 	// Assign environment variables to variables
 	GO_ENV = os.Getenv("GO_ENV")
 	PORT = os.Getenv("PORT")
+
+	// CORS configuration - fallback to development defaults if not set
+	ALLOWED_ORIGINS = os.Getenv("ALLOWED_ORIGINS")
+	if ALLOWED_ORIGINS == "" {
+		if GO_ENV == "development" {
+			ALLOWED_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
+		} else {
+			ALLOWED_ORIGINS = "https://yourdomain.com" // Update with your production domain
+		}
+	}
 
 	// Ambil variabel baru dari .env
 	WHATSAPP_API_URL = os.Getenv("WHATSAPP_API_URL")

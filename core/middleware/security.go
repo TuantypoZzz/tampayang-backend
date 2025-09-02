@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"tampayang-backend/config"
 	mylogger "tampayang-backend/core/logger"
 
 	"github.com/gofiber/fiber/v2"
@@ -37,7 +38,7 @@ func SecurityHeaders() fiber.Handler {
 // CORS configures Cross-Origin Resource Sharing
 func CORS() fiber.Handler {
 	return cors.New(cors.Config{
-		AllowOrigins:     "http://127.0.0.1:5173", // Update with your actual frontend URL
+		AllowOrigins:     config.ALLOWED_ORIGINS, // Use configurable origins from environment
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Authorization,X-Requested-With",
 		AllowCredentials: true,
