@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"os"
 	"strings"
 	"sync"
 	"time"
 
-	"tampayang-backend/config"
 	mylogger "tampayang-backend/core/logger"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,7 +38,7 @@ func SecurityHeaders() fiber.Handler {
 // CORS configures Cross-Origin Resource Sharing
 func CORS() fiber.Handler {
 	return cors.New(cors.Config{
-		AllowOrigins:     config.ALLOWED_ORIGINS, // Use configurable origins from environment
+		AllowOrigins:     os.Getenv("ALLOWED_ORIGINS"), // Use configurable origins from environment
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Authorization,X-Requested-With",
 		AllowCredentials: true,
