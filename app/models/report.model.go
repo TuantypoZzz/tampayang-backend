@@ -509,13 +509,23 @@ func UpdateReportAndLogHistory(ctx context.Context, reportID string, data entity
 		updateClauses = append(updateClauses, "completion_notes = ?")
 		args = append(args, *data.CompletionNotes)
 	}
-	if data.EstimatedCompletionDate != nil {
+
+	// Fix: Check for zero time before adding to update
+	if data.EstimatedCompletionDate != nil && !data.EstimatedCompletionDate.Time.IsZero() {
 		updateClauses = append(updateClauses, "estimated_completion = ?")
 		args = append(args, data.EstimatedCompletionDate.Time)
+	} else if data.EstimatedCompletionDate != nil && data.EstimatedCompletionDate.Time.IsZero() {
+		// If explicitly setting to zero time, use NULL instead
+		updateClauses = append(updateClauses, "estimated_completion = NULL")
 	}
-	if data.CompletedAt != nil {
+
+	// Fix: Check for zero time before adding to update
+	if data.CompletedAt != nil && !data.CompletedAt.Time.IsZero() {
 		updateClauses = append(updateClauses, "completed_at = ?")
 		args = append(args, data.CompletedAt.Time)
+	} else if data.CompletedAt != nil && data.CompletedAt.Time.IsZero() {
+		// If explicitly setting to zero time, use NULL instead
+		updateClauses = append(updateClauses, "completed_at = NULL")
 	}
 
 	if len(updateClauses) > 0 {
