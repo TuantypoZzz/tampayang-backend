@@ -3,7 +3,6 @@ package entity
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"mime/multipart"
 	"regexp"
@@ -219,19 +218,21 @@ func ValidateNewReport(newReport *Report) error {
 
 	// 1. Validasi jumlah gambar
 	if len(newReport.ReportImages) > maxFiles {
-		return errors.New("rpt017")
+		return fmt.Errorf("rpt017: terlalu banyak file gambar, maksimal %d file", maxFiles)
 	}
 
 	for _, file := range newReport.ReportImages {
 		// 2. Validasi ukuran file
 		if file.Size > maxFileSize {
-			return errors.New("rpt018")
+			return fmt.Errorf("rpt018: file %s terlalu besar (%d bytes), maksimal %d bytes", 
+				file.Filename, file.Size, maxFileSize)
 		}
 
 		// 3. Validasi format file
 		contentType := file.Header.Get("Content-Type")
 		if !allowedMimeTypes[contentType] {
-			return errors.New("rpt019")
+			return fmt.Errorf("rpt019: file %s memiliki tipe MIME tidak didukung: %s", 
+				file.Filename, contentType)
 		}
 	}
 	// --- AKHIR VALIDASI GAMBAR ---
@@ -239,18 +240,18 @@ func ValidateNewReport(newReport *Report) error {
 	phoneRegex := `^(\+62|62|0)[0-9]{9,15}$`
 	if !globalFunction.IsEmpty(newReport.ReporterPhone) {
 		if isValid, _ := regexp.MatchString(phoneRegex, newReport.ReporterPhone); !isValid {
-			return errors.New("err005")
+			return fmt.Errorf("err005: format nomor telepon tidak valid")
 		}
 	}
 
 	for _, rule := range rules {
 		if rule.IsRequired && globalFunction.IsEmpty(rule.Value) {
-			return errors.New(rule.EmptyCode)
+			return fmt.Errorf("%s: field required", rule.EmptyCode)
 		}
 
 		if !globalFunction.IsEmpty(rule.Value) && rule.TableName != "" {
 			if err := idReffExists(rule.TableName, rule.ColumnName, rule.Value); err != nil {
-				return errors.New(rule.NotFoundCode)
+				return fmt.Errorf("%s: %v", rule.NotFoundCode, err)
 			}
 		}
 	}

@@ -80,12 +80,10 @@ func InsertNewReport(ctx context.Context, data *entity.Report) error {
 		data.CreatedAt,
 	)
 
-	// Hentikan penggunaan panic! Ganti dengan return error.
 	if err != nil {
 		return fmt.Errorf("gagal menjalankan query insert: %w", err)
 	}
 
-	// Verifikasi apakah ada baris yang berhasil ditambahkan.
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("gagal mendapatkan rows affected: %w", err)
@@ -94,7 +92,6 @@ func InsertNewReport(ctx context.Context, data *entity.Report) error {
 		return fmt.Errorf("tidak ada baris yang ditambahkan ke database")
 	}
 
-	// Berhasil, tidak ada error yang dikembalikan.
 	return nil
 }
 

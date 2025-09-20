@@ -12,7 +12,8 @@ import (
 	"tampayang-backend/app/models"
 	"tampayang-backend/app/models/entity"
 	"tampayang-backend/app/services"
-	globalFunction "tampayang-backend/core/functions"
+	"tampayang-backend/core/errors"
+	"tampayang-backend/core/functions"
 	"tampayang-backend/core/response"
 
 	"github.com/dgrijalva/jwt-go"
@@ -29,12 +30,12 @@ func CreateReport(ctx *fiber.Ctx) error {
 	lonStr := ctx.FormValue("longitude", "0.0")
 
 	if err := os.MkdirAll(UploadReportPhoto, os.ModePerm); err != nil {
-		return response.ErrorResponse(ctx, "Gagal membuat direktori upload")
+		return response.ErrorResponse(ctx, errors.Wrap(err, "FILESYSTEM_ERROR", "Gagal membuat direktori upload", fiber.StatusInternalServerError))
 	}
 
 	form, err := ctx.MultipartForm()
 	if err != nil {
-		return response.ErrorResponse(ctx, "Format request tidak valid")
+		return response.ErrorResponse(ctx, errors.Wrap(err, "INVALID_REQUEST", "Format request tidak valid", fiber.StatusBadRequest))
 	}
 	files := form.File["report_images"]
 
@@ -66,15 +67,28 @@ func CreateReport(ctx *fiber.Ctx) error {
 	}
 
 	if err := models.InsertNewReport(ctx.Context(), newReport); err != nil {
-		return response.ErrorResponse(ctx, globalFunction.GetMessage("err006", nil))
+		return response.ErrorResponse(ctx, errors.Wrap(err, "DATABASE_ERROR", "Gagal menyimpan laporan ke database", fiber.StatusInternalServerError))
 	}
 
+	// Process images
 	for i, file := range newReport.ReportImages {
 		fileName := fmt.Sprintf("%s.jpg", uuid.New().String())
 		savePath := filepath.Join(UploadReportPhoto, fileName)
 
 		if err := globalFunction.CompressAndSaveImage(file, savePath); err != nil {
-			return response.ErrorResponse(ctx, "Gagal memproses dan mengompres gambar")
+			// Clean up previously saved images if any
+			for j := 0; j < i; j++ {
+				prevFileName := fmt.Sprintf("%s.jpg", uuid.New().String())
+				prevSavePath := filepath.Join(UploadReportPhoto, prevFileName)
+				os.Remove(prevSavePath)
+			}
+			
+			// Also delete the report from database since image processing failed
+			models.DeleteReportByID(newReport.ReportId.String())
+			
+			return response.ErrorResponse(ctx, errors.Wrap(err, "IMAGE_PROCESSING_ERROR", 
+				"Gagal memproses dan mengompres gambar", 
+				fiber.StatusInternalServerError))
 		}
 
 		photoData := &entity.ReportPhoto{
@@ -89,8 +103,22 @@ func CreateReport(ctx *fiber.Ctx) error {
 		}
 
 		if err := models.InsertReportPhoto(ctx.Context(), photoData); err != nil {
+			// Clean up the image file
 			os.Remove(savePath)
-			return response.ErrorResponse(ctx, "Gagal menyimpan metadata file gambar ke database")
+			
+			// Clean up previously saved images
+			for j := 0; j < i; j++ {
+				prevFileName := fmt.Sprintf("%s.jpg", uuid.New().String())
+				prevSavePath := filepath.Join(UploadReportPhoto, prevFileName)
+				os.Remove(prevSavePath)
+			}
+			
+			// Also delete the report from database
+			models.DeleteReportByID(newReport.ReportId.String())
+			
+			return response.ErrorResponse(ctx, errors.Wrap(err, "DATABASE_ERROR", 
+				"Gagal menyimpan metadata file gambar ke database", 
+				fiber.StatusInternalServerError))
 		}
 	}
 	newReport.ReportImages = nil
@@ -101,7 +129,8 @@ func CreateReport(ctx *fiber.Ctx) error {
 	var villageName string = "[Lokasi tidak teridentifikasi]"
 	villageName, err = models.GetVillageNameByID(newReport.VillageID)
 	if err != nil {
-		return response.ErrorResponse(ctx, err)
+		// Log the error but don't fail the request
+		fmt.Printf("Warning: Could not get village name: %v\n", err)
 	}
 
 	go services.SendFonnteNotification(

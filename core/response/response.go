@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	mylogger "tampayang-backend/core/logger"
+	"tampayang-backend/core/errors"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -124,42 +125,52 @@ func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
 
 	payload := make(map[string]interface{})
 
-	codeOk := false
-	enOk := false
-	idOk := false
+	// Handle custom AppError
+	if appErr, ok := errData.(*errors.AppError); ok {
+		payload["code"] = appErr.Code
+		payload["message"] = appErr.Message
+		if appErr.Details != "" {
+			payload["details"] = appErr.Details
+		}
+		httpCodeErr = appErr.Status
+	} else {
+		codeOk := false
+		enOk := false
+		idOk := false
 
-	switch v := errData.(type) {
-	case string:
-		// If errData is a string, use it as the message
-		payload["message"] = v
-	case map[string]interface{}:
-		// Check for specific keys
-		if code, ok := v["code"].(string); ok {
-			payload["code"] = code
-			if payload["code"] == "err003" {
-				httpCodeErr = fiber.StatusNotFound
+		switch v := errData.(type) {
+		case string:
+			// If errData is a string, use it as the message
+			payload["message"] = v
+		case map[string]interface{}:
+			// Check for specific keys
+			if code, ok := v["code"].(string); ok {
+				payload["code"] = code
+				if payload["code"] == "err003" {
+					httpCodeErr = fiber.StatusNotFound
+				}
+				codeOk = true
 			}
-			codeOk = true
-		}
-		if en, ok := v["en"].(string); ok {
-			payload["en"] = en
-			enOk = true
-		}
-		if id, ok := v["id"].(string); ok {
-			payload["id"] = id
-			idOk = true
-		}
+			if en, ok := v["en"].(string); ok {
+				payload["en"] = en
+				enOk = true
+			}
+			if id, ok := v["id"].(string); ok {
+				payload["id"] = id
+				idOk = true
+			}
 
-		if !codeOk || !enOk || !idOk {
-			payload = v
-		}
+			if !codeOk || !enOk || !idOk {
+				payload = v
+			}
 
-	case error:
-		// If errData is an error, use its error message
-		payload["message"] = v.Error()
-	default:
-		// Handle other data types if needed
-		payload["message"] = "An error occurred"
+		case error:
+			// If errData is an error, use its error message
+			payload["message"] = v.Error()
+		default:
+			// Handle other data types if needed
+			payload["message"] = "An error occurred"
+		}
 	}
 
 	// LOGGER HERE -----
@@ -169,7 +180,7 @@ func ErrorResponse(ctx *fiber.Ctx, errData interface{}) error {
 
 	errorData := ErrorResponse{
 		Status:     "error",
-		StatusCode: fiber.StatusInternalServerError,
+		StatusCode: httpCodeErr,
 		Payload:    payload,
 	}
 
