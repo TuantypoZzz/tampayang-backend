@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	elasticsearchLib "tampayang-backend/app/libs/elasticsearch"
 	"tampayang-backend/config"
 	"tampayang-backend/core/middlewares"
 
@@ -26,9 +25,9 @@ func CoreInit(app *fiber.App) {
 	}
 
 	// Initialize Elasticsearch connection
-	if err := elasticsearchLib.InitElasticsearchClient(); err != nil {
-		fmt.Println("\x1b[97;41mElasticsearch FAILED to RUN.\033[0m")
-	}
+	// if err := elasticsearchLib.InitElasticsearchClient(); err != nil {
+	// 	fmt.Println("\x1b[97;41mElasticsearch FAILED to RUN.\033[0m")
+	// }
 }
 
 func isPortInUse(port string) bool {
