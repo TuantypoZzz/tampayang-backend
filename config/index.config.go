@@ -34,6 +34,12 @@ var (
 	EMAIL_SENDER_PASSWORD string
 	SMTP_HOST             string
 	SMTP_PORT             string
+
+	DB_HOST     string
+	DB_PORT     string
+	DB_USER     string
+	DB_PASSWORD string
+	DB_NAME     string
 )
 
 func LoadEnvVariables() error {
@@ -66,6 +72,12 @@ func LoadEnvVariables() error {
 	EMAIL_SENDER_PASSWORD = os.Getenv("EMAIL_SENDER_PASSWORD")
 	SMTP_HOST = os.Getenv("SMTP_HOST")
 	SMTP_PORT = os.Getenv("SMTP_PORT")
+
+	DB_HOST = os.Getenv("DB_HOST")
+	DB_PORT = os.Getenv("DB_PORT")
+	DB_USER = os.Getenv("DB_USER")
+	DB_PASSWORD = os.Getenv("DB_PASSWORD")
+	DB_NAME = os.Getenv("DB_NAME")
 
 	return nil
 }

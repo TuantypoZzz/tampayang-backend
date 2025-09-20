@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"os"
 	"reflect"
 
 	// "os"
@@ -14,37 +15,22 @@ import (
 	"time"
 
 	"tampayang-backend/config"
-	"tampayang-backend/core/helper"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func GetConnectionDB() *sql.DB {
-	// GET CONFIG DATA
-	configuration := helper.ConfigJson()
-
 	var (
 		user_name, password, database, host, port interface{}
 		fullUrl                                   string
 	)
 
-	if config.GO_ENV == "development" {
-		user_name = configuration["development"].(map[string]interface{})["username"]
-		password = configuration["development"].(map[string]interface{})["password"]
-		database = configuration["development"].(map[string]interface{})["database"]
-		host = configuration["development"].(map[string]interface{})["host"]
-		port = configuration["development"].(map[string]interface{})["port"]
-		fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":" + fmt.Sprint(port) + ")/" + fmt.Sprint(database)
-	}
-
-	if config.GO_ENV == "production" {
-		user_name = configuration["production"].(map[string]interface{})["username"]
-		password = configuration["production"].(map[string]interface{})["password"]
-		database = configuration["production"].(map[string]interface{})["database"]
-		host = configuration["production"].(map[string]interface{})["host"]
-		port = configuration["production"].(map[string]interface{})["port"]
-		fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":" + fmt.Sprint(port) + ")/" + fmt.Sprint(database)
-	}
+	user_name = os.Getenv("DB_USER")
+	password = os.Getenv("DB_PASSWORD")
+	database = os.Getenv("DB_NAME")
+	host = os.Getenv("DB_HOST")
+	port = os.Getenv("DB_PORT")
+	fullUrl = fmt.Sprint(user_name) + ":" + fmt.Sprint(password) + "@tcp(" + fmt.Sprint(host) + ":" + fmt.Sprint(port) + ")/" + fmt.Sprint(database)
 
 	// SET DB VARIABLES
 
