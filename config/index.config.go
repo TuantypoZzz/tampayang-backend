@@ -45,7 +45,7 @@ var (
 func LoadEnvVariables() error {
 	// Load environment variables from the .env file
 	if err := godotenv.Load(filepath.Join(ProjectRootPath, ".env")); err != nil {
-		return err
+		// return err
 	}
 
 	// Assign environment variables to variables
